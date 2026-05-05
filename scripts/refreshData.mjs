@@ -17,6 +17,8 @@ const klineFields =
   'fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'
 const etfKlineUrl =
   `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=280&end=20500101&${klineFields}`
+const benchmarkKlineUrl =
+  `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.000819&klt=101&fqt=1&lmt=280&end=20500101&${klineFields}`
 
 const commodityContracts = [
   {
@@ -158,6 +160,17 @@ function parseFundTrend(text) {
   const accumulated = accumulatedText ? JSON.parse(accumulatedText) : []
   const latest = trend.at(-1)
   const latestAccumulated = accumulated.at(-1)
+  const accumulatedByDate = new Map(
+    accumulated.map((item) => [
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(item[0])),
+      Number(item[1]),
+    ]),
+  )
   const date = latest?.x
     ? new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Shanghai',
@@ -166,6 +179,26 @@ function parseFundTrend(text) {
         day: '2-digit',
       }).format(new Date(latest.x))
     : null
+  const navTrend = trend
+    .map((item) => {
+      const itemDate = item.x
+        ? new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Shanghai',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date(item.x))
+        : null
+
+      return {
+        date: itemDate,
+        unit: Number(item.y),
+        dailyReturn: Number(item.equityReturn) / 100,
+        accumulated: itemDate ? accumulatedByDate.get(itemDate) ?? null : null,
+      }
+    })
+    .filter((item) => item.date && Number.isFinite(item.unit))
+    .slice(-280)
 
   return {
     nav: latest
@@ -177,6 +210,7 @@ function parseFundTrend(text) {
           source: 'fund.eastmoney.com/pingzhongdata',
         }
       : null,
+    navTrend,
     performance: {
       oneMonth: extractQuotedNumber(text, 'syl_1y'),
       threeMonth: extractQuotedNumber(text, 'syl_3y'),
@@ -401,9 +435,10 @@ async function fetchCommodityDriver(contract) {
 }
 
 async function main() {
-  const [quoteText, etfKlineText, gaugeText, trendText] = await Promise.all([
+  const [quoteText, etfKlineText, benchmarkKlineText, gaugeText, trendText] = await Promise.all([
     fetchText(quoteUrl),
     fetchText(etfKlineUrl),
+    fetchText(benchmarkKlineUrl),
     fetchText(fundGaugeUrl),
     fetchText(fundTrendUrl),
   ])
@@ -411,8 +446,9 @@ async function main() {
 
   const quote = parseQuote(quoteText)
   const etfKlines = parseKlines(etfKlineText)
+  const benchmarkKlines = parseKlines(benchmarkKlineText)
   const estimate = parseFundGauge(gaugeText)
-  const { nav, performance } = parseFundTrend(trendText)
+  const { nav, navTrend, performance } = parseFundTrend(trendText)
 
   const snapshotDraft = {
     meta: {
@@ -421,6 +457,7 @@ async function main() {
       sources: [
         'push2.eastmoney.com quote api',
         'push2his.eastmoney.com 512400 adjusted kline api',
+        'push2his.eastmoney.com 000819 benchmark kline api',
         'push2.eastmoney.com futures/index quote api',
         'push2his.eastmoney.com futures/index kline api',
         'fund.eastmoney.com pingzhongdata',
@@ -429,9 +466,11 @@ async function main() {
     },
     quote,
     nav,
+    navTrend,
     estimate,
     performance,
     etfKlines,
+    benchmarkKlines,
     commodityDrivers,
   }
   const history = await writeSnapshotHistory(snapshotDraft)
@@ -449,6 +488,7 @@ async function main() {
       `price=${quote.price}`,
       `nav=${nav?.unit ?? 'n/a'}`,
       `klines=${etfKlines.length}`,
+      `benchmark=${benchmarkKlines.length}`,
       `drivers=${commodityDrivers.filter((item) => item.ok).length}/${commodityDrivers.length}`,
       `history=${history.count}`,
       `tradeDate=${quote.tradeDate}`,

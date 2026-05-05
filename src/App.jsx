@@ -23,9 +23,11 @@ import {
   etfProfile,
   eventLog,
   etfKlines,
+  benchmarkKlines,
   factorBaskets,
   holdings,
   commodityDrivers,
+  navSeries,
   riskMetrics,
   snapshotHistory,
   trendSeries,
@@ -34,6 +36,7 @@ import {
   buildBacktestStrategies,
   buildSignalEngine,
   buildStrategyOptimizer,
+  buildTradingQualityProfile,
   buildTrendProfile,
   calculateDailyChange,
   calculatePremium,
@@ -49,6 +52,7 @@ import {
 import { DecisionDeck } from './components/DecisionDeck'
 import { HoldingsTable } from './components/HoldingsTable'
 import { CommodityDriverPanel, FactorTile, MiniLineChart, RiskStack } from './components/MarketPanels'
+import { TradingQualityPanel } from './components/QualityPanels'
 import { SignalLab, StrategyOptimizer, StrategyRow } from './components/StrategyPanels'
 import { MetricCard, Panel } from './components/ui'
 import './App.css'
@@ -104,6 +108,18 @@ function App() {
       buildStrategyOptimizer({
         klines: etfKlines,
         factorBaskets,
+      }),
+    [],
+  )
+  const tradingQuality = useMemo(
+    () =>
+      buildTradingQualityProfile({
+        etfKlines,
+        benchmarkKlines,
+        navSeries,
+        price: etfProfile.price,
+        nav: etfProfile.nav,
+        quote: etfProfile.quote,
       }),
     [],
   )
@@ -287,6 +303,10 @@ function App() {
           <CommodityDriverPanel commodityDrivers={commodityDrivers} />
         </Panel>
 
+        <Panel title="跟踪与交易质量" icon={GitBranch}>
+          <TradingQualityPanel quality={tradingQuality} />
+        </Panel>
+
         <Panel className="signal-panel" title="信号实验室" icon={FlaskConical}>
           <SignalLab signal={signal} trendProfile={trendProfile} riskBudget={riskBudget} />
         </Panel>
@@ -360,7 +380,7 @@ function App() {
             </div>
           </div>
           <div className="pipeline">
-            {['行情快照', 'ETF日线', '净值核算', '商品驱动', '历史缓存', '持仓映射', '因子归因', '策略回测', '自动优化', '风险输出'].map((item, index) => (
+            {['行情快照', 'ETF日线', '基准跟踪', '净值核算', '商品驱动', '历史缓存', '持仓映射', '因子归因', '策略回测', '自动优化', '风险输出'].map((item, index) => (
               <div className="pipeline-step" key={item}>
                 <CheckCircle2 size={17} />
                 <span>{index + 1}</span>
