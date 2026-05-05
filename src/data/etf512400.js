@@ -1,0 +1,318 @@
+import liveSnapshot from './liveSnapshot.json'
+import historySnapshots from './history/512400-snapshots.json'
+
+const quoteSnapshot = liveSnapshot.quote ?? {}
+const navSnapshot = liveSnapshot.nav ?? {}
+const estimateSnapshot = liveSnapshot.estimate ?? {}
+const performanceSnapshot = liveSnapshot.performance ?? {}
+const commoditySnapshot = liveSnapshot.commodityDrivers ?? []
+const klineSnapshot = liveSnapshot.etfKlines ?? []
+
+function driverFor(key) {
+  return commoditySnapshot.find((driver) => driver.key === key && driver.ok)
+}
+
+function liveTrend(key, fallback) {
+  return driverFor(key)?.trendScore ?? fallback
+}
+
+function liveRisk(key, fallback) {
+  return driverFor(key)?.riskScore ?? fallback
+}
+
+function liveContribution(key, weight, fallback) {
+  const changePercent = driverFor(key)?.quote?.changePercent
+  if (!Number.isFinite(changePercent)) return fallback
+  return Number((weight * changePercent).toFixed(2))
+}
+
+export const etfProfile = {
+  code: '512400',
+  name: '有色金属ETF南方',
+  fullName: '南方中证申万有色金属交易型开放式指数证券投资基金',
+  indexName: '中证申万有色金属指数',
+  manager: '南方基金',
+  custodian: '工商银行',
+  fundManager: '崔蕾',
+  inceptionDate: '2017-08-03',
+  latestTradeDate: quoteSnapshot.tradeDate ?? '2026-04-30',
+  latestNavDate: navSnapshot.date ?? '2026-04-30',
+  marketStatus: '五一休市，5月6日起开市',
+  price: quoteSnapshot.price ?? 2.119,
+  previousClose: quoteSnapshot.previousClose ?? 2.14,
+  nav: navSnapshot.unit ?? 2.117,
+  q1Nav: 1.9777,
+  q1Return: 0.0265,
+  q1BenchmarkReturn: 0.0293,
+  netAssets: 275.67,
+  shares: 139.3854,
+  managementFee: 0.005,
+  custodyFee: 0.001,
+  q1EquityWeight: 0.9942,
+  sampleCount: 50,
+  rebalance: '6月 / 12月',
+  singleNameCap: 0.1,
+  quote: {
+    tradeTime: quoteSnapshot.tradeTime,
+    open: quoteSnapshot.open,
+    high: quoteSnapshot.high,
+    low: quoteSnapshot.low,
+    amountCny: quoteSnapshot.amountCny,
+    turnoverRate: quoteSnapshot.turnoverRate,
+    totalMarketValueCny: quoteSnapshot.totalMarketValueCny,
+  },
+  navSnapshot: {
+    dailyReturn: navSnapshot.dailyReturn,
+    accumulated: navSnapshot.accumulated,
+    source: navSnapshot.source,
+  },
+  estimate: estimateSnapshot,
+  performance: performanceSnapshot,
+  liveSnapshot: {
+    generatedAt: liveSnapshot.meta?.generatedAt,
+    mode: liveSnapshot.meta?.mode ?? 'seed',
+    sources: liveSnapshot.meta?.sources ?? [],
+    history: liveSnapshot.history,
+  },
+}
+
+export const holdings = [
+  {
+    code: '601899',
+    name: '紫金矿业',
+    weight: 9.44,
+    basket: '黄金铜',
+    marketValue: 260170.33,
+    signal: '核心权重',
+  },
+  {
+    code: '603993',
+    name: '洛阳钼业',
+    weight: 6.8,
+    basket: '铜钼钴',
+    marketValue: 187360.29,
+    signal: '供给弹性',
+  },
+  {
+    code: '600111',
+    name: '北方稀土',
+    weight: 5.48,
+    basket: '稀土',
+    marketValue: 151087.61,
+    signal: '政策弹性',
+  },
+  {
+    code: '601600',
+    name: '中国铝业',
+    weight: 4.1,
+    basket: '铝',
+    marketValue: 113035.56,
+    signal: '成本周期',
+  },
+  {
+    code: '603799',
+    name: '华友钴业',
+    weight: 4.05,
+    basket: '锂钴',
+    marketValue: 111560.87,
+    signal: '电池金属',
+  },
+  {
+    code: '002460',
+    name: '赣锋锂业',
+    weight: 4.02,
+    basket: '锂钴',
+    marketValue: 110928.27,
+    signal: '储能需求',
+  },
+  {
+    code: '600489',
+    name: '中金黄金',
+    weight: 3.53,
+    basket: '黄金',
+    marketValue: 97314.67,
+    signal: '避险资产',
+  },
+  {
+    code: '600547',
+    name: '山东黄金',
+    weight: 3.31,
+    basket: '黄金',
+    marketValue: 91130.57,
+    signal: '黄金 beta',
+  },
+  {
+    code: '600988',
+    name: '赤峰黄金',
+    weight: 3.26,
+    basket: '黄金',
+    marketValue: 89946.76,
+    signal: '成长黄金',
+  },
+  {
+    code: '000807',
+    name: '云铝股份',
+    weight: 2.93,
+    basket: '铝',
+    marketValue: 80817.59,
+    signal: '电解铝',
+  },
+]
+
+export const factorBaskets = [
+  {
+    key: 'gold',
+    name: '黄金链',
+    weight: 19.54,
+    trend: liveTrend('gold', 78),
+    risk: liveRisk('gold', 62),
+    contribution: liveContribution('gold', 19.54, 1.84),
+    color: '#c58a2c',
+    detail: '紫金矿业、中金黄金、山东黄金、赤峰黄金',
+    driverKey: 'gold',
+  },
+  {
+    key: 'copper',
+    name: '铜钼链',
+    weight: 16.24,
+    trend: liveTrend('copper', 72),
+    risk: liveRisk('copper', 58),
+    contribution: liveContribution('copper', 16.24, 1.31),
+    color: '#b96836',
+    detail: '紫金矿业、洛阳钼业',
+    driverKey: 'copper',
+  },
+  {
+    key: 'rareEarth',
+    name: '稀土链',
+    weight: 5.48,
+    trend: liveTrend('rareEarth', 68),
+    risk: liveRisk('rareEarth', 74),
+    contribution: liveContribution('rareEarth', 5.48, 0.7),
+    color: '#5f7f56',
+    detail: '北方稀土',
+    driverKey: 'rareEarth',
+  },
+  {
+    key: 'aluminum',
+    name: '铝链',
+    weight: 7.03,
+    trend: liveTrend('aluminum', 57),
+    risk: liveRisk('aluminum', 45),
+    contribution: liveContribution('aluminum', 7.03, 0.46),
+    color: '#73808e',
+    detail: '中国铝业、云铝股份',
+    driverKey: 'aluminum',
+  },
+  {
+    key: 'battery',
+    name: '锂钴链',
+    weight: 8.07,
+    trend: liveTrend('battery', 51),
+    risk: liveRisk('battery', 81),
+    contribution: liveContribution('battery', 8.07, -0.2),
+    color: '#337f8c',
+    detail: '华友钴业、赣锋锂业',
+    driverKey: 'battery',
+  },
+]
+
+export const commodityDrivers = commoditySnapshot.map((driver) => ({
+  key: driver.key,
+  label: driver.label,
+  unit: driver.unit,
+  source: driver.source,
+  ok: driver.ok,
+  price: driver.quote?.price,
+  changePercent: driver.quote?.changePercent,
+  tradeDate: driver.quote?.tradeDate,
+  tradeTime: driver.quote?.tradeTime,
+  return5: driver.metrics?.return5,
+  return20: driver.metrics?.return20,
+  return60: driver.metrics?.return60,
+  volatility: driver.metrics?.volatility,
+  trendScore: driver.trendScore,
+  riskScore: driver.riskScore,
+  klines: driver.klines ?? [],
+}))
+
+export const etfKlines = klineSnapshot.map((item) => ({
+  date: item.date,
+  open: item.open,
+  close: item.close,
+  high: item.high,
+  low: item.low,
+  volume: item.volume,
+  amount: item.amount,
+  amplitude: item.amplitude,
+  changePercent: item.changePercent,
+  change: item.change,
+}))
+
+export const snapshotHistory = Array.isArray(historySnapshots) ? historySnapshots : []
+
+export const trendSeries = [
+  { date: '2025-05', etf: 1.08, gold: 1.04, copper: 1.02, rareEarth: 0.98 },
+  { date: '2025-06', etf: 1.14, gold: 1.09, copper: 1.06, rareEarth: 1.02 },
+  { date: '2025-07', etf: 1.2, gold: 1.13, copper: 1.08, rareEarth: 1.05 },
+  { date: '2025-08', etf: 1.32, gold: 1.18, copper: 1.14, rareEarth: 1.17 },
+  { date: '2025-09', etf: 1.43, gold: 1.25, copper: 1.2, rareEarth: 1.3 },
+  { date: '2025-10', etf: 1.58, gold: 1.32, copper: 1.26, rareEarth: 1.45 },
+  { date: '2025-11', etf: 1.64, gold: 1.38, copper: 1.31, rareEarth: 1.5 },
+  { date: '2025-12', etf: 1.76, gold: 1.45, copper: 1.39, rareEarth: 1.58 },
+  { date: '2026-01', etf: 2.17, gold: 1.58, copper: 1.52, rareEarth: 1.89 },
+  { date: '2026-02', etf: 2.33, gold: 1.67, copper: 1.61, rareEarth: 2.05 },
+  { date: '2026-03', etf: 1.98, gold: 1.58, copper: 1.51, rareEarth: 1.73 },
+  { date: '2026-04', etf: 2.12, gold: 1.66, copper: 1.56, rareEarth: 1.9 },
+]
+
+export const riskMetrics = {
+  annualVolatility: 0.356,
+  maxDrawdown: -0.312,
+  oneDayVar95: -0.031,
+  oneDayCvar95: -0.047,
+  concentrationTop10: 46.92,
+  trackingGapQ1: -0.0028,
+  liquidityScore: 84,
+  crowdingScore: 68,
+  riskLabel: '高波动',
+}
+
+export const eventLog = [
+  {
+    date: '2026-04-30',
+    type: '交易',
+    title: '节前最后交易日',
+    impact: '价格2.119，净值2.117，折溢价约0.09%',
+    severity: 'neutral',
+  },
+  {
+    date: '2026-04-22',
+    type: '公告',
+    title: '2026年一季报披露',
+    impact: '权益仓位99.42%，前十大权重46.92%',
+    severity: 'info',
+  },
+  {
+    date: '2026-03-31',
+    type: '风控',
+    title: '一季度急涨急跌',
+    impact: '基金净值季度涨2.65%，板块波动显著放大',
+    severity: 'warning',
+  },
+  {
+    date: '2026-01-31',
+    type: '因子',
+    title: '黄金、铜、稀土共振',
+    impact: '指数单月涨幅超20%，拥挤度上升',
+    severity: 'positive',
+  },
+]
+
+export const dataSources = [
+  ...(liveSnapshot.meta?.sources ?? []),
+  '上交所 2026年第1季度报告',
+  '中证申万有色金属指数编制方案',
+  '天天基金 512400 基金档案',
+  '东方财富行情快照 2026-04-30',
+]
