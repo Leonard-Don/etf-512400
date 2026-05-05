@@ -7,6 +7,8 @@ const estimateSnapshot = liveSnapshot.estimate ?? {}
 const performanceSnapshot = liveSnapshot.performance ?? {}
 const commoditySnapshot = liveSnapshot.commodityDrivers ?? []
 const klineSnapshot = liveSnapshot.etfKlines ?? []
+const benchmarkKlineSnapshot = liveSnapshot.benchmarkKlines ?? []
+const navTrendSnapshot = liveSnapshot.navTrend ?? []
 
 function driverFor(key) {
   return commoditySnapshot.find((driver) => driver.key === key && driver.ok)
@@ -247,6 +249,26 @@ export const etfKlines = klineSnapshot.map((item) => ({
   amplitude: item.amplitude,
   changePercent: item.changePercent,
   change: item.change,
+}))
+
+export const benchmarkKlines = benchmarkKlineSnapshot.map((item) => ({
+  date: item.date,
+  open: item.open,
+  close: item.close,
+  high: item.high,
+  low: item.low,
+  volume: item.volume,
+  amount: item.amount,
+  amplitude: item.amplitude,
+  changePercent: item.changePercent,
+  change: item.change,
+}))
+
+export const navSeries = navTrendSnapshot.map((item) => ({
+  date: item.date,
+  unit: item.unit,
+  dailyReturn: item.dailyReturn,
+  accumulated: item.accumulated,
 }))
 
 export const snapshotHistory = Array.isArray(historySnapshots) ? historySnapshots : []

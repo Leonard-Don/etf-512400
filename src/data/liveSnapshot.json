@@ -1,10 +1,11 @@
 {
   "meta": {
-    "generatedAt": "2026-05-05T09:57:04.776Z",
+    "generatedAt": "2026-05-05T13:32:01.419Z",
     "mode": "refreshed",
     "sources": [
       "push2.eastmoney.com quote api",
       "push2his.eastmoney.com 512400 adjusted kline api",
+      "push2his.eastmoney.com 000819 benchmark kline api",
       "push2.eastmoney.com futures/index quote api",
       "push2his.eastmoney.com futures/index kline api",
       "fund.eastmoney.com pingzhongdata",
@@ -37,6 +38,1688 @@
     "accumulated": 2.142,
     "source": "fund.eastmoney.com/pingzhongdata"
   },
+  "navTrend": [
+    {
+      "date": "2025-03-07",
+      "unit": 1.0676,
+      "dailyReturn": 0.013300000000000001,
+      "accumulated": 1.0776
+    },
+    {
+      "date": "2025-03-10",
+      "unit": 1.0802,
+      "dailyReturn": 0.0118,
+      "accumulated": 1.0902
+    },
+    {
+      "date": "2025-03-11",
+      "unit": 1.0861,
+      "dailyReturn": 0.0055000000000000005,
+      "accumulated": 1.0961
+    },
+    {
+      "date": "2025-03-12",
+      "unit": 1.0869,
+      "dailyReturn": 0.0007000000000000001,
+      "accumulated": 1.0969
+    },
+    {
+      "date": "2025-03-13",
+      "unit": 1.0927,
+      "dailyReturn": 0.0053,
+      "accumulated": 1.1027
+    },
+    {
+      "date": "2025-03-14",
+      "unit": 1.1064,
+      "dailyReturn": 0.0125,
+      "accumulated": 1.1164
+    },
+    {
+      "date": "2025-03-17",
+      "unit": 1.0956,
+      "dailyReturn": -0.0098,
+      "accumulated": 1.1056
+    },
+    {
+      "date": "2025-03-18",
+      "unit": 1.1108,
+      "dailyReturn": 0.0139,
+      "accumulated": 1.1208
+    },
+    {
+      "date": "2025-03-19",
+      "unit": 1.1117,
+      "dailyReturn": 0.0008,
+      "accumulated": 1.1217
+    },
+    {
+      "date": "2025-03-20",
+      "unit": 1.1084,
+      "dailyReturn": -0.003,
+      "accumulated": 1.1184
+    },
+    {
+      "date": "2025-03-21",
+      "unit": 1.0821,
+      "dailyReturn": -0.023700000000000002,
+      "accumulated": 1.0921
+    },
+    {
+      "date": "2025-03-24",
+      "unit": 1.1002,
+      "dailyReturn": 0.0167,
+      "accumulated": 1.1102
+    },
+    {
+      "date": "2025-03-25",
+      "unit": 1.1045,
+      "dailyReturn": 0.0039000000000000003,
+      "accumulated": 1.1145
+    },
+    {
+      "date": "2025-03-26",
+      "unit": 1.0985,
+      "dailyReturn": -0.0054,
+      "accumulated": 1.1085
+    },
+    {
+      "date": "2025-03-27",
+      "unit": 1.0873,
+      "dailyReturn": -0.0102,
+      "accumulated": 1.0973
+    },
+    {
+      "date": "2025-03-28",
+      "unit": 1.0871,
+      "dailyReturn": -0.0002,
+      "accumulated": 1.0971
+    },
+    {
+      "date": "2025-03-31",
+      "unit": 1.0782,
+      "dailyReturn": -0.008199999999999999,
+      "accumulated": 1.0882
+    },
+    {
+      "date": "2025-04-01",
+      "unit": 1.0806,
+      "dailyReturn": 0.0022,
+      "accumulated": 1.0906
+    },
+    {
+      "date": "2025-04-02",
+      "unit": 1.0696,
+      "dailyReturn": -0.0102,
+      "accumulated": 1.0796
+    },
+    {
+      "date": "2025-04-03",
+      "unit": 1.0538,
+      "dailyReturn": -0.0148,
+      "accumulated": 1.0638
+    },
+    {
+      "date": "2025-04-07",
+      "unit": 0.9667,
+      "dailyReturn": -0.0827,
+      "accumulated": 0.9767
+    },
+    {
+      "date": "2025-04-08",
+      "unit": 0.9634,
+      "dailyReturn": -0.0034000000000000002,
+      "accumulated": 0.9734
+    },
+    {
+      "date": "2025-04-09",
+      "unit": 0.9756,
+      "dailyReturn": 0.0127,
+      "accumulated": 0.9856
+    },
+    {
+      "date": "2025-04-10",
+      "unit": 1.0099,
+      "dailyReturn": 0.0352,
+      "accumulated": 1.0199
+    },
+    {
+      "date": "2025-04-11",
+      "unit": 1.0192,
+      "dailyReturn": 0.0092,
+      "accumulated": 1.0292
+    },
+    {
+      "date": "2025-04-14",
+      "unit": 1.0422,
+      "dailyReturn": 0.0226,
+      "accumulated": 1.0522
+    },
+    {
+      "date": "2025-04-15",
+      "unit": 1.0354,
+      "dailyReturn": -0.006500000000000001,
+      "accumulated": 1.0454
+    },
+    {
+      "date": "2025-04-16",
+      "unit": 1.0352,
+      "dailyReturn": -0.0002,
+      "accumulated": 1.0452
+    },
+    {
+      "date": "2025-04-17",
+      "unit": 1.0291,
+      "dailyReturn": -0.0059,
+      "accumulated": 1.0391
+    },
+    {
+      "date": "2025-04-18",
+      "unit": 1.0263,
+      "dailyReturn": -0.0027,
+      "accumulated": 1.0363
+    },
+    {
+      "date": "2025-04-21",
+      "unit": 1.0647,
+      "dailyReturn": 0.0374,
+      "accumulated": 1.0747
+    },
+    {
+      "date": "2025-04-22",
+      "unit": 1.0605,
+      "dailyReturn": -0.0039000000000000003,
+      "accumulated": 1.0705
+    },
+    {
+      "date": "2025-04-23",
+      "unit": 1.0449,
+      "dailyReturn": -0.0147,
+      "accumulated": 1.0549
+    },
+    {
+      "date": "2025-04-24",
+      "unit": 1.0387,
+      "dailyReturn": -0.0059,
+      "accumulated": 1.0487
+    },
+    {
+      "date": "2025-04-25",
+      "unit": 1.0407,
+      "dailyReturn": 0.0019,
+      "accumulated": 1.0507
+    },
+    {
+      "date": "2025-04-28",
+      "unit": 1.0368,
+      "dailyReturn": -0.0037,
+      "accumulated": 1.0468
+    },
+    {
+      "date": "2025-04-29",
+      "unit": 1.0347,
+      "dailyReturn": -0.002,
+      "accumulated": 1.0447
+    },
+    {
+      "date": "2025-04-30",
+      "unit": 1.0322,
+      "dailyReturn": -0.0024,
+      "accumulated": 1.0422
+    },
+    {
+      "date": "2025-05-06",
+      "unit": 1.0561,
+      "dailyReturn": 0.0232,
+      "accumulated": 1.0661
+    },
+    {
+      "date": "2025-05-07",
+      "unit": 1.0592,
+      "dailyReturn": 0.0029,
+      "accumulated": 1.0692
+    },
+    {
+      "date": "2025-05-08",
+      "unit": 1.0514,
+      "dailyReturn": -0.0074,
+      "accumulated": 1.0614
+    },
+    {
+      "date": "2025-05-09",
+      "unit": 1.0485,
+      "dailyReturn": -0.0028000000000000004,
+      "accumulated": 1.0585
+    },
+    {
+      "date": "2025-05-12",
+      "unit": 1.0579,
+      "dailyReturn": 0.009000000000000001,
+      "accumulated": 1.0679
+    },
+    {
+      "date": "2025-05-13",
+      "unit": 1.0609,
+      "dailyReturn": 0.0028000000000000004,
+      "accumulated": 1.0709
+    },
+    {
+      "date": "2025-05-14",
+      "unit": 1.0699,
+      "dailyReturn": 0.0085,
+      "accumulated": 1.0799
+    },
+    {
+      "date": "2025-05-15",
+      "unit": 1.0569,
+      "dailyReturn": -0.012199999999999999,
+      "accumulated": 1.0669
+    },
+    {
+      "date": "2025-05-16",
+      "unit": 1.0556,
+      "dailyReturn": -0.0012,
+      "accumulated": 1.0656
+    },
+    {
+      "date": "2025-05-19",
+      "unit": 1.0499,
+      "dailyReturn": -0.0054,
+      "accumulated": 1.0599
+    },
+    {
+      "date": "2025-05-20",
+      "unit": 1.0546,
+      "dailyReturn": 0.0045000000000000005,
+      "accumulated": 1.0646
+    },
+    {
+      "date": "2025-05-21",
+      "unit": 1.0776,
+      "dailyReturn": 0.0218,
+      "accumulated": 1.0876
+    },
+    {
+      "date": "2025-05-22",
+      "unit": 1.066,
+      "dailyReturn": -0.0108,
+      "accumulated": 1.076
+    },
+    {
+      "date": "2025-05-23",
+      "unit": 1.0668,
+      "dailyReturn": 0.0008,
+      "accumulated": 1.0768
+    },
+    {
+      "date": "2025-05-26",
+      "unit": 1.0688,
+      "dailyReturn": 0.0019,
+      "accumulated": 1.0788
+    },
+    {
+      "date": "2025-05-27",
+      "unit": 1.0479,
+      "dailyReturn": -0.0196,
+      "accumulated": 1.0579
+    },
+    {
+      "date": "2025-05-28",
+      "unit": 1.0479,
+      "dailyReturn": 0,
+      "accumulated": 1.0579
+    },
+    {
+      "date": "2025-05-29",
+      "unit": 1.0516,
+      "dailyReturn": 0.0034999999999999996,
+      "accumulated": 1.0616
+    },
+    {
+      "date": "2025-05-30",
+      "unit": 1.0437,
+      "dailyReturn": -0.0075,
+      "accumulated": 1.0537
+    },
+    {
+      "date": "2025-06-03",
+      "unit": 1.0572,
+      "dailyReturn": 0.0129,
+      "accumulated": 1.0672
+    },
+    {
+      "date": "2025-06-04",
+      "unit": 1.0711,
+      "dailyReturn": 0.0131,
+      "accumulated": 1.0811
+    },
+    {
+      "date": "2025-06-05",
+      "unit": 1.0666,
+      "dailyReturn": -0.0042,
+      "accumulated": 1.0766
+    },
+    {
+      "date": "2025-06-06",
+      "unit": 1.0788,
+      "dailyReturn": 0.011399999999999999,
+      "accumulated": 1.0888
+    },
+    {
+      "date": "2025-06-09",
+      "unit": 1.0825,
+      "dailyReturn": 0.0034000000000000002,
+      "accumulated": 1.0925
+    },
+    {
+      "date": "2025-06-10",
+      "unit": 1.0828,
+      "dailyReturn": 0.0003,
+      "accumulated": 1.0928
+    },
+    {
+      "date": "2025-06-11",
+      "unit": 1.1052,
+      "dailyReturn": 0.0207,
+      "accumulated": 1.1152
+    },
+    {
+      "date": "2025-06-12",
+      "unit": 1.1176,
+      "dailyReturn": 0.011200000000000002,
+      "accumulated": 1.1276
+    },
+    {
+      "date": "2025-06-13",
+      "unit": 1.1177,
+      "dailyReturn": 0.0001,
+      "accumulated": 1.1277
+    },
+    {
+      "date": "2025-06-16",
+      "unit": 1.1129,
+      "dailyReturn": -0.0043,
+      "accumulated": 1.1229
+    },
+    {
+      "date": "2025-06-17",
+      "unit": 1.1131,
+      "dailyReturn": 0.0002,
+      "accumulated": 1.1231
+    },
+    {
+      "date": "2025-06-18",
+      "unit": 1.1096,
+      "dailyReturn": -0.0031,
+      "accumulated": 1.1196
+    },
+    {
+      "date": "2025-06-19",
+      "unit": 1.0922,
+      "dailyReturn": -0.015700000000000002,
+      "accumulated": 1.1022
+    },
+    {
+      "date": "2025-06-20",
+      "unit": 1.0865,
+      "dailyReturn": -0.0052,
+      "accumulated": 1.0965
+    },
+    {
+      "date": "2025-06-23",
+      "unit": 1.0959,
+      "dailyReturn": 0.0087,
+      "accumulated": 1.1059
+    },
+    {
+      "date": "2025-06-24",
+      "unit": 1.1022,
+      "dailyReturn": 0.005699999999999999,
+      "accumulated": 1.1122
+    },
+    {
+      "date": "2025-06-25",
+      "unit": 1.1109,
+      "dailyReturn": 0.0079,
+      "accumulated": 1.1209
+    },
+    {
+      "date": "2025-06-26",
+      "unit": 1.114,
+      "dailyReturn": 0.0028000000000000004,
+      "accumulated": 1.124
+    },
+    {
+      "date": "2025-06-27",
+      "unit": 1.1374,
+      "dailyReturn": 0.021,
+      "accumulated": 1.1474
+    },
+    {
+      "date": "2025-06-30",
+      "unit": 1.1372,
+      "dailyReturn": -0.0002,
+      "accumulated": 1.1472
+    },
+    {
+      "date": "2025-07-01",
+      "unit": 1.1541,
+      "dailyReturn": 0.0149,
+      "accumulated": 1.1641
+    },
+    {
+      "date": "2025-07-02",
+      "unit": 1.1645,
+      "dailyReturn": 0.009000000000000001,
+      "accumulated": 1.1745
+    },
+    {
+      "date": "2025-07-03",
+      "unit": 1.1676,
+      "dailyReturn": 0.0027,
+      "accumulated": 1.1776
+    },
+    {
+      "date": "2025-07-04",
+      "unit": 1.1506,
+      "dailyReturn": -0.0146,
+      "accumulated": 1.1606
+    },
+    {
+      "date": "2025-07-07",
+      "unit": 1.1404,
+      "dailyReturn": -0.0089,
+      "accumulated": 1.1504
+    },
+    {
+      "date": "2025-07-08",
+      "unit": 1.1525,
+      "dailyReturn": 0.0106,
+      "accumulated": 1.1625
+    },
+    {
+      "date": "2025-07-09",
+      "unit": 1.1288,
+      "dailyReturn": -0.0206,
+      "accumulated": 1.1388
+    },
+    {
+      "date": "2025-07-10",
+      "unit": 1.1443,
+      "dailyReturn": 0.0137,
+      "accumulated": 1.1543
+    },
+    {
+      "date": "2025-07-11",
+      "unit": 1.1654,
+      "dailyReturn": 0.0184,
+      "accumulated": 1.1754
+    },
+    {
+      "date": "2025-07-14",
+      "unit": 1.1718,
+      "dailyReturn": 0.0055000000000000005,
+      "accumulated": 1.1818
+    },
+    {
+      "date": "2025-07-15",
+      "unit": 1.1593,
+      "dailyReturn": -0.010700000000000001,
+      "accumulated": 1.1693
+    },
+    {
+      "date": "2025-07-16",
+      "unit": 1.1553,
+      "dailyReturn": -0.0034999999999999996,
+      "accumulated": 1.1653
+    },
+    {
+      "date": "2025-07-17",
+      "unit": 1.1601,
+      "dailyReturn": 0.0042,
+      "accumulated": 1.1701
+    },
+    {
+      "date": "2025-07-18",
+      "unit": 1.1888,
+      "dailyReturn": 0.024700000000000003,
+      "accumulated": 1.1988
+    },
+    {
+      "date": "2025-07-21",
+      "unit": 1.2218,
+      "dailyReturn": 0.0278,
+      "accumulated": 1.2318
+    },
+    {
+      "date": "2025-07-22",
+      "unit": 1.2499,
+      "dailyReturn": 0.023,
+      "accumulated": 1.2599
+    },
+    {
+      "date": "2025-07-23",
+      "unit": 1.247,
+      "dailyReturn": -0.0023,
+      "accumulated": 1.257
+    },
+    {
+      "date": "2025-07-24",
+      "unit": 1.2871,
+      "dailyReturn": 0.0322,
+      "accumulated": 1.2971
+    },
+    {
+      "date": "2025-07-25",
+      "unit": 1.2869,
+      "dailyReturn": -0.0002,
+      "accumulated": 1.2969
+    },
+    {
+      "date": "2025-07-28",
+      "unit": 1.2807,
+      "dailyReturn": -0.0048,
+      "accumulated": 1.2907
+    },
+    {
+      "date": "2025-07-29",
+      "unit": 1.2786,
+      "dailyReturn": -0.0016,
+      "accumulated": 1.2886
+    },
+    {
+      "date": "2025-07-30",
+      "unit": 1.2714,
+      "dailyReturn": -0.005600000000000001,
+      "accumulated": 1.2814
+    },
+    {
+      "date": "2025-07-31",
+      "unit": 1.2274,
+      "dailyReturn": -0.0346,
+      "accumulated": 1.2374
+    },
+    {
+      "date": "2025-08-01",
+      "unit": 1.2231,
+      "dailyReturn": -0.0034999999999999996,
+      "accumulated": 1.2331
+    },
+    {
+      "date": "2025-08-04",
+      "unit": 1.2442,
+      "dailyReturn": 0.0173,
+      "accumulated": 1.2542
+    },
+    {
+      "date": "2025-08-05",
+      "unit": 1.2497,
+      "dailyReturn": 0.0044,
+      "accumulated": 1.2597
+    },
+    {
+      "date": "2025-08-06",
+      "unit": 1.2645,
+      "dailyReturn": 0.0118,
+      "accumulated": 1.2745
+    },
+    {
+      "date": "2025-08-07",
+      "unit": 1.2808,
+      "dailyReturn": 0.0129,
+      "accumulated": 1.2908
+    },
+    {
+      "date": "2025-08-08",
+      "unit": 1.2976,
+      "dailyReturn": 0.0131,
+      "accumulated": 1.3076
+    },
+    {
+      "date": "2025-08-11",
+      "unit": 1.3032,
+      "dailyReturn": 0.0043,
+      "accumulated": 1.3132
+    },
+    {
+      "date": "2025-08-12",
+      "unit": 1.2983,
+      "dailyReturn": -0.0038,
+      "accumulated": 1.3083
+    },
+    {
+      "date": "2025-08-13",
+      "unit": 1.3253,
+      "dailyReturn": 0.0208,
+      "accumulated": 1.3353
+    },
+    {
+      "date": "2025-08-14",
+      "unit": 1.3134,
+      "dailyReturn": -0.009000000000000001,
+      "accumulated": 1.3234
+    },
+    {
+      "date": "2025-08-15",
+      "unit": 1.3423,
+      "dailyReturn": 0.022000000000000002,
+      "accumulated": 1.3523
+    },
+    {
+      "date": "2025-08-18",
+      "unit": 1.3476,
+      "dailyReturn": 0.0039000000000000003,
+      "accumulated": 1.3576
+    },
+    {
+      "date": "2025-08-19",
+      "unit": 1.3425,
+      "dailyReturn": -0.0038,
+      "accumulated": 1.3525
+    },
+    {
+      "date": "2025-08-20",
+      "unit": 1.3546,
+      "dailyReturn": 0.009000000000000001,
+      "accumulated": 1.3646
+    },
+    {
+      "date": "2025-08-21",
+      "unit": 1.3498,
+      "dailyReturn": -0.0034999999999999996,
+      "accumulated": 1.3598
+    },
+    {
+      "date": "2025-08-22",
+      "unit": 1.367,
+      "dailyReturn": 0.0127,
+      "accumulated": 1.377
+    },
+    {
+      "date": "2025-08-25",
+      "unit": 1.434,
+      "dailyReturn": 0.049,
+      "accumulated": 1.444
+    },
+    {
+      "date": "2025-08-26",
+      "unit": 1.4272,
+      "dailyReturn": -0.004699999999999999,
+      "accumulated": 1.4372
+    },
+    {
+      "date": "2025-08-27",
+      "unit": 1.4162,
+      "dailyReturn": -0.0077,
+      "accumulated": 1.4262
+    },
+    {
+      "date": "2025-08-28",
+      "unit": 1.439,
+      "dailyReturn": 0.0161,
+      "accumulated": 1.449
+    },
+    {
+      "date": "2025-08-29",
+      "unit": 1.4782,
+      "dailyReturn": 0.027200000000000002,
+      "accumulated": 1.4882
+    },
+    {
+      "date": "2025-09-01",
+      "unit": 1.5284,
+      "dailyReturn": 0.034,
+      "accumulated": 1.5384
+    },
+    {
+      "date": "2025-09-02",
+      "unit": 1.5106,
+      "dailyReturn": -0.0116,
+      "accumulated": 1.5206
+    },
+    {
+      "date": "2025-09-03",
+      "unit": 1.5012,
+      "dailyReturn": -0.0062,
+      "accumulated": 1.5112
+    },
+    {
+      "date": "2025-09-04",
+      "unit": 1.4408,
+      "dailyReturn": -0.04019999999999999,
+      "accumulated": 1.4508
+    },
+    {
+      "date": "2025-09-05",
+      "unit": 1.5045,
+      "dailyReturn": 0.044199999999999996,
+      "accumulated": 1.5145
+    },
+    {
+      "date": "2025-09-08",
+      "unit": 1.5029,
+      "dailyReturn": -0.0011,
+      "accumulated": 1.5129
+    },
+    {
+      "date": "2025-09-09",
+      "unit": 1.516,
+      "dailyReturn": 0.0087,
+      "accumulated": 1.526
+    },
+    {
+      "date": "2025-09-10",
+      "unit": 1.4984,
+      "dailyReturn": -0.0116,
+      "accumulated": 1.5084
+    },
+    {
+      "date": "2025-09-11",
+      "unit": 1.5252,
+      "dailyReturn": 0.0179,
+      "accumulated": 1.5352
+    },
+    {
+      "date": "2025-09-12",
+      "unit": 1.5612,
+      "dailyReturn": 0.0236,
+      "accumulated": 1.5712
+    },
+    {
+      "date": "2025-09-15",
+      "unit": 1.5357,
+      "dailyReturn": -0.0067,
+      "accumulated": 1.5607
+    },
+    {
+      "date": "2025-09-16",
+      "unit": 1.5155,
+      "dailyReturn": -0.0132,
+      "accumulated": 1.5405
+    },
+    {
+      "date": "2025-09-17",
+      "unit": 1.5187,
+      "dailyReturn": 0.0021,
+      "accumulated": 1.5437
+    },
+    {
+      "date": "2025-09-18",
+      "unit": 1.462,
+      "dailyReturn": -0.0373,
+      "accumulated": 1.487
+    },
+    {
+      "date": "2025-09-19",
+      "unit": 1.4803,
+      "dailyReturn": 0.0125,
+      "accumulated": 1.5053
+    },
+    {
+      "date": "2025-09-22",
+      "unit": 1.4957,
+      "dailyReturn": 0.0104,
+      "accumulated": 1.5207
+    },
+    {
+      "date": "2025-09-23",
+      "unit": 1.483,
+      "dailyReturn": -0.0085,
+      "accumulated": 1.508
+    },
+    {
+      "date": "2025-09-24",
+      "unit": 1.5041,
+      "dailyReturn": 0.014199999999999999,
+      "accumulated": 1.5291
+    },
+    {
+      "date": "2025-09-25",
+      "unit": 1.5316,
+      "dailyReturn": 0.0183,
+      "accumulated": 1.5566
+    },
+    {
+      "date": "2025-09-26",
+      "unit": 1.5332,
+      "dailyReturn": 0.001,
+      "accumulated": 1.5582
+    },
+    {
+      "date": "2025-09-29",
+      "unit": 1.5912,
+      "dailyReturn": 0.0378,
+      "accumulated": 1.6162
+    },
+    {
+      "date": "2025-09-30",
+      "unit": 1.6497,
+      "dailyReturn": 0.0368,
+      "accumulated": 1.6747
+    },
+    {
+      "date": "2025-10-09",
+      "unit": 1.7839,
+      "dailyReturn": 0.08130000000000001,
+      "accumulated": 1.8089
+    },
+    {
+      "date": "2025-10-10",
+      "unit": 1.734,
+      "dailyReturn": -0.027999999999999997,
+      "accumulated": 1.759
+    },
+    {
+      "date": "2025-10-13",
+      "unit": 1.7983,
+      "dailyReturn": 0.0371,
+      "accumulated": 1.8233
+    },
+    {
+      "date": "2025-10-14",
+      "unit": 1.73,
+      "dailyReturn": -0.038,
+      "accumulated": 1.755
+    },
+    {
+      "date": "2025-10-15",
+      "unit": 1.7447,
+      "dailyReturn": 0.0085,
+      "accumulated": 1.7697
+    },
+    {
+      "date": "2025-10-16",
+      "unit": 1.706,
+      "dailyReturn": -0.0222,
+      "accumulated": 1.731
+    },
+    {
+      "date": "2025-10-17",
+      "unit": 1.6733,
+      "dailyReturn": -0.0192,
+      "accumulated": 1.6983
+    },
+    {
+      "date": "2025-10-20",
+      "unit": 1.6484,
+      "dailyReturn": -0.0149,
+      "accumulated": 1.6734
+    },
+    {
+      "date": "2025-10-21",
+      "unit": 1.6733,
+      "dailyReturn": 0.0151,
+      "accumulated": 1.6983
+    },
+    {
+      "date": "2025-10-22",
+      "unit": 1.6521,
+      "dailyReturn": -0.0127,
+      "accumulated": 1.6771
+    },
+    {
+      "date": "2025-10-23",
+      "unit": 1.6715,
+      "dailyReturn": 0.011699999999999999,
+      "accumulated": 1.6965
+    },
+    {
+      "date": "2025-10-24",
+      "unit": 1.6998,
+      "dailyReturn": 0.0169,
+      "accumulated": 1.7248
+    },
+    {
+      "date": "2025-10-27",
+      "unit": 1.7416,
+      "dailyReturn": 0.0246,
+      "accumulated": 1.7666
+    },
+    {
+      "date": "2025-10-28",
+      "unit": 1.6864,
+      "dailyReturn": -0.0317,
+      "accumulated": 1.7114
+    },
+    {
+      "date": "2025-10-29",
+      "unit": 1.7634,
+      "dailyReturn": 0.045700000000000005,
+      "accumulated": 1.7884
+    },
+    {
+      "date": "2025-10-30",
+      "unit": 1.7847,
+      "dailyReturn": 0.0121,
+      "accumulated": 1.8097
+    },
+    {
+      "date": "2025-10-31",
+      "unit": 1.7425,
+      "dailyReturn": -0.0236,
+      "accumulated": 1.7675
+    },
+    {
+      "date": "2025-11-03",
+      "unit": 1.7196,
+      "dailyReturn": -0.0131,
+      "accumulated": 1.7446
+    },
+    {
+      "date": "2025-11-04",
+      "unit": 1.6644,
+      "dailyReturn": -0.0321,
+      "accumulated": 1.6894
+    },
+    {
+      "date": "2025-11-05",
+      "unit": 1.6724,
+      "dailyReturn": 0.0048,
+      "accumulated": 1.6974
+    },
+    {
+      "date": "2025-11-06",
+      "unit": 1.7259,
+      "dailyReturn": 0.032,
+      "accumulated": 1.7509
+    },
+    {
+      "date": "2025-11-07",
+      "unit": 1.7385,
+      "dailyReturn": 0.0073,
+      "accumulated": 1.7635
+    },
+    {
+      "date": "2025-11-10",
+      "unit": 1.747,
+      "dailyReturn": 0.0049,
+      "accumulated": 1.772
+    },
+    {
+      "date": "2025-11-11",
+      "unit": 1.7228,
+      "dailyReturn": -0.0139,
+      "accumulated": 1.7478
+    },
+    {
+      "date": "2025-11-12",
+      "unit": 1.723,
+      "dailyReturn": 0.0001,
+      "accumulated": 1.748
+    },
+    {
+      "date": "2025-11-13",
+      "unit": 1.7939,
+      "dailyReturn": 0.041100000000000005,
+      "accumulated": 1.8189
+    },
+    {
+      "date": "2025-11-14",
+      "unit": 1.7578,
+      "dailyReturn": -0.020099999999999996,
+      "accumulated": 1.7828
+    },
+    {
+      "date": "2025-11-17",
+      "unit": 1.752,
+      "dailyReturn": -0.0033,
+      "accumulated": 1.777
+    },
+    {
+      "date": "2025-11-18",
+      "unit": 1.7015,
+      "dailyReturn": -0.0288,
+      "accumulated": 1.7265
+    },
+    {
+      "date": "2025-11-19",
+      "unit": 1.7489,
+      "dailyReturn": 0.0279,
+      "accumulated": 1.7739
+    },
+    {
+      "date": "2025-11-20",
+      "unit": 1.7424,
+      "dailyReturn": -0.0037,
+      "accumulated": 1.7674
+    },
+    {
+      "date": "2025-11-21",
+      "unit": 1.65,
+      "dailyReturn": -0.053,
+      "accumulated": 1.675
+    },
+    {
+      "date": "2025-11-24",
+      "unit": 1.6354,
+      "dailyReturn": -0.0088,
+      "accumulated": 1.6604
+    },
+    {
+      "date": "2025-11-25",
+      "unit": 1.6738,
+      "dailyReturn": 0.0235,
+      "accumulated": 1.6988
+    },
+    {
+      "date": "2025-11-26",
+      "unit": 1.6723,
+      "dailyReturn": -0.0009,
+      "accumulated": 1.6973
+    },
+    {
+      "date": "2025-11-27",
+      "unit": 1.6764,
+      "dailyReturn": 0.0025,
+      "accumulated": 1.7014
+    },
+    {
+      "date": "2025-11-28",
+      "unit": 1.7042,
+      "dailyReturn": 0.0166,
+      "accumulated": 1.7292
+    },
+    {
+      "date": "2025-12-01",
+      "unit": 1.756,
+      "dailyReturn": 0.0304,
+      "accumulated": 1.781
+    },
+    {
+      "date": "2025-12-02",
+      "unit": 1.7308,
+      "dailyReturn": -0.0144,
+      "accumulated": 1.7558
+    },
+    {
+      "date": "2025-12-03",
+      "unit": 1.7415,
+      "dailyReturn": 0.0062,
+      "accumulated": 1.7665
+    },
+    {
+      "date": "2025-12-04",
+      "unit": 1.7475,
+      "dailyReturn": 0.0034000000000000002,
+      "accumulated": 1.7725
+    },
+    {
+      "date": "2025-12-05",
+      "unit": 1.7912,
+      "dailyReturn": 0.025,
+      "accumulated": 1.8162
+    },
+    {
+      "date": "2025-12-08",
+      "unit": 1.8037,
+      "dailyReturn": 0.006999999999999999,
+      "accumulated": 1.8287
+    },
+    {
+      "date": "2025-12-09",
+      "unit": 1.7464,
+      "dailyReturn": -0.0318,
+      "accumulated": 1.7714
+    },
+    {
+      "date": "2025-12-10",
+      "unit": 1.7631,
+      "dailyReturn": 0.0096,
+      "accumulated": 1.7881
+    },
+    {
+      "date": "2025-12-11",
+      "unit": 1.7498,
+      "dailyReturn": -0.0075,
+      "accumulated": 1.7748
+    },
+    {
+      "date": "2025-12-12",
+      "unit": 1.7732,
+      "dailyReturn": 0.0134,
+      "accumulated": 1.7982
+    },
+    {
+      "date": "2025-12-15",
+      "unit": 1.7621,
+      "dailyReturn": -0.0063,
+      "accumulated": 1.7871
+    },
+    {
+      "date": "2025-12-16",
+      "unit": 1.7158,
+      "dailyReturn": -0.0263,
+      "accumulated": 1.7408
+    },
+    {
+      "date": "2025-12-17",
+      "unit": 1.7732,
+      "dailyReturn": 0.0335,
+      "accumulated": 1.7982
+    },
+    {
+      "date": "2025-12-18",
+      "unit": 1.7694,
+      "dailyReturn": -0.0021,
+      "accumulated": 1.7944
+    },
+    {
+      "date": "2025-12-19",
+      "unit": 1.8066,
+      "dailyReturn": 0.021,
+      "accumulated": 1.8316
+    },
+    {
+      "date": "2025-12-22",
+      "unit": 1.8471,
+      "dailyReturn": 0.022400000000000003,
+      "accumulated": 1.8721
+    },
+    {
+      "date": "2025-12-23",
+      "unit": 1.8582,
+      "dailyReturn": 0.006,
+      "accumulated": 1.8832
+    },
+    {
+      "date": "2025-12-24",
+      "unit": 1.8659,
+      "dailyReturn": 0.0040999999999999995,
+      "accumulated": 1.8909
+    },
+    {
+      "date": "2025-12-25",
+      "unit": 1.8484,
+      "dailyReturn": -0.009399999999999999,
+      "accumulated": 1.8734
+    },
+    {
+      "date": "2025-12-26",
+      "unit": 1.92,
+      "dailyReturn": 0.0387,
+      "accumulated": 1.945
+    },
+    {
+      "date": "2025-12-29",
+      "unit": 1.8768,
+      "dailyReturn": -0.0225,
+      "accumulated": 1.9018
+    },
+    {
+      "date": "2025-12-30",
+      "unit": 1.9088,
+      "dailyReturn": 0.0171,
+      "accumulated": 1.9338
+    },
+    {
+      "date": "2025-12-31",
+      "unit": 1.9266,
+      "dailyReturn": 0.009300000000000001,
+      "accumulated": 1.9516
+    },
+    {
+      "date": "2026-01-05",
+      "unit": 1.979,
+      "dailyReturn": 0.027200000000000002,
+      "accumulated": 2.004
+    },
+    {
+      "date": "2026-01-06",
+      "unit": 2.06,
+      "dailyReturn": 0.0409,
+      "accumulated": 2.085
+    },
+    {
+      "date": "2026-01-07",
+      "unit": 2.072,
+      "dailyReturn": 0.0058,
+      "accumulated": 2.097
+    },
+    {
+      "date": "2026-01-08",
+      "unit": 2.0299,
+      "dailyReturn": -0.0203,
+      "accumulated": 2.0549
+    },
+    {
+      "date": "2026-01-09",
+      "unit": 2.0889,
+      "dailyReturn": 0.0291,
+      "accumulated": 2.1139
+    },
+    {
+      "date": "2026-01-12",
+      "unit": 2.1121,
+      "dailyReturn": 0.0111,
+      "accumulated": 2.1371
+    },
+    {
+      "date": "2026-01-13",
+      "unit": 2.139,
+      "dailyReturn": 0.0127,
+      "accumulated": 2.164
+    },
+    {
+      "date": "2026-01-14",
+      "unit": 2.1508,
+      "dailyReturn": 0.0055000000000000005,
+      "accumulated": 2.1758
+    },
+    {
+      "date": "2026-01-15",
+      "unit": 2.1912,
+      "dailyReturn": 0.018799999999999997,
+      "accumulated": 2.2162
+    },
+    {
+      "date": "2026-01-16",
+      "unit": 2.1708,
+      "dailyReturn": -0.009300000000000001,
+      "accumulated": 2.1958
+    },
+    {
+      "date": "2026-01-19",
+      "unit": 2.1758,
+      "dailyReturn": 0.0023,
+      "accumulated": 2.2008
+    },
+    {
+      "date": "2026-01-20",
+      "unit": 2.1841,
+      "dailyReturn": 0.0038,
+      "accumulated": 2.2091
+    },
+    {
+      "date": "2026-01-21",
+      "unit": 2.2472,
+      "dailyReturn": 0.028900000000000002,
+      "accumulated": 2.2722
+    },
+    {
+      "date": "2026-01-22",
+      "unit": 2.2296,
+      "dailyReturn": -0.0078000000000000005,
+      "accumulated": 2.2546
+    },
+    {
+      "date": "2026-01-23",
+      "unit": 2.2896,
+      "dailyReturn": 0.0269,
+      "accumulated": 2.3146
+    },
+    {
+      "date": "2026-01-26",
+      "unit": 2.4074,
+      "dailyReturn": 0.051500000000000004,
+      "accumulated": 2.4324
+    },
+    {
+      "date": "2026-01-27",
+      "unit": 2.3859,
+      "dailyReturn": -0.0089,
+      "accumulated": 2.4109
+    },
+    {
+      "date": "2026-01-28",
+      "unit": 2.5368,
+      "dailyReturn": 0.0632,
+      "accumulated": 2.5618
+    },
+    {
+      "date": "2026-01-29",
+      "unit": 2.587,
+      "dailyReturn": 0.019799999999999998,
+      "accumulated": 2.612
+    },
+    {
+      "date": "2026-01-30",
+      "unit": 2.3727,
+      "dailyReturn": -0.0828,
+      "accumulated": 2.3977
+    },
+    {
+      "date": "2026-02-02",
+      "unit": 2.1857,
+      "dailyReturn": -0.0788,
+      "accumulated": 2.2107
+    },
+    {
+      "date": "2026-02-03",
+      "unit": 2.2522,
+      "dailyReturn": 0.0304,
+      "accumulated": 2.2772
+    },
+    {
+      "date": "2026-02-04",
+      "unit": 2.257,
+      "dailyReturn": 0.0021,
+      "accumulated": 2.282
+    },
+    {
+      "date": "2026-02-05",
+      "unit": 2.1458,
+      "dailyReturn": -0.0493,
+      "accumulated": 2.1708
+    },
+    {
+      "date": "2026-02-06",
+      "unit": 2.1538,
+      "dailyReturn": 0.0037,
+      "accumulated": 2.1788
+    },
+    {
+      "date": "2026-02-09",
+      "unit": 2.1973,
+      "dailyReturn": 0.0202,
+      "accumulated": 2.2223
+    },
+    {
+      "date": "2026-02-10",
+      "unit": 2.1952,
+      "dailyReturn": -0.001,
+      "accumulated": 2.2202
+    },
+    {
+      "date": "2026-02-11",
+      "unit": 2.2548,
+      "dailyReturn": 0.027200000000000002,
+      "accumulated": 2.2798
+    },
+    {
+      "date": "2026-02-12",
+      "unit": 2.2699,
+      "dailyReturn": 0.0067,
+      "accumulated": 2.2949
+    },
+    {
+      "date": "2026-02-13",
+      "unit": 2.1897,
+      "dailyReturn": -0.0353,
+      "accumulated": 2.2147
+    },
+    {
+      "date": "2026-02-24",
+      "unit": 2.26,
+      "dailyReturn": 0.0321,
+      "accumulated": 2.285
+    },
+    {
+      "date": "2026-02-25",
+      "unit": 2.3452,
+      "dailyReturn": 0.0377,
+      "accumulated": 2.3702
+    },
+    {
+      "date": "2026-02-26",
+      "unit": 2.3276,
+      "dailyReturn": -0.0075,
+      "accumulated": 2.3526
+    },
+    {
+      "date": "2026-02-27",
+      "unit": 2.4085,
+      "dailyReturn": 0.0348,
+      "accumulated": 2.4335
+    },
+    {
+      "date": "2026-03-02",
+      "unit": 2.4933,
+      "dailyReturn": 0.0352,
+      "accumulated": 2.5183
+    },
+    {
+      "date": "2026-03-03",
+      "unit": 2.3538,
+      "dailyReturn": -0.0559,
+      "accumulated": 2.3788
+    },
+    {
+      "date": "2026-03-04",
+      "unit": 2.3447,
+      "dailyReturn": -0.0039000000000000003,
+      "accumulated": 2.3697
+    },
+    {
+      "date": "2026-03-05",
+      "unit": 2.3273,
+      "dailyReturn": -0.0074,
+      "accumulated": 2.3523
+    },
+    {
+      "date": "2026-03-06",
+      "unit": 2.2784,
+      "dailyReturn": -0.021,
+      "accumulated": 2.3034
+    },
+    {
+      "date": "2026-03-09",
+      "unit": 2.258,
+      "dailyReturn": -0.009000000000000001,
+      "accumulated": 2.283
+    },
+    {
+      "date": "2026-03-10",
+      "unit": 2.2796,
+      "dailyReturn": 0.0096,
+      "accumulated": 2.3046
+    },
+    {
+      "date": "2026-03-11",
+      "unit": 2.27,
+      "dailyReturn": -0.0042,
+      "accumulated": 2.295
+    },
+    {
+      "date": "2026-03-12",
+      "unit": 2.2561,
+      "dailyReturn": -0.0060999999999999995,
+      "accumulated": 2.2811
+    },
+    {
+      "date": "2026-03-13",
+      "unit": 2.1947,
+      "dailyReturn": -0.027200000000000002,
+      "accumulated": 2.2197
+    },
+    {
+      "date": "2026-03-16",
+      "unit": 2.1302,
+      "dailyReturn": -0.0294,
+      "accumulated": 2.1552
+    },
+    {
+      "date": "2026-03-17",
+      "unit": 2.0919,
+      "dailyReturn": -0.018000000000000002,
+      "accumulated": 2.1169
+    },
+    {
+      "date": "2026-03-18",
+      "unit": 2.0744,
+      "dailyReturn": -0.0084,
+      "accumulated": 2.0994
+    },
+    {
+      "date": "2026-03-19",
+      "unit": 1.9469,
+      "dailyReturn": -0.061500000000000006,
+      "accumulated": 1.9719
+    },
+    {
+      "date": "2026-03-20",
+      "unit": 1.9248,
+      "dailyReturn": -0.011399999999999999,
+      "accumulated": 1.9498
+    },
+    {
+      "date": "2026-03-23",
+      "unit": 1.8356,
+      "dailyReturn": -0.0463,
+      "accumulated": 1.8606
+    },
+    {
+      "date": "2026-03-24",
+      "unit": 1.8941,
+      "dailyReturn": 0.0319,
+      "accumulated": 1.9191
+    },
+    {
+      "date": "2026-03-25",
+      "unit": 1.9516,
+      "dailyReturn": 0.0304,
+      "accumulated": 1.9766
+    },
+    {
+      "date": "2026-03-26",
+      "unit": 1.9181,
+      "dailyReturn": -0.0172,
+      "accumulated": 1.9431
+    },
+    {
+      "date": "2026-03-27",
+      "unit": 1.9717,
+      "dailyReturn": 0.0279,
+      "accumulated": 1.9967
+    },
+    {
+      "date": "2026-03-30",
+      "unit": 2.0073,
+      "dailyReturn": 0.0181,
+      "accumulated": 2.0323
+    },
+    {
+      "date": "2026-03-31",
+      "unit": 1.9777,
+      "dailyReturn": -0.0147,
+      "accumulated": 2.0027
+    },
+    {
+      "date": "2026-04-01",
+      "unit": 2.0268,
+      "dailyReturn": 0.0248,
+      "accumulated": 2.0518
+    },
+    {
+      "date": "2026-04-02",
+      "unit": 1.9925,
+      "dailyReturn": -0.0169,
+      "accumulated": 2.0175
+    },
+    {
+      "date": "2026-04-03",
+      "unit": 1.9721,
+      "dailyReturn": -0.0102,
+      "accumulated": 1.9971
+    },
+    {
+      "date": "2026-04-07",
+      "unit": 1.9927,
+      "dailyReturn": 0.0104,
+      "accumulated": 2.0177
+    },
+    {
+      "date": "2026-04-08",
+      "unit": 2.1126,
+      "dailyReturn": 0.0602,
+      "accumulated": 2.1376
+    },
+    {
+      "date": "2026-04-09",
+      "unit": 2.102,
+      "dailyReturn": -0.005,
+      "accumulated": 2.127
+    },
+    {
+      "date": "2026-04-10",
+      "unit": 2.0918,
+      "dailyReturn": -0.0049,
+      "accumulated": 2.1168
+    },
+    {
+      "date": "2026-04-13",
+      "unit": 2.0975,
+      "dailyReturn": 0.0027,
+      "accumulated": 2.1225
+    },
+    {
+      "date": "2026-04-14",
+      "unit": 2.1365,
+      "dailyReturn": 0.018600000000000002,
+      "accumulated": 2.1615
+    },
+    {
+      "date": "2026-04-15",
+      "unit": 2.1042,
+      "dailyReturn": -0.0151,
+      "accumulated": 2.1292
+    },
+    {
+      "date": "2026-04-16",
+      "unit": 2.1674,
+      "dailyReturn": 0.03,
+      "accumulated": 2.1924
+    },
+    {
+      "date": "2026-04-17",
+      "unit": 2.1678,
+      "dailyReturn": 0.0002,
+      "accumulated": 2.1928
+    },
+    {
+      "date": "2026-04-20",
+      "unit": 2.1755,
+      "dailyReturn": 0.0036,
+      "accumulated": 2.2005
+    },
+    {
+      "date": "2026-04-21",
+      "unit": 2.179,
+      "dailyReturn": 0.0016,
+      "accumulated": 2.204
+    },
+    {
+      "date": "2026-04-22",
+      "unit": 2.1807,
+      "dailyReturn": 0.0008,
+      "accumulated": 2.2057
+    },
+    {
+      "date": "2026-04-23",
+      "unit": 2.0966,
+      "dailyReturn": -0.038599999999999995,
+      "accumulated": 2.1216
+    },
+    {
+      "date": "2026-04-24",
+      "unit": 2.1177,
+      "dailyReturn": 0.0101,
+      "accumulated": 2.1427
+    },
+    {
+      "date": "2026-04-27",
+      "unit": 2.0958,
+      "dailyReturn": -0.0103,
+      "accumulated": 2.1208
+    },
+    {
+      "date": "2026-04-28",
+      "unit": 2.0448,
+      "dailyReturn": -0.024300000000000002,
+      "accumulated": 2.0698
+    },
+    {
+      "date": "2026-04-29",
+      "unit": 2.1368,
+      "dailyReturn": 0.045,
+      "accumulated": 2.1618
+    },
+    {
+      "date": "2026-04-30",
+      "unit": 2.117,
+      "dailyReturn": -0.009300000000000001,
+      "accumulated": 2.142
+    }
+  ],
   "estimate": {
     "date": "2026-04-30",
     "value": 2.1167,
@@ -3414,6 +5097,3368 @@
       "change": -0.021
     }
   ],
+  "benchmarkKlines": [
+    {
+      "date": "2025-03-07",
+      "open": 5131.92,
+      "close": 5200.95,
+      "high": 5257.37,
+      "low": 5130.52,
+      "volume": 32717945,
+      "amount": 42467135634.6,
+      "amplitude": 0.024700000000000003,
+      "changePercent": 0.013300000000000001,
+      "change": 68.16
+    },
+    {
+      "date": "2025-03-10",
+      "open": 5240.12,
+      "close": 5262.55,
+      "high": 5269.98,
+      "low": 5190.19,
+      "volume": 34168144,
+      "amount": 40666165523.6,
+      "amplitude": 0.015300000000000001,
+      "changePercent": 0.0118,
+      "change": 61.6
+    },
+    {
+      "date": "2025-03-11",
+      "open": 5184.56,
+      "close": 5291.65,
+      "high": 5291.65,
+      "low": 5171.49,
+      "volume": 31469517,
+      "amount": 41199596817.4,
+      "amplitude": 0.022799999999999997,
+      "changePercent": 0.0055000000000000005,
+      "change": 29.1
+    },
+    {
+      "date": "2025-03-12",
+      "open": 5307.28,
+      "close": 5295.61,
+      "high": 5319.64,
+      "low": 5268.42,
+      "volume": 28167970,
+      "amount": 36246984702.5,
+      "amplitude": 0.0097,
+      "changePercent": 0.0007000000000000001,
+      "change": 3.96
+    },
+    {
+      "date": "2025-03-13",
+      "open": 5316.94,
+      "close": 5323.93,
+      "high": 5353.11,
+      "low": 5278.42,
+      "volume": 25991226,
+      "amount": 35442566519.3,
+      "amplitude": 0.0141,
+      "changePercent": 0.0053,
+      "change": 28.32
+    },
+    {
+      "date": "2025-03-14",
+      "open": 5432.57,
+      "close": 5390.54,
+      "high": 5451.86,
+      "low": 5353.7,
+      "volume": 36542927,
+      "amount": 51006940465.7,
+      "amplitude": 0.0184,
+      "changePercent": 0.0125,
+      "change": 66.61
+    },
+    {
+      "date": "2025-03-17",
+      "open": 5381.29,
+      "close": 5338.23,
+      "high": 5402.91,
+      "low": 5329.93,
+      "volume": 25841093,
+      "amount": 36955193917,
+      "amplitude": 0.013500000000000002,
+      "changePercent": -0.0097,
+      "change": -52.31
+    },
+    {
+      "date": "2025-03-18",
+      "open": 5360.08,
+      "close": 5412.39,
+      "high": 5459.37,
+      "low": 5355.67,
+      "volume": 27835886,
+      "amount": 39036334443.2,
+      "amplitude": 0.0194,
+      "changePercent": 0.0139,
+      "change": 74.16
+    },
+    {
+      "date": "2025-03-19",
+      "open": 5404.89,
+      "close": 5416.81,
+      "high": 5417.75,
+      "low": 5359.18,
+      "volume": 21322238,
+      "amount": 30966569324.7,
+      "amplitude": 0.0108,
+      "changePercent": 0.0008,
+      "change": 4.42
+    },
+    {
+      "date": "2025-03-20",
+      "open": 5448,
+      "close": 5401.03,
+      "high": 5465.81,
+      "low": 5396.01,
+      "volume": 22997446,
+      "amount": 32286351247.2,
+      "amplitude": 0.0129,
+      "changePercent": -0.0029,
+      "change": -15.78
+    },
+    {
+      "date": "2025-03-21",
+      "open": 5383.21,
+      "close": 5273.03,
+      "high": 5405.79,
+      "low": 5255.57,
+      "volume": 24424278,
+      "amount": 34043596458.1,
+      "amplitude": 0.0278,
+      "changePercent": -0.023700000000000002,
+      "change": -128
+    },
+    {
+      "date": "2025-03-24",
+      "open": 5278.27,
+      "close": 5361.39,
+      "high": 5386.01,
+      "low": 5252.31,
+      "volume": 34695525,
+      "amount": 41878825182.6,
+      "amplitude": 0.0254,
+      "changePercent": 0.0168,
+      "change": 88.36
+    },
+    {
+      "date": "2025-03-25",
+      "open": 5365.96,
+      "close": 5382.7,
+      "high": 5412.63,
+      "low": 5327.5,
+      "volume": 30496239,
+      "amount": 36801188057.4,
+      "amplitude": 0.0159,
+      "changePercent": 0.004,
+      "change": 21.31
+    },
+    {
+      "date": "2025-03-26",
+      "open": 5418.91,
+      "close": 5353.28,
+      "high": 5481.3,
+      "low": 5341.55,
+      "volume": 37681861,
+      "amount": 45555098379.4,
+      "amplitude": 0.026000000000000002,
+      "changePercent": -0.0055000000000000005,
+      "change": -29.42
+    },
+    {
+      "date": "2025-03-27",
+      "open": 5301.37,
+      "close": 5298.61,
+      "high": 5328.63,
+      "low": 5254.98,
+      "volume": 25199083,
+      "amount": 31456542201.3,
+      "amplitude": 0.0138,
+      "changePercent": -0.0102,
+      "change": -54.67
+    },
+    {
+      "date": "2025-03-28",
+      "open": 5318.03,
+      "close": 5297.95,
+      "high": 5329.31,
+      "low": 5245.9,
+      "volume": 25540880,
+      "amount": 32856216680.9,
+      "amplitude": 0.015700000000000002,
+      "changePercent": -0.0001,
+      "change": -0.66
+    },
+    {
+      "date": "2025-03-31",
+      "open": 5269.92,
+      "close": 5254.78,
+      "high": 5295.42,
+      "low": 5202.55,
+      "volume": 23966800,
+      "amount": 31314779159.6,
+      "amplitude": 0.0175,
+      "changePercent": -0.008100000000000001,
+      "change": -43.17
+    },
+    {
+      "date": "2025-04-01",
+      "open": 5269,
+      "close": 5266.49,
+      "high": 5306.45,
+      "low": 5246.78,
+      "volume": 20040486,
+      "amount": 26767835850.7,
+      "amplitude": 0.011399999999999999,
+      "changePercent": 0.0022,
+      "change": 11.71
+    },
+    {
+      "date": "2025-04-02",
+      "open": 5247.19,
+      "close": 5212.9,
+      "high": 5281.16,
+      "low": 5203.58,
+      "volume": 16794903,
+      "amount": 22193166914.5,
+      "amplitude": 0.0147,
+      "changePercent": -0.0102,
+      "change": -53.59
+    },
+    {
+      "date": "2025-04-03",
+      "open": 5193.28,
+      "close": 5135.93,
+      "high": 5207.66,
+      "low": 5127.06,
+      "volume": 24192560,
+      "amount": 29944078549.3,
+      "amplitude": 0.0155,
+      "changePercent": -0.0148,
+      "change": -76.97
+    },
+    {
+      "date": "2025-04-07",
+      "open": 4748.18,
+      "close": 4712.11,
+      "high": 4826.44,
+      "low": 4667.87,
+      "volume": 35678332,
+      "amount": 46658753604.2,
+      "amplitude": 0.030899999999999997,
+      "changePercent": -0.0825,
+      "change": -423.82
+    },
+    {
+      "date": "2025-04-08",
+      "open": 4684.64,
+      "close": 4696.07,
+      "high": 4696.07,
+      "low": 4581.66,
+      "volume": 44589838,
+      "amount": 51149142668.7,
+      "amplitude": 0.024300000000000002,
+      "changePercent": -0.0034000000000000002,
+      "change": -16.04
+    },
+    {
+      "date": "2025-04-09",
+      "open": 4606.95,
+      "close": 4755.7,
+      "high": 4761.51,
+      "low": 4507.59,
+      "volume": 41219195,
+      "amount": 50013543410.4,
+      "amplitude": 0.0541,
+      "changePercent": 0.0127,
+      "change": 59.63
+    },
+    {
+      "date": "2025-04-10",
+      "open": 4871.74,
+      "close": 4922.95,
+      "high": 4972.86,
+      "low": 4831.45,
+      "volume": 38112165,
+      "amount": 49415239242,
+      "amplitude": 0.0297,
+      "changePercent": 0.0352,
+      "change": 167.25
+    },
+    {
+      "date": "2025-04-11",
+      "open": 4966.79,
+      "close": 4968.43,
+      "high": 5001.53,
+      "low": 4939.71,
+      "volume": 27990245,
+      "amount": 39828184707.9,
+      "amplitude": 0.0126,
+      "changePercent": 0.0092,
+      "change": 45.48
+    },
+    {
+      "date": "2025-04-14",
+      "open": 5005.12,
+      "close": 5081.07,
+      "high": 5131.13,
+      "low": 4996.55,
+      "volume": 31851225,
+      "amount": 43391482188.3,
+      "amplitude": 0.0271,
+      "changePercent": 0.0227,
+      "change": 112.64
+    },
+    {
+      "date": "2025-04-15",
+      "open": 5073.03,
+      "close": 5048.15,
+      "high": 5073.87,
+      "low": 5014.94,
+      "volume": 21555419,
+      "amount": 30342420413.8,
+      "amplitude": 0.0116,
+      "changePercent": -0.006500000000000001,
+      "change": -32.92
+    },
+    {
+      "date": "2025-04-16",
+      "open": 5086.81,
+      "close": 5047.33,
+      "high": 5091.7,
+      "low": 4974.09,
+      "volume": 23678079,
+      "amount": 32614226125,
+      "amplitude": 0.0233,
+      "changePercent": -0.0002,
+      "change": -0.82
+    },
+    {
+      "date": "2025-04-17",
+      "open": 5076.62,
+      "close": 5017.08,
+      "high": 5121.7,
+      "low": 5004.66,
+      "volume": 23488973,
+      "amount": 35778615536.3,
+      "amplitude": 0.0232,
+      "changePercent": -0.006,
+      "change": -30.25
+    },
+    {
+      "date": "2025-04-18",
+      "open": 4996.84,
+      "close": 5003.83,
+      "high": 5013.46,
+      "low": 4948.62,
+      "volume": 17329019,
+      "amount": 24916810167.7,
+      "amplitude": 0.0129,
+      "changePercent": -0.0026,
+      "change": -13.25
+    },
+    {
+      "date": "2025-04-21",
+      "open": 5038.18,
+      "close": 5191.3,
+      "high": 5191.57,
+      "low": 5025.51,
+      "volume": 26611191,
+      "amount": 37127627452.5,
+      "amplitude": 0.0332,
+      "changePercent": 0.0375,
+      "change": 187.47
+    },
+    {
+      "date": "2025-04-22",
+      "open": 5201.15,
+      "close": 5171.05,
+      "high": 5225.16,
+      "low": 5157.68,
+      "volume": 27057367,
+      "amount": 38956541808,
+      "amplitude": 0.013000000000000001,
+      "changePercent": -0.0039000000000000003,
+      "change": -20.25
+    },
+    {
+      "date": "2025-04-23",
+      "open": 5119.36,
+      "close": 5094.8,
+      "high": 5154.2,
+      "low": 5079.38,
+      "volume": 26887991,
+      "amount": 40805797782.7,
+      "amplitude": 0.014499999999999999,
+      "changePercent": -0.0147,
+      "change": -76.25
+    },
+    {
+      "date": "2025-04-24",
+      "open": 5122.75,
+      "close": 5065.06,
+      "high": 5137.23,
+      "low": 5059.62,
+      "volume": 18569699,
+      "amount": 27025473142.4,
+      "amplitude": 0.0152,
+      "changePercent": -0.0058,
+      "change": -29.74
+    },
+    {
+      "date": "2025-04-25",
+      "open": 5082.9,
+      "close": 5074.69,
+      "high": 5133.81,
+      "low": 5067.31,
+      "volume": 20845762,
+      "amount": 27718305776.3,
+      "amplitude": 0.0131,
+      "changePercent": 0.0019,
+      "change": 9.63
+    },
+    {
+      "date": "2025-04-28",
+      "open": 5059.03,
+      "close": 5056.02,
+      "high": 5071.31,
+      "low": 5032.79,
+      "volume": 18735710,
+      "amount": 22474110389,
+      "amplitude": 0.0076,
+      "changePercent": -0.0037,
+      "change": -18.67
+    },
+    {
+      "date": "2025-04-29",
+      "open": 5054.55,
+      "close": 5045.91,
+      "high": 5066.85,
+      "low": 5032.32,
+      "volume": 13611109,
+      "amount": 16834297349,
+      "amplitude": 0.0068000000000000005,
+      "changePercent": -0.002,
+      "change": -10.11
+    },
+    {
+      "date": "2025-04-30",
+      "open": 5039.82,
+      "close": 5033.8,
+      "high": 5069.43,
+      "low": 5030.26,
+      "volume": 15371087,
+      "amount": 19451614348.9,
+      "amplitude": 0.0078000000000000005,
+      "changePercent": -0.0024,
+      "change": -12.11
+    },
+    {
+      "date": "2025-05-06",
+      "open": 5093.29,
+      "close": 5150.88,
+      "high": 5153.37,
+      "low": 5093.29,
+      "volume": 23289323,
+      "amount": 33015985317.9,
+      "amplitude": 0.011899999999999999,
+      "changePercent": 0.0233,
+      "change": 117.08
+    },
+    {
+      "date": "2025-05-07",
+      "open": 5186.95,
+      "close": 5166.17,
+      "high": 5189.24,
+      "low": 5132.83,
+      "volume": 23115216,
+      "amount": 31239486014.1,
+      "amplitude": 0.011000000000000001,
+      "changePercent": 0.003,
+      "change": 15.29
+    },
+    {
+      "date": "2025-05-08",
+      "open": 5138.21,
+      "close": 5127.96,
+      "high": 5170.1,
+      "low": 5110,
+      "volume": 17601966,
+      "amount": 23901300060,
+      "amplitude": 0.0116,
+      "changePercent": -0.0074,
+      "change": -38.21
+    },
+    {
+      "date": "2025-05-09",
+      "open": 5107.47,
+      "close": 5113.08,
+      "high": 5128.82,
+      "low": 5085.03,
+      "volume": 16178505,
+      "amount": 21656899162.1,
+      "amplitude": 0.0085,
+      "changePercent": -0.0029,
+      "change": -14.88
+    },
+    {
+      "date": "2025-05-12",
+      "open": 5108.34,
+      "close": 5155.64,
+      "high": 5156.07,
+      "low": 5077.24,
+      "volume": 20964150,
+      "amount": 28105963706.1,
+      "amplitude": 0.0154,
+      "changePercent": 0.0083,
+      "change": 42.56
+    },
+    {
+      "date": "2025-05-13",
+      "open": 5165.85,
+      "close": 5170.02,
+      "high": 5184.44,
+      "low": 5141.53,
+      "volume": 18865979,
+      "amount": 25910431727.3,
+      "amplitude": 0.0083,
+      "changePercent": 0.0028000000000000004,
+      "change": 14.38
+    },
+    {
+      "date": "2025-05-14",
+      "open": 5164.65,
+      "close": 5214.17,
+      "high": 5215.85,
+      "low": 5164.65,
+      "volume": 20530711,
+      "amount": 28341174143.8,
+      "amplitude": 0.009899999999999999,
+      "changePercent": 0.0085,
+      "change": 44.15
+    },
+    {
+      "date": "2025-05-15",
+      "open": 5194.24,
+      "close": 5150.7,
+      "high": 5205.5,
+      "low": 5135.93,
+      "volume": 20424504,
+      "amount": 29533154841.9,
+      "amplitude": 0.013300000000000001,
+      "changePercent": -0.012199999999999999,
+      "change": -63.47
+    },
+    {
+      "date": "2025-05-16",
+      "open": 5145.43,
+      "close": 5141.18,
+      "high": 5177.46,
+      "low": 5123.09,
+      "volume": 16584125,
+      "amount": 23661794214.6,
+      "amplitude": 0.0106,
+      "changePercent": -0.0018,
+      "change": -9.52
+    },
+    {
+      "date": "2025-05-19",
+      "open": 5146.37,
+      "close": 5113.47,
+      "high": 5152.4,
+      "low": 5096,
+      "volume": 15699579,
+      "amount": 20137848743.1,
+      "amplitude": 0.011000000000000001,
+      "changePercent": -0.0054,
+      "change": -27.71
+    },
+    {
+      "date": "2025-05-20",
+      "open": 5110.23,
+      "close": 5133.9,
+      "high": 5145.82,
+      "low": 5110.23,
+      "volume": 15171347,
+      "amount": 21291916381.6,
+      "amplitude": 0.006999999999999999,
+      "changePercent": 0.004,
+      "change": 20.43
+    },
+    {
+      "date": "2025-05-21",
+      "open": 5167.63,
+      "close": 5245.78,
+      "high": 5246.6,
+      "low": 5150.74,
+      "volume": 22066438,
+      "amount": 31207242060.7,
+      "amplitude": 0.0187,
+      "changePercent": 0.0218,
+      "change": 111.88
+    },
+    {
+      "date": "2025-05-22",
+      "open": 5224.81,
+      "close": 5186.98,
+      "high": 5245.01,
+      "low": 5184.02,
+      "volume": 15689853,
+      "amount": 22245816490.3,
+      "amplitude": 0.0116,
+      "changePercent": -0.011200000000000002,
+      "change": -58.8
+    },
+    {
+      "date": "2025-05-23",
+      "open": 5177.27,
+      "close": 5191.14,
+      "high": 5231.93,
+      "low": 5177.27,
+      "volume": 15868277,
+      "amount": 23917550505.7,
+      "amplitude": 0.0105,
+      "changePercent": 0.0008,
+      "change": 4.16
+    },
+    {
+      "date": "2025-05-26",
+      "open": 5185.27,
+      "close": 5201.33,
+      "high": 5243.08,
+      "low": 5175.97,
+      "volume": 16841409,
+      "amount": 23142371096,
+      "amplitude": 0.0129,
+      "changePercent": 0.002,
+      "change": 10.19
+    },
+    {
+      "date": "2025-05-27",
+      "open": 5194.02,
+      "close": 5099.27,
+      "high": 5198.91,
+      "low": 5075.46,
+      "volume": 17298026,
+      "amount": 21859117699.5,
+      "amplitude": 0.023700000000000002,
+      "changePercent": -0.0196,
+      "change": -102.06
+    },
+    {
+      "date": "2025-05-28",
+      "open": 5092.71,
+      "close": 5099.71,
+      "high": 5118.43,
+      "low": 5092.18,
+      "volume": 11096342,
+      "amount": 14658967202.8,
+      "amplitude": 0.0051,
+      "changePercent": 0.0001,
+      "change": 0.44
+    },
+    {
+      "date": "2025-05-29",
+      "open": 5068.64,
+      "close": 5117.34,
+      "high": 5135.45,
+      "low": 5061.52,
+      "volume": 13830120,
+      "amount": 17947849565.4,
+      "amplitude": 0.014499999999999999,
+      "changePercent": 0.0034999999999999996,
+      "change": 17.63
+    },
+    {
+      "date": "2025-05-30",
+      "open": 5115.05,
+      "close": 5077.73,
+      "high": 5115.05,
+      "low": 5064.26,
+      "volume": 11946920,
+      "amount": 14989062059.3,
+      "amplitude": 0.009899999999999999,
+      "changePercent": -0.0077,
+      "change": -39.61
+    },
+    {
+      "date": "2025-06-03",
+      "open": 5123.9,
+      "close": 5142.65,
+      "high": 5169.6,
+      "low": 5118.6,
+      "volume": 17466737,
+      "amount": 23472459162.3,
+      "amplitude": 0.01,
+      "changePercent": 0.0128,
+      "change": 64.92
+    },
+    {
+      "date": "2025-06-04",
+      "open": 5146.81,
+      "close": 5210.67,
+      "high": 5230.29,
+      "low": 5146.81,
+      "volume": 20104840,
+      "amount": 27361999679.8,
+      "amplitude": 0.016200000000000003,
+      "changePercent": 0.0132,
+      "change": 68.02
+    },
+    {
+      "date": "2025-06-05",
+      "open": 5219.17,
+      "close": 5188.72,
+      "high": 5238.54,
+      "low": 5178.17,
+      "volume": 17739643,
+      "amount": 24885228142.8,
+      "amplitude": 0.0116,
+      "changePercent": -0.0042,
+      "change": -21.95
+    },
+    {
+      "date": "2025-06-06",
+      "open": 5210.09,
+      "close": 5247.58,
+      "high": 5270.04,
+      "low": 5210.09,
+      "volume": 24774995,
+      "amount": 29161551684.3,
+      "amplitude": 0.0116,
+      "changePercent": 0.0113,
+      "change": 58.86
+    },
+    {
+      "date": "2025-06-09",
+      "open": 5233.36,
+      "close": 5265.34,
+      "high": 5272.65,
+      "low": 5195.14,
+      "volume": 26406677,
+      "amount": 34583623294.2,
+      "amplitude": 0.0148,
+      "changePercent": 0.0034000000000000002,
+      "change": 17.76
+    },
+    {
+      "date": "2025-06-10",
+      "open": 5264.44,
+      "close": 5266.82,
+      "high": 5291.99,
+      "low": 5232.32,
+      "volume": 22510532,
+      "amount": 31251402459.6,
+      "amplitude": 0.0113,
+      "changePercent": 0.0003,
+      "change": 1.48
+    },
+    {
+      "date": "2025-06-11",
+      "open": 5262.44,
+      "close": 5373.01,
+      "high": 5393.31,
+      "low": 5262.44,
+      "volume": 28183756,
+      "amount": 39812442947.7,
+      "amplitude": 0.0248,
+      "changePercent": 0.0202,
+      "change": 106.19
+    },
+    {
+      "date": "2025-06-12",
+      "open": 5376.48,
+      "close": 5432.97,
+      "high": 5440.71,
+      "low": 5344.78,
+      "volume": 23500011,
+      "amount": 34166350715.1,
+      "amplitude": 0.0179,
+      "changePercent": 0.011200000000000002,
+      "change": 59.96
+    },
+    {
+      "date": "2025-06-13",
+      "open": 5449.45,
+      "close": 5423.58,
+      "high": 5464.91,
+      "low": 5394.29,
+      "volume": 27859458,
+      "amount": 40055922710.1,
+      "amplitude": 0.013000000000000001,
+      "changePercent": -0.0017000000000000001,
+      "change": -9.39
+    },
+    {
+      "date": "2025-06-16",
+      "open": 5412.29,
+      "close": 5400.92,
+      "high": 5457.29,
+      "low": 5380.35,
+      "volume": 20635109,
+      "amount": 31922394536,
+      "amplitude": 0.014199999999999999,
+      "changePercent": -0.0042,
+      "change": -22.66
+    },
+    {
+      "date": "2025-06-17",
+      "open": 5389.56,
+      "close": 5401.75,
+      "high": 5431.42,
+      "low": 5389.56,
+      "volume": 15582715,
+      "amount": 25628690875.4,
+      "amplitude": 0.0078000000000000005,
+      "changePercent": 0.0002,
+      "change": 0.83
+    },
+    {
+      "date": "2025-06-18",
+      "open": 5404.05,
+      "close": 5384.8,
+      "high": 5415.49,
+      "low": 5339.8,
+      "volume": 16368601,
+      "amount": 22982298886.5,
+      "amplitude": 0.013999999999999999,
+      "changePercent": -0.0031,
+      "change": -16.95
+    },
+    {
+      "date": "2025-06-19",
+      "open": 5362.15,
+      "close": 5297.86,
+      "high": 5379.49,
+      "low": 5280.23,
+      "volume": 17551584,
+      "amount": 24800609296.5,
+      "amplitude": 0.0184,
+      "changePercent": -0.0161,
+      "change": -86.94
+    },
+    {
+      "date": "2025-06-20",
+      "open": 5284.23,
+      "close": 5262.3,
+      "high": 5310.35,
+      "low": 5256.83,
+      "volume": 14732250,
+      "amount": 21721143039.1,
+      "amplitude": 0.0101,
+      "changePercent": -0.0067,
+      "change": -35.56
+    },
+    {
+      "date": "2025-06-23",
+      "open": 5264.71,
+      "close": 5304.68,
+      "high": 5314.75,
+      "low": 5264.71,
+      "volume": 15169793,
+      "amount": 23917291729.3,
+      "amplitude": 0.0095,
+      "changePercent": 0.008100000000000001,
+      "change": 42.38
+    },
+    {
+      "date": "2025-06-24",
+      "open": 5298.59,
+      "close": 5335.32,
+      "high": 5378.69,
+      "low": 5287.17,
+      "volume": 19609435,
+      "amount": 30685453655.8,
+      "amplitude": 0.0173,
+      "changePercent": 0.0058,
+      "change": 30.64
+    },
+    {
+      "date": "2025-06-25",
+      "open": 5337.89,
+      "close": 5376.72,
+      "high": 5377.02,
+      "low": 5320.76,
+      "volume": 18193854,
+      "amount": 27918898942.8,
+      "amplitude": 0.0105,
+      "changePercent": 0.0078000000000000005,
+      "change": 41.4
+    },
+    {
+      "date": "2025-06-26",
+      "open": 5378.05,
+      "close": 5389.21,
+      "high": 5450.77,
+      "low": 5354.73,
+      "volume": 20753958,
+      "amount": 30152712892.6,
+      "amplitude": 0.0179,
+      "changePercent": 0.0023,
+      "change": 12.49
+    },
+    {
+      "date": "2025-06-27",
+      "open": 5420.24,
+      "close": 5490.05,
+      "high": 5543.27,
+      "low": 5420.24,
+      "volume": 33066440,
+      "amount": 43596844639.4,
+      "amplitude": 0.022799999999999997,
+      "changePercent": 0.0187,
+      "change": 100.84
+    },
+    {
+      "date": "2025-06-30",
+      "open": 5498.55,
+      "close": 5489.17,
+      "high": 5504.3,
+      "low": 5446.92,
+      "volume": 26026328,
+      "amount": 35694292265.6,
+      "amplitude": 0.0105,
+      "changePercent": -0.0002,
+      "change": -0.88
+    },
+    {
+      "date": "2025-07-01",
+      "open": 5499.28,
+      "close": 5571.25,
+      "high": 5571.25,
+      "low": 5448.27,
+      "volume": 24293996,
+      "amount": 33166890644,
+      "amplitude": 0.022400000000000003,
+      "changePercent": 0.015,
+      "change": 82.08
+    },
+    {
+      "date": "2025-07-02",
+      "open": 5554.13,
+      "close": 5621.46,
+      "high": 5662.98,
+      "low": 5546.48,
+      "volume": 30397140,
+      "amount": 41193343705.4,
+      "amplitude": 0.0209,
+      "changePercent": 0.009000000000000001,
+      "change": 50.21
+    },
+    {
+      "date": "2025-07-03",
+      "open": 5643.95,
+      "close": 5631.39,
+      "high": 5653.15,
+      "low": 5583.79,
+      "volume": 22697479,
+      "amount": 33051795858.1,
+      "amplitude": 0.0123,
+      "changePercent": 0.0018,
+      "change": 9.93
+    },
+    {
+      "date": "2025-07-04",
+      "open": 5588.91,
+      "close": 5546.86,
+      "high": 5603.37,
+      "low": 5528.41,
+      "volume": 22538576,
+      "amount": 31954658517,
+      "amplitude": 0.013300000000000001,
+      "changePercent": -0.015,
+      "change": -84.53
+    },
+    {
+      "date": "2025-07-07",
+      "open": 5512.33,
+      "close": 5497.78,
+      "high": 5532.91,
+      "low": 5491.05,
+      "volume": 15714588,
+      "amount": 20979264323.6,
+      "amplitude": 0.0075,
+      "changePercent": -0.0088,
+      "change": -49.08
+    },
+    {
+      "date": "2025-07-08",
+      "open": 5512.68,
+      "close": 5556.51,
+      "high": 5581.31,
+      "low": 5512.68,
+      "volume": 19162092,
+      "amount": 28960042023.1,
+      "amplitude": 0.0125,
+      "changePercent": 0.010700000000000001,
+      "change": 58.73
+    },
+    {
+      "date": "2025-07-09",
+      "open": 5581.42,
+      "close": 5441.97,
+      "high": 5581.42,
+      "low": 5430.76,
+      "volume": 29731836,
+      "amount": 38461620955.3,
+      "amplitude": 0.0271,
+      "changePercent": -0.0206,
+      "change": -114.54
+    },
+    {
+      "date": "2025-07-10",
+      "open": 5476.37,
+      "close": 5516.78,
+      "high": 5534.7,
+      "low": 5473.26,
+      "volume": 25803703,
+      "amount": 40355197881.5,
+      "amplitude": 0.0113,
+      "changePercent": 0.0137,
+      "change": 74.81
+    },
+    {
+      "date": "2025-07-11",
+      "open": 5559.98,
+      "close": 5618.3,
+      "high": 5687.05,
+      "low": 5552.44,
+      "volume": 36308594,
+      "amount": 58495260029.4,
+      "amplitude": 0.024399999999999998,
+      "changePercent": 0.0184,
+      "change": 101.52
+    },
+    {
+      "date": "2025-07-14",
+      "open": 5683.92,
+      "close": 5649.06,
+      "high": 5724.71,
+      "low": 5649.06,
+      "volume": 38055890,
+      "amount": 65437169248,
+      "amplitude": 0.013500000000000002,
+      "changePercent": 0.0055000000000000005,
+      "change": 30.76
+    },
+    {
+      "date": "2025-07-15",
+      "open": 5625.13,
+      "close": 5588.76,
+      "high": 5660.1,
+      "low": 5541.92,
+      "volume": 29066676,
+      "amount": 46973986246.6,
+      "amplitude": 0.0209,
+      "changePercent": -0.010700000000000001,
+      "change": -60.3
+    },
+    {
+      "date": "2025-07-16",
+      "open": 5583.19,
+      "close": 5569.55,
+      "high": 5607.99,
+      "low": 5545.18,
+      "volume": 20791089,
+      "amount": 33318309359.2,
+      "amplitude": 0.011200000000000002,
+      "changePercent": -0.0034000000000000002,
+      "change": -19.21
+    },
+    {
+      "date": "2025-07-17",
+      "open": 5563.15,
+      "close": 5591.9,
+      "high": 5601.55,
+      "low": 5545.71,
+      "volume": 20598262,
+      "amount": 36431758861.2,
+      "amplitude": 0.01,
+      "changePercent": 0.004,
+      "change": 22.35
+    },
+    {
+      "date": "2025-07-18",
+      "open": 5606.69,
+      "close": 5730.54,
+      "high": 5757.23,
+      "low": 5606.69,
+      "volume": 33001807,
+      "amount": 60241660092.8,
+      "amplitude": 0.0269,
+      "changePercent": 0.0248,
+      "change": 138.64
+    },
+    {
+      "date": "2025-07-21",
+      "open": 5760.52,
+      "close": 5890.06,
+      "high": 5890.15,
+      "low": 5745.24,
+      "volume": 40196260,
+      "amount": 64054205087.8,
+      "amplitude": 0.0253,
+      "changePercent": 0.0278,
+      "change": 159.52
+    },
+    {
+      "date": "2025-07-22",
+      "open": 5898.15,
+      "close": 6022.62,
+      "high": 6022.79,
+      "low": 5889.25,
+      "volume": 43086705,
+      "amount": 70709272811.8,
+      "amplitude": 0.0227,
+      "changePercent": 0.0225,
+      "change": 132.56
+    },
+    {
+      "date": "2025-07-23",
+      "open": 6050.85,
+      "close": 6008.01,
+      "high": 6069.09,
+      "low": 5992.76,
+      "volume": 37265535,
+      "amount": 64218910656.9,
+      "amplitude": 0.0127,
+      "changePercent": -0.0024,
+      "change": -14.61
+    },
+    {
+      "date": "2025-07-24",
+      "open": 5965.55,
+      "close": 6199.75,
+      "high": 6217.9,
+      "low": 5965.55,
+      "volume": 47648650,
+      "amount": 92805515798.5,
+      "amplitude": 0.042,
+      "changePercent": 0.0319,
+      "change": 191.74
+    },
+    {
+      "date": "2025-07-25",
+      "open": 6184,
+      "close": 6199.13,
+      "high": 6232.17,
+      "low": 6162.86,
+      "volume": 39107281,
+      "amount": 81537971871.7,
+      "amplitude": 0.011200000000000002,
+      "changePercent": -0.0001,
+      "change": -0.62
+    },
+    {
+      "date": "2025-07-28",
+      "open": 6132.85,
+      "close": 6169.23,
+      "high": 6188.82,
+      "low": 6059.94,
+      "volume": 34777788,
+      "amount": 71152318130.5,
+      "amplitude": 0.0208,
+      "changePercent": -0.0048,
+      "change": -29.9
+    },
+    {
+      "date": "2025-07-29",
+      "open": 6122.17,
+      "close": 6159.27,
+      "high": 6187.56,
+      "low": 6118.28,
+      "volume": 28398042,
+      "amount": 57533888221.1,
+      "amplitude": 0.011200000000000002,
+      "changePercent": -0.0016,
+      "change": -9.96
+    },
+    {
+      "date": "2025-07-30",
+      "open": 6179.27,
+      "close": 6124.56,
+      "high": 6195.21,
+      "low": 6068.5,
+      "volume": 32939515,
+      "amount": 65481272899.9,
+      "amplitude": 0.0206,
+      "changePercent": -0.005600000000000001,
+      "change": -34.71
+    },
+    {
+      "date": "2025-07-31",
+      "open": 6027.65,
+      "close": 5912.82,
+      "high": 6029.35,
+      "low": 5886.63,
+      "volume": 36591126,
+      "amount": 63986321162.6,
+      "amplitude": 0.0233,
+      "changePercent": -0.0346,
+      "change": -211.74
+    },
+    {
+      "date": "2025-08-01",
+      "open": 5904.43,
+      "close": 5892.22,
+      "high": 5936.05,
+      "low": 5880.56,
+      "volume": 23606036,
+      "amount": 44127699050.6,
+      "amplitude": 0.009399999999999999,
+      "changePercent": -0.0034999999999999996,
+      "change": -20.6
+    },
+    {
+      "date": "2025-08-04",
+      "open": 5910,
+      "close": 5994,
+      "high": 5996.26,
+      "low": 5910,
+      "volume": 25445660,
+      "amount": 45437293192.6,
+      "amplitude": 0.0146,
+      "changePercent": 0.0173,
+      "change": 101.78
+    },
+    {
+      "date": "2025-08-05",
+      "open": 6015.37,
+      "close": 6020.87,
+      "high": 6036.53,
+      "low": 5990.29,
+      "volume": 25300313,
+      "amount": 39376004309.9,
+      "amplitude": 0.0077,
+      "changePercent": 0.0045000000000000005,
+      "change": 26.87
+    },
+    {
+      "date": "2025-08-06",
+      "open": 6016.5,
+      "close": 6092.12,
+      "high": 6101.43,
+      "low": 6016.34,
+      "volume": 30540169,
+      "amount": 43464017593.8,
+      "amplitude": 0.0141,
+      "changePercent": 0.0118,
+      "change": 71.25
+    },
+    {
+      "date": "2025-08-07",
+      "open": 6111.71,
+      "close": 6170.61,
+      "high": 6171,
+      "low": 5999.52,
+      "volume": 37928228,
+      "amount": 67837952244.7,
+      "amplitude": 0.0281,
+      "changePercent": 0.0129,
+      "change": 78.49
+    },
+    {
+      "date": "2025-08-08",
+      "open": 6149.18,
+      "close": 6245.3,
+      "high": 6279.15,
+      "low": 6146.59,
+      "volume": 33416672,
+      "amount": 63428429788.6,
+      "amplitude": 0.0215,
+      "changePercent": 0.0121,
+      "change": 74.69
+    },
+    {
+      "date": "2025-08-11",
+      "open": 6298.94,
+      "close": 6272.5,
+      "high": 6298.94,
+      "low": 6219.84,
+      "volume": 32828464,
+      "amount": 62345066823.2,
+      "amplitude": 0.0127,
+      "changePercent": 0.0044,
+      "change": 27.2
+    },
+    {
+      "date": "2025-08-12",
+      "open": 6239.35,
+      "close": 6248.48,
+      "high": 6269.41,
+      "low": 6190.11,
+      "volume": 27863049,
+      "amount": 56306581581.8,
+      "amplitude": 0.0126,
+      "changePercent": -0.0038,
+      "change": -24.02
+    },
+    {
+      "date": "2025-08-13",
+      "open": 6256.08,
+      "close": 6378.82,
+      "high": 6382.33,
+      "low": 6256.08,
+      "volume": 37765652,
+      "amount": 62031061328.2,
+      "amplitude": 0.0202,
+      "changePercent": 0.0209,
+      "change": 130.34
+    },
+    {
+      "date": "2025-08-14",
+      "open": 6374.16,
+      "close": 6321.81,
+      "high": 6419.83,
+      "low": 6312.93,
+      "volume": 34726998,
+      "amount": 63509119865.9,
+      "amplitude": 0.0168,
+      "changePercent": -0.0089,
+      "change": -57.01
+    },
+    {
+      "date": "2025-08-15",
+      "open": 6279.97,
+      "close": 6460.95,
+      "high": 6487.67,
+      "low": 6279.97,
+      "volume": 36486242,
+      "amount": 63910159054.2,
+      "amplitude": 0.0329,
+      "changePercent": 0.022000000000000002,
+      "change": 139.14
+    },
+    {
+      "date": "2025-08-18",
+      "open": 6507.95,
+      "close": 6486.52,
+      "high": 6546.74,
+      "low": 6412.88,
+      "volume": 45995940,
+      "amount": 85431446993.7,
+      "amplitude": 0.0207,
+      "changePercent": 0.004,
+      "change": 25.57
+    },
+    {
+      "date": "2025-08-19",
+      "open": 6483.05,
+      "close": 6462.25,
+      "high": 6565.28,
+      "low": 6445.07,
+      "volume": 39987558,
+      "amount": 84798431685.8,
+      "amplitude": 0.018500000000000003,
+      "changePercent": -0.0037,
+      "change": -24.27
+    },
+    {
+      "date": "2025-08-20",
+      "open": 6417.41,
+      "close": 6520.59,
+      "high": 6581.49,
+      "low": 6415.75,
+      "volume": 37945004,
+      "amount": 75940147791.8,
+      "amplitude": 0.0256,
+      "changePercent": 0.009000000000000001,
+      "change": 58.34
+    },
+    {
+      "date": "2025-08-21",
+      "open": 6525.43,
+      "close": 6497.76,
+      "high": 6622,
+      "low": 6471.94,
+      "volume": 33558560,
+      "amount": 67466237139.7,
+      "amplitude": 0.023,
+      "changePercent": -0.0034999999999999996,
+      "change": -22.83
+    },
+    {
+      "date": "2025-08-22",
+      "open": 6489.78,
+      "close": 6580.17,
+      "high": 6611.4,
+      "low": 6489.78,
+      "volume": 33406476,
+      "amount": 73573505485.3,
+      "amplitude": 0.0187,
+      "changePercent": 0.0127,
+      "change": 82.41
+    },
+    {
+      "date": "2025-08-25",
+      "open": 6687.62,
+      "close": 6903.49,
+      "high": 6917.64,
+      "low": 6687.62,
+      "volume": 55459962,
+      "amount": 112051023552.5,
+      "amplitude": 0.035,
+      "changePercent": 0.049100000000000005,
+      "change": 323.32
+    },
+    {
+      "date": "2025-08-26",
+      "open": 6877.86,
+      "close": 6870.37,
+      "high": 6933.85,
+      "low": 6805.88,
+      "volume": 42686379,
+      "amount": 90065278283.8,
+      "amplitude": 0.018500000000000003,
+      "changePercent": -0.0048,
+      "change": -33.12
+    },
+    {
+      "date": "2025-08-27",
+      "open": 6901.21,
+      "close": 6817.82,
+      "high": 6991.4,
+      "low": 6817.56,
+      "volume": 45717881,
+      "amount": 102067826488.6,
+      "amplitude": 0.0253,
+      "changePercent": -0.0076,
+      "change": -52.55
+    },
+    {
+      "date": "2025-08-28",
+      "open": 6783.88,
+      "close": 6927.94,
+      "high": 6945.91,
+      "low": 6755.74,
+      "volume": 42797213,
+      "amount": 97334225027.4,
+      "amplitude": 0.0279,
+      "changePercent": 0.016200000000000003,
+      "change": 110.12
+    },
+    {
+      "date": "2025-08-29",
+      "open": 6972.44,
+      "close": 7116.63,
+      "high": 7170.99,
+      "low": 6959.99,
+      "volume": 51801360,
+      "amount": 109616025816,
+      "amplitude": 0.0305,
+      "changePercent": 0.027200000000000002,
+      "change": 188.69
+    },
+    {
+      "date": "2025-09-01",
+      "open": 7225.17,
+      "close": 7358.72,
+      "high": 7362.55,
+      "low": 7093.79,
+      "volume": 57456592,
+      "amount": 121228562711.9,
+      "amplitude": 0.0378,
+      "changePercent": 0.034,
+      "change": 242.09
+    },
+    {
+      "date": "2025-09-02",
+      "open": 7407.73,
+      "close": 7273.56,
+      "high": 7416.46,
+      "low": 7214.02,
+      "volume": 51793131,
+      "amount": 112767381621.2,
+      "amplitude": 0.0275,
+      "changePercent": -0.0116,
+      "change": -85.16
+    },
+    {
+      "date": "2025-09-03",
+      "open": 7383.27,
+      "close": 7228.09,
+      "high": 7418.26,
+      "low": 7152.09,
+      "volume": 50975443,
+      "amount": 99080177605.2,
+      "amplitude": 0.0366,
+      "changePercent": -0.0063,
+      "change": -45.47
+    },
+    {
+      "date": "2025-09-04",
+      "open": 7206.35,
+      "close": 6937.51,
+      "high": 7298.58,
+      "low": 6834.9,
+      "volume": 54163285,
+      "amount": 105732407156.5,
+      "amplitude": 0.0641,
+      "changePercent": -0.04019999999999999,
+      "change": -290.58
+    },
+    {
+      "date": "2025-09-05",
+      "open": 6918.96,
+      "close": 7240.62,
+      "high": 7250.26,
+      "low": 6918.96,
+      "volume": 45549968,
+      "amount": 92636584020.1,
+      "amplitude": 0.0478,
+      "changePercent": 0.0437,
+      "change": 303.11
+    },
+    {
+      "date": "2025-09-08",
+      "open": 7319.93,
+      "close": 7233.47,
+      "high": 7327.79,
+      "low": 7180,
+      "volume": 42824786,
+      "amount": 91648522843.8,
+      "amplitude": 0.0204,
+      "changePercent": -0.001,
+      "change": -7.15
+    },
+    {
+      "date": "2025-09-09",
+      "open": 7242.38,
+      "close": 7296.63,
+      "high": 7445.83,
+      "low": 7218.14,
+      "volume": 47227193,
+      "amount": 99013022416.2,
+      "amplitude": 0.0315,
+      "changePercent": 0.0087,
+      "change": 63.16
+    },
+    {
+      "date": "2025-09-10",
+      "open": 7149.08,
+      "close": 7212.16,
+      "high": 7288.01,
+      "low": 7106.54,
+      "volume": 35737495,
+      "amount": 75269500049.5,
+      "amplitude": 0.024900000000000002,
+      "changePercent": -0.0116,
+      "change": -84.47
+    },
+    {
+      "date": "2025-09-11",
+      "open": 7204.26,
+      "close": 7341.07,
+      "high": 7341.2,
+      "low": 7179,
+      "volume": 35899821,
+      "amount": 78730725042.7,
+      "amplitude": 0.0225,
+      "changePercent": 0.0179,
+      "change": 128.91
+    },
+    {
+      "date": "2025-09-12",
+      "open": 7393.57,
+      "close": 7514.75,
+      "high": 7585.12,
+      "low": 7381.95,
+      "volume": 59040484,
+      "amount": 109940242815.1,
+      "amplitude": 0.0277,
+      "changePercent": 0.023700000000000002,
+      "change": 173.68
+    },
+    {
+      "date": "2025-09-15",
+      "open": 7502.78,
+      "close": 7464.14,
+      "high": 7574.64,
+      "low": 7457.63,
+      "volume": 41711089,
+      "amount": 85213957144,
+      "amplitude": 0.015600000000000001,
+      "changePercent": -0.0067,
+      "change": -50.61
+    },
+    {
+      "date": "2025-09-16",
+      "open": 7538.58,
+      "close": 7366.11,
+      "high": 7556.64,
+      "low": 7202.48,
+      "volume": 46655387,
+      "amount": 89648474154.2,
+      "amplitude": 0.047400000000000005,
+      "changePercent": -0.0131,
+      "change": -98.03
+    },
+    {
+      "date": "2025-09-17",
+      "open": 7305.12,
+      "close": 7381.73,
+      "high": 7382.68,
+      "low": 7238.37,
+      "volume": 36343620,
+      "amount": 71280252444.2,
+      "amplitude": 0.0196,
+      "changePercent": 0.0021,
+      "change": 15.62
+    },
+    {
+      "date": "2025-09-18",
+      "open": 7282.4,
+      "close": 7106.05,
+      "high": 7284.72,
+      "low": 7026.31,
+      "volume": 44253099,
+      "amount": 84668195288.3,
+      "amplitude": 0.035,
+      "changePercent": -0.0373,
+      "change": -275.68
+    },
+    {
+      "date": "2025-09-19",
+      "open": 7100.06,
+      "close": 7195.21,
+      "high": 7263.3,
+      "low": 7100.06,
+      "volume": 30461477,
+      "amount": 65960355716.2,
+      "amplitude": 0.023,
+      "changePercent": 0.0125,
+      "change": 89.16
+    },
+    {
+      "date": "2025-09-22",
+      "open": 7296.77,
+      "close": 7270.09,
+      "high": 7307.27,
+      "low": 7140.59,
+      "volume": 30939092,
+      "amount": 66853786696.6,
+      "amplitude": 0.0232,
+      "changePercent": 0.0104,
+      "change": 74.88
+    },
+    {
+      "date": "2025-09-23",
+      "open": 7283.04,
+      "close": 7208.88,
+      "high": 7384.28,
+      "low": 7090.12,
+      "volume": 35705856,
+      "amount": 73838300912.1,
+      "amplitude": 0.0405,
+      "changePercent": -0.0084,
+      "change": -61.21
+    },
+    {
+      "date": "2025-09-24",
+      "open": 7176.72,
+      "close": 7311.21,
+      "high": 7313.19,
+      "low": 7156.57,
+      "volume": 27838536,
+      "amount": 60960901711.1,
+      "amplitude": 0.0217,
+      "changePercent": 0.014199999999999999,
+      "change": 102.33
+    },
+    {
+      "date": "2025-09-25",
+      "open": 7442.82,
+      "close": 7444.12,
+      "high": 7510.56,
+      "low": 7383.13,
+      "volume": 48561107,
+      "amount": 93866029993.4,
+      "amplitude": 0.0174,
+      "changePercent": 0.0182,
+      "change": 132.91
+    },
+    {
+      "date": "2025-09-26",
+      "open": 7433.17,
+      "close": 7451.21,
+      "high": 7607.91,
+      "low": 7433.17,
+      "volume": 40213526,
+      "amount": 77513817543,
+      "amplitude": 0.0235,
+      "changePercent": 0.001,
+      "change": 7.09
+    },
+    {
+      "date": "2025-09-29",
+      "open": 7526.43,
+      "close": 7733.66,
+      "high": 7742.29,
+      "low": 7455.31,
+      "volume": 47785472,
+      "amount": 89713852469.9,
+      "amplitude": 0.0385,
+      "changePercent": 0.0379,
+      "change": 282.45
+    },
+    {
+      "date": "2025-09-30",
+      "open": 7832.2,
+      "close": 8011.26,
+      "high": 8031.72,
+      "low": 7827.44,
+      "volume": 52199766,
+      "amount": 109508303838.6,
+      "amplitude": 0.0264,
+      "changePercent": 0.0359,
+      "change": 277.6
+    },
+    {
+      "date": "2025-10-09",
+      "open": 8380.48,
+      "close": 8664.22,
+      "high": 8664.22,
+      "low": 8342.72,
+      "volume": 64782330,
+      "amount": 151128619914,
+      "amplitude": 0.0401,
+      "changePercent": 0.0815,
+      "change": 652.96
+    },
+    {
+      "date": "2025-10-10",
+      "open": 8586.15,
+      "close": 8422.52,
+      "high": 8687.39,
+      "low": 8360.76,
+      "volume": 63454625,
+      "amount": 148288490106,
+      "amplitude": 0.0377,
+      "changePercent": -0.0279,
+      "change": -241.7
+    },
+    {
+      "date": "2025-10-13",
+      "open": 8205.54,
+      "close": 8735.79,
+      "high": 8752.61,
+      "low": 8205.54,
+      "volume": 67356795,
+      "amount": 155967740452.9,
+      "amplitude": 0.065,
+      "changePercent": 0.037200000000000004,
+      "change": 313.27
+    },
+    {
+      "date": "2025-10-14",
+      "open": 8959.5,
+      "close": 8404.18,
+      "high": 8986.41,
+      "low": 8322.55,
+      "volume": 74497665,
+      "amount": 173413211234.9,
+      "amplitude": 0.076,
+      "changePercent": -0.038,
+      "change": -331.61
+    },
+    {
+      "date": "2025-10-15",
+      "open": 8483.14,
+      "close": 8475.59,
+      "high": 8529.75,
+      "low": 8230.78,
+      "volume": 52713663,
+      "amount": 123000619211.2,
+      "amplitude": 0.0356,
+      "changePercent": 0.0085,
+      "change": 71.41
+    },
+    {
+      "date": "2025-10-16",
+      "open": 8424.07,
+      "close": 8287.38,
+      "high": 8484.34,
+      "low": 8246.02,
+      "volume": 45301960,
+      "amount": 93355666367.6,
+      "amplitude": 0.0281,
+      "changePercent": -0.0222,
+      "change": -188.21
+    },
+    {
+      "date": "2025-10-17",
+      "open": 8373.44,
+      "close": 8124.19,
+      "high": 8464.33,
+      "low": 8098.12,
+      "volume": 46576226,
+      "amount": 98949410632.1,
+      "amplitude": 0.044199999999999996,
+      "changePercent": -0.0197,
+      "change": -163.19
+    },
+    {
+      "date": "2025-10-20",
+      "open": 8047.39,
+      "close": 8003.66,
+      "high": 8121.35,
+      "low": 7947.46,
+      "volume": 37429218,
+      "amount": 81073382537.4,
+      "amplitude": 0.021400000000000002,
+      "changePercent": -0.0148,
+      "change": -120.53
+    },
+    {
+      "date": "2025-10-21",
+      "open": 8090.88,
+      "close": 8124.61,
+      "high": 8204.95,
+      "low": 8011.18,
+      "volume": 39383960,
+      "amount": 77285466620.2,
+      "amplitude": 0.0242,
+      "changePercent": 0.0151,
+      "change": 120.95
+    },
+    {
+      "date": "2025-10-22",
+      "open": 7830.4,
+      "close": 8021.16,
+      "high": 8044.36,
+      "low": 7830.4,
+      "volume": 36834361,
+      "amount": 74411344607.6,
+      "amplitude": 0.0263,
+      "changePercent": -0.0127,
+      "change": -103.45
+    },
+    {
+      "date": "2025-10-23",
+      "open": 7972.13,
+      "close": 8114.06,
+      "high": 8130.43,
+      "low": 7864.3,
+      "volume": 36739309,
+      "amount": 72942218328.4,
+      "amplitude": 0.0332,
+      "changePercent": 0.0116,
+      "change": 92.9
+    },
+    {
+      "date": "2025-10-24",
+      "open": 8188.35,
+      "close": 8251.67,
+      "high": 8288.21,
+      "low": 8147.08,
+      "volume": 39468413,
+      "amount": 81591371833,
+      "amplitude": 0.0174,
+      "changePercent": 0.017,
+      "change": 137.61
+    },
+    {
+      "date": "2025-10-27",
+      "open": 8314.59,
+      "close": 8452.77,
+      "high": 8505.31,
+      "low": 8312.77,
+      "volume": 46652821,
+      "amount": 104126240720.3,
+      "amplitude": 0.0233,
+      "changePercent": 0.024399999999999998,
+      "change": 201.1
+    },
+    {
+      "date": "2025-10-28",
+      "open": 8389.84,
+      "close": 8182.02,
+      "high": 8399.15,
+      "low": 8159.16,
+      "volume": 49022566,
+      "amount": 99039776462.3,
+      "amplitude": 0.028399999999999998,
+      "changePercent": -0.032,
+      "change": -270.75
+    },
+    {
+      "date": "2025-10-29",
+      "open": 8232.56,
+      "close": 8555.4,
+      "high": 8563.46,
+      "low": 8232.56,
+      "volume": 49677785,
+      "amount": 96757581456.2,
+      "amplitude": 0.0404,
+      "changePercent": 0.045599999999999995,
+      "change": 373.38
+    },
+    {
+      "date": "2025-10-30",
+      "open": 8490.63,
+      "close": 8656.35,
+      "high": 8763.56,
+      "low": 8476.29,
+      "volume": 60566064,
+      "amount": 137362939783.8,
+      "amplitude": 0.0336,
+      "changePercent": 0.0118,
+      "change": 100.95
+    },
+    {
+      "date": "2025-10-31",
+      "open": 8640.3,
+      "close": 8451.84,
+      "high": 8658.5,
+      "low": 8451.84,
+      "volume": 45690700,
+      "amount": 103597947775.8,
+      "amplitude": 0.0239,
+      "changePercent": -0.0236,
+      "change": -204.51
+    },
+    {
+      "date": "2025-11-03",
+      "open": 8424.74,
+      "close": 8341.43,
+      "high": 8436.85,
+      "low": 8112.7,
+      "volume": 45175647,
+      "amount": 93064830865,
+      "amplitude": 0.0384,
+      "changePercent": -0.0131,
+      "change": -110.41
+    },
+    {
+      "date": "2025-11-04",
+      "open": 8277.05,
+      "close": 8074.17,
+      "high": 8323.61,
+      "low": 8010.66,
+      "volume": 37039471,
+      "amount": 75510716363.6,
+      "amplitude": 0.0375,
+      "changePercent": -0.032,
+      "change": -267.26
+    },
+    {
+      "date": "2025-11-05",
+      "open": 7878.71,
+      "close": 8113.03,
+      "high": 8155.83,
+      "low": 7858.92,
+      "volume": 32626669,
+      "amount": 71724892590.8,
+      "amplitude": 0.0368,
+      "changePercent": 0.0048,
+      "change": 38.86
+    },
+    {
+      "date": "2025-11-06",
+      "open": 8109.52,
+      "close": 8371.91,
+      "high": 8377.19,
+      "low": 8109.52,
+      "volume": 40860610,
+      "amount": 78902411878.3,
+      "amplitude": 0.033,
+      "changePercent": 0.0319,
+      "change": 258.88
+    },
+    {
+      "date": "2025-11-07",
+      "open": 8337.57,
+      "close": 8433.69,
+      "high": 8487.55,
+      "low": 8308.3,
+      "volume": 37905139,
+      "amount": 78327492239.3,
+      "amplitude": 0.021400000000000002,
+      "changePercent": 0.0074,
+      "change": 61.78
+    },
+    {
+      "date": "2025-11-10",
+      "open": 8535.88,
+      "close": 8475.07,
+      "high": 8615.41,
+      "low": 8404.79,
+      "volume": 40303643,
+      "amount": 85484538182.8,
+      "amplitude": 0.025,
+      "changePercent": 0.0049,
+      "change": 41.38
+    },
+    {
+      "date": "2025-11-11",
+      "open": 8542.11,
+      "close": 8357.43,
+      "high": 8574.06,
+      "low": 8336.3,
+      "volume": 34712345,
+      "amount": 70603685458.1,
+      "amplitude": 0.0281,
+      "changePercent": -0.0139,
+      "change": -117.64
+    },
+    {
+      "date": "2025-11-12",
+      "open": 8325.71,
+      "close": 8358.63,
+      "high": 8483.49,
+      "low": 8232.81,
+      "volume": 39487017,
+      "amount": 71463305087.4,
+      "amplitude": 0.03,
+      "changePercent": 0.0001,
+      "change": 1.2
+    },
+    {
+      "date": "2025-11-13",
+      "open": 8432.76,
+      "close": 8702.82,
+      "high": 8773.56,
+      "low": 8413.49,
+      "volume": 51699906,
+      "amount": 111296284894.9,
+      "amplitude": 0.0431,
+      "changePercent": 0.0412,
+      "change": 344.19
+    },
+    {
+      "date": "2025-11-14",
+      "open": 8568.2,
+      "close": 8528.09,
+      "high": 8640.69,
+      "low": 8480.59,
+      "volume": 34962370,
+      "amount": 76806681184.5,
+      "amplitude": 0.0184,
+      "changePercent": -0.020099999999999996,
+      "change": -174.73
+    },
+    {
+      "date": "2025-11-17",
+      "open": 8500.31,
+      "close": 8500.39,
+      "high": 8593.99,
+      "low": 8457.12,
+      "volume": 35870501,
+      "amount": 88113996874.1,
+      "amplitude": 0.016,
+      "changePercent": -0.0032,
+      "change": -27.7
+    },
+    {
+      "date": "2025-11-18",
+      "open": 8460.63,
+      "close": 8255.12,
+      "high": 8490.48,
+      "low": 8190.69,
+      "volume": 38625683,
+      "amount": 89118696295.4,
+      "amplitude": 0.0353,
+      "changePercent": -0.028900000000000002,
+      "change": -245.27
+    },
+    {
+      "date": "2025-11-19",
+      "open": 8303.06,
+      "close": 8485.46,
+      "high": 8538.73,
+      "low": 8302.95,
+      "volume": 32638557,
+      "amount": 83800539147.3,
+      "amplitude": 0.0286,
+      "changePercent": 0.0279,
+      "change": 230.34
+    },
+    {
+      "date": "2025-11-20",
+      "open": 8487.67,
+      "close": 8454.18,
+      "high": 8660.39,
+      "low": 8438.36,
+      "volume": 30707441,
+      "amount": 80265067084.4,
+      "amplitude": 0.0262,
+      "changePercent": -0.0037,
+      "change": -31.28
+    },
+    {
+      "date": "2025-11-21",
+      "open": 8219.86,
+      "close": 8005.25,
+      "high": 8227.02,
+      "low": 7997.58,
+      "volume": 35221724,
+      "amount": 72379141271.2,
+      "amplitude": 0.0271,
+      "changePercent": -0.053099999999999994,
+      "change": -448.93
+    },
+    {
+      "date": "2025-11-24",
+      "open": 8006.62,
+      "close": 7932.83,
+      "high": 8014.41,
+      "low": 7806.92,
+      "volume": 27979071,
+      "amount": 64814738339.2,
+      "amplitude": 0.0259,
+      "changePercent": -0.009000000000000001,
+      "change": -72.42
+    },
+    {
+      "date": "2025-11-25",
+      "open": 8034.9,
+      "close": 8119.59,
+      "high": 8162.92,
+      "low": 7998.02,
+      "volume": 28539339,
+      "amount": 65200631409.8,
+      "amplitude": 0.0208,
+      "changePercent": 0.0235,
+      "change": 186.76
+    },
+    {
+      "date": "2025-11-26",
+      "open": 8161.56,
+      "close": 8112.41,
+      "high": 8219.61,
+      "low": 8099.19,
+      "volume": 24528389,
+      "amount": 55135355599.7,
+      "amplitude": 0.0148,
+      "changePercent": -0.0009,
+      "change": -7.18
+    },
+    {
+      "date": "2025-11-27",
+      "open": 8185.85,
+      "close": 8132.39,
+      "high": 8292.88,
+      "low": 8122.19,
+      "volume": 24224937,
+      "amount": 52796701967.3,
+      "amplitude": 0.021,
+      "changePercent": 0.0025,
+      "change": 19.98
+    },
+    {
+      "date": "2025-11-28",
+      "open": 8147.01,
+      "close": 8265.75,
+      "high": 8292.95,
+      "low": 8108.7,
+      "volume": 24535667,
+      "amount": 56651334315,
+      "amplitude": 0.0227,
+      "changePercent": 0.016399999999999998,
+      "change": 133.36
+    },
+    {
+      "date": "2025-12-01",
+      "open": 8483.13,
+      "close": 8517.87,
+      "high": 8644.41,
+      "low": 8451.79,
+      "volume": 43868657,
+      "amount": 90830838141,
+      "amplitude": 0.0233,
+      "changePercent": 0.0305,
+      "change": 252.12
+    },
+    {
+      "date": "2025-12-02",
+      "open": 8446.81,
+      "close": 8395.88,
+      "high": 8446.81,
+      "low": 8344.49,
+      "volume": 24177429,
+      "amount": 51273256627.6,
+      "amplitude": 0.012,
+      "changePercent": -0.0143,
+      "change": -121.99
+    },
+    {
+      "date": "2025-12-03",
+      "open": 8412.88,
+      "close": 8447.91,
+      "high": 8554.35,
+      "low": 8391.51,
+      "volume": 34623464,
+      "amount": 69104637077.3,
+      "amplitude": 0.0194,
+      "changePercent": 0.0062,
+      "change": 52.03
+    },
+    {
+      "date": "2025-12-04",
+      "open": 8570.43,
+      "close": 8476.95,
+      "high": 8664,
+      "low": 8445.92,
+      "volume": 33615984,
+      "amount": 69512344844.7,
+      "amplitude": 0.0258,
+      "changePercent": 0.0034000000000000002,
+      "change": 29.04
+    },
+    {
+      "date": "2025-12-05",
+      "open": 8460.16,
+      "close": 8689.03,
+      "high": 8716.89,
+      "low": 8460.16,
+      "volume": 40401044,
+      "amount": 75032721544.2,
+      "amplitude": 0.030299999999999997,
+      "changePercent": 0.025,
+      "change": 212.08
+    },
+    {
+      "date": "2025-12-08",
+      "open": 8694.68,
+      "close": 8750.46,
+      "high": 8757.44,
+      "low": 8584.85,
+      "volume": 37097582,
+      "amount": 77806474933,
+      "amplitude": 0.0199,
+      "changePercent": 0.0070999999999999995,
+      "change": 61.43
+    },
+    {
+      "date": "2025-12-09",
+      "open": 8664.4,
+      "close": 8472.4,
+      "high": 8664.4,
+      "low": 8415.23,
+      "volume": 35603007,
+      "amount": 68911735809.1,
+      "amplitude": 0.0285,
+      "changePercent": -0.0318,
+      "change": -278.06
+    },
+    {
+      "date": "2025-12-10",
+      "open": 8516.35,
+      "close": 8553.91,
+      "high": 8567.95,
+      "low": 8432.16,
+      "volume": 25414260,
+      "amount": 53847941215.8,
+      "amplitude": 0.016,
+      "changePercent": 0.0096,
+      "change": 81.51
+    },
+    {
+      "date": "2025-12-11",
+      "open": 8631.48,
+      "close": 8489.62,
+      "high": 8698.47,
+      "low": 8486.2,
+      "volume": 28862999,
+      "amount": 62688831998.1,
+      "amplitude": 0.0248,
+      "changePercent": -0.0075,
+      "change": -64.29
+    },
+    {
+      "date": "2025-12-12",
+      "open": 8631.32,
+      "close": 8593.43,
+      "high": 8644.59,
+      "low": 8500.65,
+      "volume": 32449319,
+      "amount": 69635181872.2,
+      "amplitude": 0.017,
+      "changePercent": 0.012199999999999999,
+      "change": 103.81
+    },
+    {
+      "date": "2025-12-15",
+      "open": 8466.7,
+      "close": 8542.18,
+      "high": 8641.48,
+      "low": 8461.71,
+      "volume": 26324045,
+      "amount": 56645094757.1,
+      "amplitude": 0.0209,
+      "changePercent": -0.006,
+      "change": -51.25
+    },
+    {
+      "date": "2025-12-16",
+      "open": 8493.13,
+      "close": 8317.68,
+      "high": 8521.37,
+      "low": 8249.41,
+      "volume": 27626958,
+      "amount": 58689899094,
+      "amplitude": 0.0318,
+      "changePercent": -0.0263,
+      "change": -224.5
+    },
+    {
+      "date": "2025-12-17",
+      "open": 8385.85,
+      "close": 8596.19,
+      "high": 8651.67,
+      "low": 8373.38,
+      "volume": 30312515,
+      "amount": 68084618079.8,
+      "amplitude": 0.0335,
+      "changePercent": 0.0335,
+      "change": 278.51
+    },
+    {
+      "date": "2025-12-18",
+      "open": 8556.67,
+      "close": 8577.96,
+      "high": 8722.86,
+      "low": 8540.4,
+      "volume": 24552613,
+      "amount": 55627078830.7,
+      "amplitude": 0.0212,
+      "changePercent": -0.0021,
+      "change": -18.23
+    },
+    {
+      "date": "2025-12-19",
+      "open": 8576.64,
+      "close": 8758.9,
+      "high": 8765.62,
+      "low": 8490.75,
+      "volume": 28951512,
+      "amount": 66803758460.1,
+      "amplitude": 0.032,
+      "changePercent": 0.021099999999999997,
+      "change": 180.94
+    },
+    {
+      "date": "2025-12-22",
+      "open": 8838.3,
+      "close": 8955.91,
+      "high": 9004.2,
+      "low": 8838.3,
+      "volume": 33218493,
+      "amount": 76437061412.3,
+      "amplitude": 0.0189,
+      "changePercent": 0.0225,
+      "change": 197.01
+    },
+    {
+      "date": "2025-12-23",
+      "open": 9001.46,
+      "close": 9009.76,
+      "high": 9169.11,
+      "low": 8910.99,
+      "volume": 36738990,
+      "amount": 82405099381.4,
+      "amplitude": 0.0288,
+      "changePercent": 0.006,
+      "change": 53.85
+    },
+    {
+      "date": "2025-12-24",
+      "open": 9094.77,
+      "close": 9047.29,
+      "high": 9111.34,
+      "low": 8969.99,
+      "volume": 31622327,
+      "amount": 71783271218.3,
+      "amplitude": 0.015700000000000002,
+      "changePercent": 0.0042,
+      "change": 37.53
+    },
+    {
+      "date": "2025-12-25",
+      "open": 8927.54,
+      "close": 8962.07,
+      "high": 8990.52,
+      "low": 8848.24,
+      "volume": 27126200,
+      "amount": 60271308268.8,
+      "amplitude": 0.015700000000000002,
+      "changePercent": -0.009399999999999999,
+      "change": -85.22
+    },
+    {
+      "date": "2025-12-26",
+      "open": 9083.66,
+      "close": 9309.86,
+      "high": 9356.68,
+      "low": 9075.56,
+      "volume": 47462009,
+      "amount": 95159375331.4,
+      "amplitude": 0.031400000000000004,
+      "changePercent": 0.0388,
+      "change": 347.79
+    },
+    {
+      "date": "2025-12-29",
+      "open": 9414.92,
+      "close": 9100.38,
+      "high": 9419.08,
+      "low": 9091.69,
+      "volume": 51074569,
+      "amount": 103732023844.9,
+      "amplitude": 0.0352,
+      "changePercent": -0.0225,
+      "change": -209.48
+    },
+    {
+      "date": "2025-12-30",
+      "open": 8853.52,
+      "close": 9255.89,
+      "high": 9312.96,
+      "low": 8852.35,
+      "volume": 40013116,
+      "amount": 84070070714.7,
+      "amplitude": 0.0506,
+      "changePercent": 0.0171,
+      "change": 155.51
+    },
+    {
+      "date": "2025-12-31",
+      "open": 9253.91,
+      "close": 9342.49,
+      "high": 9508.81,
+      "low": 9247.73,
+      "volume": 41125774,
+      "amount": 86839020405.8,
+      "amplitude": 0.0282,
+      "changePercent": 0.009399999999999999,
+      "change": 86.6
+    },
+    {
+      "date": "2026-01-05",
+      "open": 9487,
+      "close": 9597.61,
+      "high": 9612.24,
+      "low": 9398.38,
+      "volume": 48381047,
+      "amount": 99421680613.6,
+      "amplitude": 0.0229,
+      "changePercent": 0.0273,
+      "change": 255.12
+    },
+    {
+      "date": "2026-01-06",
+      "open": 9748.13,
+      "close": 9990.76,
+      "high": 10048.62,
+      "low": 9731.43,
+      "volume": 54930829,
+      "amount": 123363464055.9,
+      "amplitude": 0.033,
+      "changePercent": 0.040999999999999995,
+      "change": 393.15
+    },
+    {
+      "date": "2026-01-07",
+      "open": 10050.44,
+      "close": 10049.22,
+      "high": 10187.01,
+      "low": 9932.46,
+      "volume": 55093658,
+      "amount": 132730775411.9,
+      "amplitude": 0.0255,
+      "changePercent": 0.0059,
+      "change": 58.46
+    },
+    {
+      "date": "2026-01-08",
+      "open": 9930.66,
+      "close": 9845.05,
+      "high": 10089.53,
+      "low": 9732.48,
+      "volume": 45128050,
+      "amount": 103235920404.3,
+      "amplitude": 0.0355,
+      "changePercent": -0.0203,
+      "change": -204.17
+    },
+    {
+      "date": "2026-01-09",
+      "open": 9763.91,
+      "close": 10131.18,
+      "high": 10188.44,
+      "low": 9763.91,
+      "volume": 47586839,
+      "amount": 110689983013,
+      "amplitude": 0.0431,
+      "changePercent": 0.0291,
+      "change": 286.13
+    },
+    {
+      "date": "2026-01-12",
+      "open": 10359.74,
+      "close": 10244.24,
+      "high": 10380.15,
+      "low": 10092.38,
+      "volume": 53423323,
+      "amount": 126962664155.6,
+      "amplitude": 0.028399999999999998,
+      "changePercent": 0.011200000000000002,
+      "change": 113.06
+    },
+    {
+      "date": "2026-01-13",
+      "open": 10236.61,
+      "close": 10375.11,
+      "high": 10594.81,
+      "low": 10216.58,
+      "volume": 51084042,
+      "amount": 127156564536.9,
+      "amplitude": 0.0369,
+      "changePercent": 0.0128,
+      "change": 130.87
+    },
+    {
+      "date": "2026-01-14",
+      "open": 10423.96,
+      "close": 10432.47,
+      "high": 10667.75,
+      "low": 10332.86,
+      "volume": 59924662,
+      "amount": 143761237503.2,
+      "amplitude": 0.0323,
+      "changePercent": 0.0055000000000000005,
+      "change": 57.36
+    },
+    {
+      "date": "2026-01-15",
+      "open": 10413.92,
+      "close": 10628.86,
+      "high": 10863.26,
+      "low": 10402.01,
+      "volume": 57517781,
+      "amount": 136549538381.9,
+      "amplitude": 0.044199999999999996,
+      "changePercent": 0.018799999999999997,
+      "change": 196.39
+    },
+    {
+      "date": "2026-01-16",
+      "open": 10634.61,
+      "close": 10530.11,
+      "high": 10889.57,
+      "low": 10486.97,
+      "volume": 57177532,
+      "amount": 134463136429.4,
+      "amplitude": 0.0379,
+      "changePercent": -0.009300000000000001,
+      "change": -98.75
+    },
+    {
+      "date": "2026-01-19",
+      "open": 10542.29,
+      "close": 10554.92,
+      "high": 10616.95,
+      "low": 10323.14,
+      "volume": 47420011,
+      "amount": 107788914309.1,
+      "amplitude": 0.0279,
+      "changePercent": 0.0024,
+      "change": 24.81
+    },
+    {
+      "date": "2026-01-20",
+      "open": 10610.02,
+      "close": 10595.49,
+      "high": 10699.08,
+      "low": 10218.49,
+      "volume": 53321148,
+      "amount": 118285094256.1,
+      "amplitude": 0.0455,
+      "changePercent": 0.0038,
+      "change": 40.57
+    },
+    {
+      "date": "2026-01-21",
+      "open": 10616.36,
+      "close": 10901.69,
+      "high": 10914.68,
+      "low": 10571.22,
+      "volume": 51191326,
+      "amount": 124137529831.3,
+      "amplitude": 0.032400000000000005,
+      "changePercent": 0.028900000000000002,
+      "change": 306.2
+    },
+    {
+      "date": "2026-01-22",
+      "open": 10788.79,
+      "close": 10816.59,
+      "high": 10884.5,
+      "low": 10673.09,
+      "volume": 44729724,
+      "amount": 104607886005.9,
+      "amplitude": 0.0194,
+      "changePercent": -0.0078000000000000005,
+      "change": -85.1
+    },
+    {
+      "date": "2026-01-23",
+      "open": 10993.68,
+      "close": 11107.73,
+      "high": 11168.91,
+      "low": 10885.13,
+      "volume": 58991639,
+      "amount": 140812123748.6,
+      "amplitude": 0.0262,
+      "changePercent": 0.0269,
+      "change": 291.14
+    },
+    {
+      "date": "2026-01-26",
+      "open": 11402.73,
+      "close": 11680.36,
+      "high": 11726.69,
+      "low": 11402.73,
+      "volume": 80699031,
+      "amount": 196950163362.5,
+      "amplitude": 0.0292,
+      "changePercent": 0.0516,
+      "change": 572.63
+    },
+    {
+      "date": "2026-01-27",
+      "open": 11556.04,
+      "close": 11575.57,
+      "high": 11882.78,
+      "low": 11368.54,
+      "volume": 79276247,
+      "amount": 197808643813.3,
+      "amplitude": 0.044000000000000004,
+      "changePercent": -0.009000000000000001,
+      "change": -104.79
+    },
+    {
+      "date": "2026-01-28",
+      "open": 11680.25,
+      "close": 12311.47,
+      "high": 12334.16,
+      "low": 11557.9,
+      "volume": 86126249,
+      "amount": 224061669851.9,
+      "amplitude": 0.06709999999999999,
+      "changePercent": 0.0636,
+      "change": 735.9
+    },
+    {
+      "date": "2026-01-29",
+      "open": 12608.63,
+      "close": 12560.05,
+      "high": 12914.91,
+      "low": 11952.59,
+      "volume": 110271225,
+      "amount": 293138731252.3,
+      "amplitude": 0.0782,
+      "changePercent": 0.0202,
+      "change": 248.58
+    },
+    {
+      "date": "2026-01-30",
+      "open": 11923.6,
+      "close": 11525.63,
+      "high": 11995.65,
+      "low": 11369.17,
+      "volume": 78946679,
+      "amount": 214717006262.9,
+      "amplitude": 0.0499,
+      "changePercent": -0.0824,
+      "change": -1034.42
+    },
+    {
+      "date": "2026-02-02",
+      "open": 10681.73,
+      "close": 10615.72,
+      "high": 11011.22,
+      "low": 10601.27,
+      "volume": 59306024,
+      "amount": 144983819207.7,
+      "amplitude": 0.0356,
+      "changePercent": -0.0789,
+      "change": -909.91
+    },
+    {
+      "date": "2026-02-03",
+      "open": 10654.36,
+      "close": 10940.59,
+      "high": 10978.18,
+      "low": 10452.66,
+      "volume": 75454661,
+      "amount": 181501513607.3,
+      "amplitude": 0.0495,
+      "changePercent": 0.030600000000000002,
+      "change": 324.87
+    },
+    {
+      "date": "2026-02-04",
+      "open": 11116.1,
+      "close": 10964.1,
+      "high": 11122.33,
+      "low": 10809.07,
+      "volume": 56368092,
+      "amount": 130866292018.3,
+      "amplitude": 0.0286,
+      "changePercent": 0.0021,
+      "change": 23.51
+    },
+    {
+      "date": "2026-02-05",
+      "open": 10690.84,
+      "close": 10424.14,
+      "high": 10804.86,
+      "low": 10248.79,
+      "volume": 53294640,
+      "amount": 126527311277.4,
+      "amplitude": 0.0507,
+      "changePercent": -0.0492,
+      "change": -539.96
+    },
+    {
+      "date": "2026-02-06",
+      "open": 10002.95,
+      "close": 10463.08,
+      "high": 10596.33,
+      "low": 9987.54,
+      "volume": 49468501,
+      "amount": 114922149365.3,
+      "amplitude": 0.0584,
+      "changePercent": 0.0037,
+      "change": 38.94
+    },
+    {
+      "date": "2026-02-09",
+      "open": 10689.63,
+      "close": 10674.91,
+      "high": 10752.17,
+      "low": 10569.76,
+      "volume": 39513709,
+      "amount": 99427505722.5,
+      "amplitude": 0.0174,
+      "changePercent": 0.0202,
+      "change": 211.83
+    },
+    {
+      "date": "2026-02-10",
+      "open": 10699.19,
+      "close": 10665.11,
+      "high": 10763.57,
+      "low": 10596.36,
+      "volume": 32578086,
+      "amount": 80448537243.9,
+      "amplitude": 0.015700000000000002,
+      "changePercent": -0.0009,
+      "change": -9.8
+    },
+    {
+      "date": "2026-02-11",
+      "open": 10641.7,
+      "close": 10953.33,
+      "high": 11047.54,
+      "low": 10641.7,
+      "volume": 39639897,
+      "amount": 107903755630.6,
+      "amplitude": 0.0381,
+      "changePercent": 0.027000000000000003,
+      "change": 288.22
+    },
+    {
+      "date": "2026-02-12",
+      "open": 10942.5,
+      "close": 11026.93,
+      "high": 11171.36,
+      "low": 10941.83,
+      "volume": 38379186,
+      "amount": 104248639876.8,
+      "amplitude": 0.021,
+      "changePercent": 0.0067,
+      "change": 73.6
+    },
+    {
+      "date": "2026-02-13",
+      "open": 10779.48,
+      "close": 10637.45,
+      "high": 10905.67,
+      "low": 10627.01,
+      "volume": 36850272,
+      "amount": 95954258123.7,
+      "amplitude": 0.0253,
+      "changePercent": -0.0353,
+      "change": -389.48
+    },
+    {
+      "date": "2026-02-24",
+      "open": 10996.28,
+      "close": 10980.86,
+      "high": 11048.5,
+      "low": 10916.16,
+      "volume": 40374942,
+      "amount": 102778263901.4,
+      "amplitude": 0.0124,
+      "changePercent": 0.0323,
+      "change": 343.41
+    },
+    {
+      "date": "2026-02-25",
+      "open": 11044.85,
+      "close": 11394.84,
+      "high": 11519.7,
+      "low": 10988.41,
+      "volume": 55942325,
+      "amount": 151546539960.2,
+      "amplitude": 0.0484,
+      "changePercent": 0.0377,
+      "change": 413.98
+    },
+    {
+      "date": "2026-02-26",
+      "open": 11520.42,
+      "close": 11309.74,
+      "high": 11520.42,
+      "low": 11287.22,
+      "volume": 43548391,
+      "amount": 125812901925.5,
+      "amplitude": 0.020499999999999997,
+      "changePercent": -0.0075,
+      "change": -85.1
+    },
+    {
+      "date": "2026-02-27",
+      "open": 11250.59,
+      "close": 11703.19,
+      "high": 11704.11,
+      "low": 11250.59,
+      "volume": 51352965,
+      "amount": 142708920275,
+      "amplitude": 0.0401,
+      "changePercent": 0.0348,
+      "change": 393.45
+    },
+    {
+      "date": "2026-03-02",
+      "open": 11922.96,
+      "close": 12115.82,
+      "high": 12139.13,
+      "low": 11526.9,
+      "volume": 75660713,
+      "amount": 211753656466.3,
+      "amplitude": 0.052300000000000006,
+      "changePercent": 0.0353,
+      "change": 412.63
+    },
+    {
+      "date": "2026-03-03",
+      "open": 11916.03,
+      "close": 11437.9,
+      "high": 12045.37,
+      "low": 11421.4,
+      "volume": 66851528,
+      "amount": 192482920683.8,
+      "amplitude": 0.051500000000000004,
+      "changePercent": -0.055999999999999994,
+      "change": -677.92
+    },
+    {
+      "date": "2026-03-04",
+      "open": 11098.76,
+      "close": 11393.9,
+      "high": 11658.12,
+      "low": 11098.76,
+      "volume": 51932655,
+      "amount": 139968045406.2,
+      "amplitude": 0.0489,
+      "changePercent": -0.0038,
+      "change": -44
+    },
+    {
+      "date": "2026-03-05",
+      "open": 11586.42,
+      "close": 11309.43,
+      "high": 11596.68,
+      "low": 11179.67,
+      "volume": 44982994,
+      "amount": 117540491596.6,
+      "amplitude": 0.0366,
+      "changePercent": -0.0074,
+      "change": -84.47
+    },
+    {
+      "date": "2026-03-06",
+      "open": 11142.47,
+      "close": 11072.16,
+      "high": 11265.15,
+      "low": 10925.37,
+      "volume": 37240368,
+      "amount": 100928253233.5,
+      "amplitude": 0.03,
+      "changePercent": -0.021,
+      "change": -237.27
+    },
+    {
+      "date": "2026-03-09",
+      "open": 10842.29,
+      "close": 10973.41,
+      "high": 11041.59,
+      "low": 10569.43,
+      "volume": 44828498,
+      "amount": 119208140517,
+      "amplitude": 0.0426,
+      "changePercent": -0.0089,
+      "change": -98.75
+    },
+    {
+      "date": "2026-03-10",
+      "open": 11063.45,
+      "close": 11078.75,
+      "high": 11127.8,
+      "low": 10990.67,
+      "volume": 31611533,
+      "amount": 84863239087.6,
+      "amplitude": 0.0125,
+      "changePercent": 0.0096,
+      "change": 105.34
+    },
+    {
+      "date": "2026-03-11",
+      "open": 11122.86,
+      "close": 11032.42,
+      "high": 11176.69,
+      "low": 10997.03,
+      "volume": 32159986,
+      "amount": 88533485466.5,
+      "amplitude": 0.016200000000000003,
+      "changePercent": -0.0042,
+      "change": -46.33
+    },
+    {
+      "date": "2026-03-12",
+      "open": 10982.97,
+      "close": 10964.63,
+      "high": 11100.84,
+      "low": 10834.12,
+      "volume": 39062108,
+      "amount": 97123447176.3,
+      "amplitude": 0.0242,
+      "changePercent": -0.0060999999999999995,
+      "change": -67.79
+    },
+    {
+      "date": "2026-03-13",
+      "open": 10878.04,
+      "close": 10666.85,
+      "high": 11093,
+      "low": 10637.2,
+      "volume": 39861709,
+      "amount": 101843204993.1,
+      "amplitude": 0.0416,
+      "changePercent": -0.027200000000000002,
+      "change": -297.78
+    },
+    {
+      "date": "2026-03-16",
+      "open": 10564.56,
+      "close": 10353.94,
+      "high": 10594.16,
+      "low": 10075.37,
+      "volume": 47353713,
+      "amount": 115656173756.9,
+      "amplitude": 0.048600000000000004,
+      "changePercent": -0.029300000000000003,
+      "change": -312.91
+    },
+    {
+      "date": "2026-03-17",
+      "open": 10383.99,
+      "close": 10167.74,
+      "high": 10486.1,
+      "low": 10165.46,
+      "volume": 32378286,
+      "amount": 78536770011.4,
+      "amplitude": 0.031,
+      "changePercent": -0.018000000000000002,
+      "change": -186.2
+    },
+    {
+      "date": "2026-03-18",
+      "open": 10162.12,
+      "close": 10082.89,
+      "high": 10178.42,
+      "low": 9915.58,
+      "volume": 31420433,
+      "amount": 74115952872.5,
+      "amplitude": 0.0259,
+      "changePercent": -0.0083,
+      "change": -84.85
+    },
+    {
+      "date": "2026-03-19",
+      "open": 9775.51,
+      "close": 9463.43,
+      "high": 9835.28,
+      "low": 9418.63,
+      "volume": 47792379,
+      "amount": 109838984877.5,
+      "amplitude": 0.041299999999999996,
+      "changePercent": -0.061399999999999996,
+      "change": -619.46
+    },
+    {
+      "date": "2026-03-20",
+      "open": 9512.26,
+      "close": 9356.16,
+      "high": 9605.69,
+      "low": 9339.41,
+      "volume": 37112583,
+      "amount": 89589917401.8,
+      "amplitude": 0.0281,
+      "changePercent": -0.0113,
+      "change": -107.27
+    },
+    {
+      "date": "2026-03-23",
+      "open": 9034.5,
+      "close": 8923.32,
+      "high": 9267.54,
+      "low": 8867.86,
+      "volume": 47638281,
+      "amount": 106125769050.4,
+      "amplitude": 0.042699999999999995,
+      "changePercent": -0.0463,
+      "change": -432.84
+    },
+    {
+      "date": "2026-03-24",
+      "open": 9102.03,
+      "close": 9208.19,
+      "high": 9208.32,
+      "low": 8810.64,
+      "volume": 42861170,
+      "amount": 101417069039.1,
+      "amplitude": 0.0446,
+      "changePercent": 0.0319,
+      "change": 284.87
+    },
+    {
+      "date": "2026-03-25",
+      "open": 9479.31,
+      "close": 9488.2,
+      "high": 9606.87,
+      "low": 9410.54,
+      "volume": 43977580,
+      "amount": 111122039742.9,
+      "amplitude": 0.0213,
+      "changePercent": 0.0304,
+      "change": 280.01
+    },
+    {
+      "date": "2026-03-26",
+      "open": 9472.79,
+      "close": 9325.48,
+      "high": 9534.02,
+      "low": 9280.98,
+      "volume": 29955105,
+      "amount": 78996873178.9,
+      "amplitude": 0.026699999999999998,
+      "changePercent": -0.0171,
+      "change": -162.72
+    },
+    {
+      "date": "2026-03-27",
+      "open": 9168.59,
+      "close": 9586.07,
+      "high": 9656.38,
+      "low": 9168.59,
+      "volume": 32904647,
+      "amount": 92841294919.5,
+      "amplitude": 0.052300000000000006,
+      "changePercent": 0.0279,
+      "change": 260.59
+    },
+    {
+      "date": "2026-03-30",
+      "open": 9629.26,
+      "close": 9759.44,
+      "high": 9761,
+      "low": 9497.18,
+      "volume": 42319387,
+      "amount": 98134905125,
+      "amplitude": 0.0275,
+      "changePercent": 0.0181,
+      "change": 173.37
+    },
+    {
+      "date": "2026-03-31",
+      "open": 9788.15,
+      "close": 9616.03,
+      "high": 9844.14,
+      "low": 9573.38,
+      "volume": 37796430,
+      "amount": 88807513078.9,
+      "amplitude": 0.0277,
+      "changePercent": -0.0147,
+      "change": -143.41
+    },
+    {
+      "date": "2026-04-01",
+      "open": 9849.46,
+      "close": 9854.89,
+      "high": 9897.01,
+      "low": 9743.46,
+      "volume": 35280956,
+      "amount": 89254371526.9,
+      "amplitude": 0.016,
+      "changePercent": 0.0248,
+      "change": 238.86
+    },
+    {
+      "date": "2026-04-02",
+      "open": 9819.16,
+      "close": 9687.98,
+      "high": 9871.61,
+      "low": 9595.29,
+      "volume": 31568993,
+      "amount": 80065515384,
+      "amplitude": 0.027999999999999997,
+      "changePercent": -0.0169,
+      "change": -166.91
+    },
+    {
+      "date": "2026-04-03",
+      "open": 9707.53,
+      "close": 9589.08,
+      "high": 9718.73,
+      "low": 9539.95,
+      "volume": 20487598,
+      "amount": 50754136353.4,
+      "amplitude": 0.018500000000000003,
+      "changePercent": -0.0102,
+      "change": -98.9
+    },
+    {
+      "date": "2026-04-07",
+      "open": 9600.82,
+      "close": 9690.04,
+      "high": 9718.04,
+      "low": 9583.2,
+      "volume": 23493599,
+      "amount": 60282933399.7,
+      "amplitude": 0.0141,
+      "changePercent": 0.0105,
+      "change": 100.96
+    },
+    {
+      "date": "2026-04-08",
+      "open": 10015.76,
+      "close": 10272.95,
+      "high": 10283.59,
+      "low": 10015.76,
+      "volume": 46856269,
+      "amount": 118438205242.9,
+      "amplitude": 0.0276,
+      "changePercent": 0.0602,
+      "change": 582.91
+    },
+    {
+      "date": "2026-04-09",
+      "open": 10116.4,
+      "close": 10221.63,
+      "high": 10320.61,
+      "low": 10098.2,
+      "volume": 34970062,
+      "amount": 89667308688,
+      "amplitude": 0.0217,
+      "changePercent": -0.005,
+      "change": -51.32
+    },
+    {
+      "date": "2026-04-10",
+      "open": 10289.37,
+      "close": 10171.95,
+      "high": 10339.47,
+      "low": 10161.34,
+      "volume": 32212241,
+      "amount": 92387067613.4,
+      "amplitude": 0.0174,
+      "changePercent": -0.0049,
+      "change": -49.68
+    },
+    {
+      "date": "2026-04-13",
+      "open": 10141.08,
+      "close": 10200.57,
+      "high": 10219.31,
+      "low": 10094.08,
+      "volume": 30446527,
+      "amount": 87767575754.1,
+      "amplitude": 0.0123,
+      "changePercent": 0.0028000000000000004,
+      "change": 28.62
+    },
+    {
+      "date": "2026-04-14",
+      "open": 10390.21,
+      "close": 10390.32,
+      "high": 10402.18,
+      "low": 10260.7,
+      "volume": 37077439,
+      "amount": 105470921659.6,
+      "amplitude": 0.0139,
+      "changePercent": 0.018600000000000002,
+      "change": 189.75
+    },
+    {
+      "date": "2026-04-15",
+      "open": 10518.59,
+      "close": 10233.38,
+      "high": 10572.32,
+      "low": 10196.25,
+      "volume": 37371456,
+      "amount": 108188409923.2,
+      "amplitude": 0.0362,
+      "changePercent": -0.0151,
+      "change": -156.94
+    },
+    {
+      "date": "2026-04-16",
+      "open": 10310.29,
+      "close": 10540.68,
+      "high": 10545.06,
+      "low": 10310.29,
+      "volume": 34175078,
+      "amount": 101307086201.1,
+      "amplitude": 0.0229,
+      "changePercent": 0.03,
+      "change": 307.3
+    },
+    {
+      "date": "2026-04-17",
+      "open": 10472.46,
+      "close": 10537.82,
+      "high": 10616.63,
+      "low": 10472.46,
+      "volume": 34400166,
+      "amount": 105803212343.1,
+      "amplitude": 0.0137,
+      "changePercent": -0.0003,
+      "change": -2.86
+    },
+    {
+      "date": "2026-04-20",
+      "open": 10528.21,
+      "close": 10575.78,
+      "high": 10678.61,
+      "low": 10512.75,
+      "volume": 38258043,
+      "amount": 106350306787.6,
+      "amplitude": 0.015700000000000002,
+      "changePercent": 0.0036,
+      "change": 37.96
+    },
+    {
+      "date": "2026-04-21",
+      "open": 10586.88,
+      "close": 10592.76,
+      "high": 10623.16,
+      "low": 10440.97,
+      "volume": 30632941,
+      "amount": 94350435349.3,
+      "amplitude": 0.0172,
+      "changePercent": 0.0016,
+      "change": 16.98
+    },
+    {
+      "date": "2026-04-22",
+      "open": 10501.61,
+      "close": 10601.31,
+      "high": 10636.49,
+      "low": 10473.69,
+      "volume": 35498199,
+      "amount": 100701367761.1,
+      "amplitude": 0.0154,
+      "changePercent": 0.0008,
+      "change": 8.55
+    },
+    {
+      "date": "2026-04-23",
+      "open": 10603.93,
+      "close": 10192.51,
+      "high": 10615.97,
+      "low": 10122.68,
+      "volume": 40567869,
+      "amount": 115116392820.2,
+      "amplitude": 0.04650000000000001,
+      "changePercent": -0.038599999999999995,
+      "change": -408.8
+    },
+    {
+      "date": "2026-04-24",
+      "open": 10115.22,
+      "close": 10291.61,
+      "high": 10351.1,
+      "low": 10042.48,
+      "volume": 32832217,
+      "amount": 97544851449.3,
+      "amplitude": 0.030299999999999997,
+      "changePercent": 0.0097,
+      "change": 99.1
+    },
+    {
+      "date": "2026-04-27",
+      "open": 10239.55,
+      "close": 10185.56,
+      "high": 10306.55,
+      "low": 10166.13,
+      "volume": 28929827,
+      "amount": 88819631959.2,
+      "amplitude": 0.013600000000000001,
+      "changePercent": -0.0103,
+      "change": -106.05
+    },
+    {
+      "date": "2026-04-28",
+      "open": 10112.63,
+      "close": 9937.88,
+      "high": 10118.35,
+      "low": 9900.54,
+      "volume": 32190563,
+      "amount": 79563716433.7,
+      "amplitude": 0.021400000000000002,
+      "changePercent": -0.024300000000000002,
+      "change": -247.68
+    },
+    {
+      "date": "2026-04-29",
+      "open": 9889.1,
+      "close": 10385.26,
+      "high": 10391.87,
+      "low": 9889.1,
+      "volume": 37801246,
+      "amount": 114326702063.7,
+      "amplitude": 0.0506,
+      "changePercent": 0.045,
+      "change": 447.38
+    },
+    {
+      "date": "2026-04-30",
+      "open": 10326.48,
+      "close": 10287.95,
+      "high": 10466.83,
+      "low": 10209.51,
+      "volume": 37584241,
+      "amount": 121500104051.2,
+      "amplitude": 0.0248,
+      "changePercent": -0.009399999999999999,
+      "change": -97.31
+    }
+  ],
   "commodityDrivers": [
     {
       "key": "gold",
@@ -4824,7 +9869,7 @@
   "history": {
     "path": "src/data/history/512400-snapshots.json",
     "count": 1,
-    "latestGeneratedAt": "2026-05-05T09:57:04.776Z",
+    "latestGeneratedAt": "2026-05-05T13:32:01.419Z",
     "latestTradeDate": "2026-04-30"
   }
 }
