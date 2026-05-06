@@ -58,20 +58,51 @@ const commodityContracts = [
   },
 ]
 
-async function fetchText(url) {
-  const response = await fetch(url, {
-    headers: {
-      Accept: '*/*',
-      'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125 Safari/537.36',
-    },
-  })
+// 指数退避重试 fetchText：429/5xx/网络抖动重试 3 次，4xx 立即失败
+async function fetchText(url, { attempts = 3 } = {}) {
+  let lastError = null
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: '*/*',
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125 Safari/537.36',
+        },
+      })
 
-  if (!response.ok) {
-    throw new Error(`Fetch failed ${response.status} ${url}`)
+      if (response.ok) return await response.text()
+
+      const retryable = response.status === 429 || response.status >= 500
+      const error = new Error(`Fetch failed ${response.status} ${url}`)
+      if (!retryable) throw error
+      lastError = error
+    } catch (error) {
+      lastError = error
+    }
+
+    if (attempt < attempts - 1) {
+      const delay = 300 * 2 ** attempt
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
   }
+  throw lastError ?? new Error(`Fetch failed without details: ${url}`)
+}
 
-  return response.text()
+// 控制并发上限的简易调度器，避免一次性向接口发出过多请求
+async function runLimited(items, limit, fn) {
+  const results = new Array(items.length)
+  let cursor = 0
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor
+      cursor += 1
+      results[index] = await fn(items[index], index)
+    }
+  }
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker())
+  await Promise.all(workers)
+  return results
 }
 
 async function readJsonFile(path, fallback) {
@@ -155,8 +186,13 @@ function parseFundGauge(text) {
 
 function parseFundTrend(text) {
   const trendText = extractAssignment(text, 'Data_netWorthTrend')
+  if (!trendText) {
+    throw new Error(
+      'parseFundTrend: 未找到 Data_netWorthTrend 赋值，pingzhongdata 字段名可能已变更',
+    )
+  }
   const accumulatedText = extractAssignment(text, 'Data_ACWorthTrend')
-  const trend = trendText ? JSON.parse(trendText) : []
+  const trend = JSON.parse(trendText)
   const accumulated = accumulatedText ? JSON.parse(accumulatedText) : []
   const latest = trend.at(-1)
   const latestAccumulated = accumulated.at(-1)
@@ -200,6 +236,10 @@ function parseFundTrend(text) {
     .filter((item) => item.date && Number.isFinite(item.unit))
     .slice(-280)
 
+  if (navTrend.length === 0) {
+    throw new Error('parseFundTrend: navTrend 为空，可能解析逻辑或上游数据异常')
+  }
+
   return {
     nav: latest
       ? {
@@ -230,6 +270,12 @@ function parseQuote(text) {
   const tradeClock = shanghaiDateTimeFromEpoch(data.f86)
   const price = priceFromQuote(data.f43, data.f59)
   const previousClose = priceFromQuote(data.f60, data.f59)
+
+  if (!data.f57 || price === null || previousClose === null) {
+    throw new Error(
+      `parseQuote: 关键字段缺失 (code=${data.f57 ?? 'null'}, price=${data.f43 ?? 'null'}, prev=${data.f60 ?? 'null'})`,
+    )
+  }
 
   return {
     code: data.f57,
@@ -290,7 +336,12 @@ function parseSecurityQuote(text, contract) {
 
 function parseKlines(text) {
   const payload = JSON.parse(text)
-  if (payload.rc !== 0 || !payload.data?.klines) return []
+  if (payload.rc !== 0 || !payload.data?.klines) {
+    throw new Error(`parseKlines: 接口返回异常 (rc=${payload.rc ?? 'null'})`)
+  }
+  if (payload.data.klines.length === 0) {
+    throw new Error('parseKlines: klines 数组为空')
+  }
 
   return payload.data.klines.map((line) => {
     const [date, open, close, high, low, volume, amount, amplitude, changePercent, change] =
@@ -435,14 +486,13 @@ async function fetchCommodityDriver(contract) {
 }
 
 async function main() {
-  const [quoteText, etfKlineText, benchmarkKlineText, gaugeText, trendText] = await Promise.all([
-    fetchText(quoteUrl),
-    fetchText(etfKlineUrl),
-    fetchText(benchmarkKlineUrl),
-    fetchText(fundGaugeUrl),
-    fetchText(fundTrendUrl),
-  ])
-  const commodityDrivers = await Promise.all(commodityContracts.map(fetchCommodityDriver))
+  // 限制并发，避免一次性向东方财富/天天基金抛过多请求触发风控
+  const [quoteText, etfKlineText, benchmarkKlineText, gaugeText, trendText] = await runLimited(
+    [quoteUrl, etfKlineUrl, benchmarkKlineUrl, fundGaugeUrl, fundTrendUrl],
+    4,
+    (url) => fetchText(url),
+  )
+  const commodityDrivers = await runLimited(commodityContracts, 2, fetchCommodityDriver)
 
   const quote = parseQuote(quoteText)
   const etfKlines = parseKlines(etfKlineText)

@@ -10,6 +10,69 @@ import {
   trailingHigh,
 } from './math.js'
 
+// 仓位档位：满仓 / 中性 / 深度回撤抢反弹 / 浅回撤试探 / 风控压仓
+const EXPOSURE_LEVELS = {
+  trendFull: 1,
+  trendNeutral: 0.45,
+  deepPullback: 0.82,
+  entryPullback: 0.42,
+  riskCut: 0.18,
+}
+
+// 由仓位反推动作的阈值
+const ACTION_THRESHOLDS = {
+  main: 0.78,
+  second: 0.52,
+  first: 0.28,
+}
+
+// scoreCandidate：综合分加权（注意 maxDrawdown 为负，乘正数即扣分）
+const SCORER = {
+  testAnnualReturn: 88,
+  testMaxDrawdown: 72,
+  trainAnnualReturn: 18,
+  testHitRate: 12,
+  winLossRatio: 7,
+  trainTestGap: 35,
+  drawdownGap: 70,
+  benchmarkBeatBonus: 10,
+  benchmarkMissCap: 14,
+  benchmarkMissSlope: 18,
+  underExposurePenalty: 16, // 平均仓位 < 12%
+  overExposurePenalty: 5, // 平均仓位 > 88%
+  fastWindowComplexity: 3, // fastWindow < 15
+  slowWindowComplexity: 2, // slowWindow > 100
+}
+
+// stabilityScoreFor：稳定性 = 88 - 训练/测试差距 - 回撤差距 - 负收益惩罚 - 输基准惩罚
+const STABILITY = {
+  base: 88,
+  trainTestGapPenalty: 42,
+  drawdownGapPenalty: 95,
+  negativeReturnPenalty: 28,
+  underBenchmarkPenalty: 10,
+}
+
+const OVERFIT = {
+  shortSampleDays: 360, // 样本不足 360 → 稳定性最高只能评中
+  lowGap: 0.28,
+  midGap: 0.55,
+  highStability: 70,
+  midStability: 48,
+}
+
+const FACTOR_OVERLAY = {
+  defensiveMultiplier: 0.5, // 高风险因子 ≥3 → 仓位减半
+  expansionMultiplier: 1.12, // 因子共振强 → 上调仓位
+  defensiveHighRiskMin: 3,
+  expansionPositiveMin: 3,
+  expansionHighRiskMax: 1,
+}
+
+const MIN_KLINE_SAMPLE = 140 // 至少需要的 K 线样本
+const MIN_PERIODS_FOR_RANKING = 35 // 测试段交易日太少不参与排名
+const STABILITY_CAP_SHORT_SAMPLE = 78 // 样本不足时稳定性的上限
+
 function optimizedExposure(params, klines, index) {
   const close = klines[index].close
   const fastMa = movingAverage(klines, index, params.fastWindow)
@@ -22,28 +85,28 @@ function optimizedExposure(params, klines, index) {
   let exposure = 0
 
   if (trendOn) {
-    exposure = 1
+    exposure = EXPOSURE_LEVELS.trendFull
   } else if (trendNeutral) {
-    exposure = 0.45
+    exposure = EXPOSURE_LEVELS.trendNeutral
   }
 
   if (drawdown <= -params.deepPullback) {
-    exposure = Math.max(exposure, 0.82)
+    exposure = Math.max(exposure, EXPOSURE_LEVELS.deepPullback)
   } else if (drawdown <= -params.entryPullback) {
-    exposure = Math.max(exposure, 0.42)
+    exposure = Math.max(exposure, EXPOSURE_LEVELS.entryPullback)
   }
 
   if (drawdown <= -params.riskCut && slowMa && close < slowMa) {
-    exposure = Math.min(exposure, 0.18)
+    exposure = Math.min(exposure, EXPOSURE_LEVELS.riskCut)
   }
 
   return clamp(exposure, 0, 1)
 }
 
 function actionFromOptimizedExposure(exposure) {
-  if (exposure >= 0.78) return '主仓持有'
-  if (exposure >= 0.52) return '第二档配置'
-  if (exposure >= 0.28) return '第一档低吸'
+  if (exposure >= ACTION_THRESHOLDS.main) return '主仓持有'
+  if (exposure >= ACTION_THRESHOLDS.second) return '第二档配置'
+  if (exposure >= ACTION_THRESHOLDS.first) return '第一档低吸'
   if (exposure > 0) return '观察仓'
   return '空仓等待'
 }
@@ -164,20 +227,32 @@ function generateOptimizerCandidates() {
 function scoreCandidate({ train, test, benchmarkTest, params }) {
   const trainTestGap = Math.abs(train.annualReturn - test.annualReturn)
   const drawdownGap = Math.abs(train.maxDrawdown - test.maxDrawdown)
-  const exposurePenalty = test.exposure < 0.12 ? 16 : test.exposure > 0.88 ? 5 : 0
-  const complexityPenalty = (params.fastWindow < 15 ? 3 : 0) + (params.slowWindow > 100 ? 2 : 0)
+  const exposurePenalty =
+    test.exposure < 0.12
+      ? SCORER.underExposurePenalty
+      : test.exposure > 0.88
+        ? SCORER.overExposurePenalty
+        : 0
+  const complexityPenalty =
+    (params.fastWindow < 15 ? SCORER.fastWindowComplexity : 0) +
+    (params.slowWindow > 100 ? SCORER.slowWindowComplexity : 0)
   const benchmarkBonus =
-    test.annualReturn > benchmarkTest.annualReturn ? 10 : -Math.min(14, Math.abs(test.annualReturn - benchmarkTest.annualReturn) * 18)
+    test.annualReturn > benchmarkTest.annualReturn
+      ? SCORER.benchmarkBeatBonus
+      : -Math.min(
+          SCORER.benchmarkMissCap,
+          Math.abs(test.annualReturn - benchmarkTest.annualReturn) * SCORER.benchmarkMissSlope,
+        )
 
   return (
-    test.annualReturn * 88 +
-    test.maxDrawdown * 72 +
-    train.annualReturn * 18 +
-    test.hitRate * 12 +
-    Math.min(test.winLossRatio, 2) * 7 +
+    test.annualReturn * SCORER.testAnnualReturn +
+    test.maxDrawdown * SCORER.testMaxDrawdown +
+    train.annualReturn * SCORER.trainAnnualReturn +
+    test.hitRate * SCORER.testHitRate +
+    Math.min(test.winLossRatio, 2) * SCORER.winLossRatio +
     benchmarkBonus -
-    trainTestGap * 35 -
-    drawdownGap * 70 -
+    trainTestGap * SCORER.trainTestGap -
+    drawdownGap * SCORER.drawdownGap -
     exposurePenalty -
     complexityPenalty
   )
@@ -186,33 +261,52 @@ function scoreCandidate({ train, test, benchmarkTest, params }) {
 function stabilityScoreFor(train, test, benchmarkTest) {
   const trainTestGap = Math.abs(train.annualReturn - test.annualReturn)
   const drawdownGap = Math.abs(train.maxDrawdown - test.maxDrawdown)
-  const negativePenalty = test.annualReturn < 0 ? 28 : 0
-  const benchmarkPenalty = test.annualReturn < benchmarkTest.annualReturn ? 10 : 0
+  const negativePenalty = test.annualReturn < 0 ? STABILITY.negativeReturnPenalty : 0
+  const benchmarkPenalty =
+    test.annualReturn < benchmarkTest.annualReturn ? STABILITY.underBenchmarkPenalty : 0
 
   return Math.round(
-    clamp(88 - trainTestGap * 42 - drawdownGap * 95 - negativePenalty - benchmarkPenalty, 0, 100),
+    clamp(
+      STABILITY.base -
+        trainTestGap * STABILITY.trainTestGapPenalty -
+        drawdownGap * STABILITY.drawdownGapPenalty -
+        negativePenalty -
+        benchmarkPenalty,
+      0,
+      100,
+    ),
   )
 }
 
 function overfitLabel(stabilityScore, train, test, sampleSize) {
   const gap = Math.abs(train.annualReturn - test.annualReturn)
-  if (sampleSize < 360 && stabilityScore >= 70 && gap < 0.28 && test.annualReturn > 0) return '中'
-  if (stabilityScore >= 70 && gap < 0.28 && test.annualReturn > 0) return '低'
-  if (stabilityScore >= 48 && gap < 0.55) return '中'
+  if (
+    sampleSize < OVERFIT.shortSampleDays &&
+    stabilityScore >= OVERFIT.highStability &&
+    gap < OVERFIT.lowGap &&
+    test.annualReturn > 0
+  )
+    return '中'
+  if (stabilityScore >= OVERFIT.highStability && gap < OVERFIT.lowGap && test.annualReturn > 0)
+    return '低'
+  if (stabilityScore >= OVERFIT.midStability && gap < OVERFIT.midGap) return '中'
   return '高'
 }
 
 function factorOverlayFor(factorProfile) {
-  if (factorProfile.highRiskFactors >= 3) {
+  if (factorProfile.highRiskFactors >= FACTOR_OVERLAY.defensiveHighRiskMin) {
     return {
-      multiplier: 0.5,
+      multiplier: FACTOR_OVERLAY.defensiveMultiplier,
       note: '当前高风险因子达到3个，推荐仓位减半',
     }
   }
 
-  if (factorProfile.positiveFactors >= 3 && factorProfile.highRiskFactors <= 1) {
+  if (
+    factorProfile.positiveFactors >= FACTOR_OVERLAY.expansionPositiveMin &&
+    factorProfile.highRiskFactors <= FACTOR_OVERLAY.expansionHighRiskMax
+  ) {
     return {
-      multiplier: 1.12,
+      multiplier: FACTOR_OVERLAY.expansionMultiplier,
       note: '当前因子共振较强，允许略微上调仓位',
     }
   }
@@ -231,10 +325,10 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
   const cleaned = cleanKlines(klines)
   const factorProfile = buildFactorProfile(factorBaskets)
 
-  if (cleaned.length < 140) {
+  if (cleaned.length < MIN_KLINE_SAMPLE) {
     return {
       ok: false,
-      reason: 'K线样本不足，至少需要140个交易日',
+      reason: `K线样本不足，至少需要${MIN_KLINE_SAMPLE}个交易日`,
       totalCandidates: 0,
       best: null,
       leaderboard: [],
@@ -244,7 +338,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
   const splitIndex = Math.max(90, Math.floor(cleaned.length * 0.65))
   const trainStart = 0
   const trainEnd = splitIndex - 1
-  const testStart = splitIndex - 1
+  const testStart = splitIndex
   const testEnd = cleaned.length - 1
   const benchmarkTest = evaluateBuyHold(cleaned, testStart, testEnd)
   const candidates = generateOptimizerCandidates().map((params) => {
@@ -252,7 +346,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
     const test = evaluateOptimizedCandidate(cleaned, params, testStart, testEnd)
     const stabilityScore = Math.min(
       stabilityScoreFor(train, test, benchmarkTest),
-      cleaned.length < 360 ? 78 : 100,
+      cleaned.length < OVERFIT.shortSampleDays ? STABILITY_CAP_SHORT_SAMPLE : 100,
     )
     return {
       params,
@@ -265,7 +359,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
   })
 
   const ranked = candidates
-    .filter((candidate) => candidate.test.periods >= 35)
+    .filter((candidate) => candidate.test.periods >= MIN_PERIODS_FOR_RANKING)
     .sort((a, b) => b.score - a.score)
 
   const best = ranked[0]
