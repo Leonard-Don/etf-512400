@@ -1,6 +1,6 @@
 [
   {
-    "generatedAt": "2026-05-06T04:13:31.996Z",
+    "generatedAt": "2026-05-06T06:29:39.104Z",
     "tradeDate": "2026-04-30",
     "tradeTime": "2026-04-30 16:11:58",
     "price": 2.119,
@@ -13,42 +13,42 @@
       {
         "key": "gold",
         "ok": true,
-        "price": 1016.12,
-        "changePercent": 0.004,
-        "trendScore": 25,
+        "price": 1027.92,
+        "changePercent": 0.0222,
+        "trendScore": 32,
         "riskScore": 95
       },
       {
         "key": "copper",
         "ok": true,
-        "price": 101030,
-        "changePercent": -0.0023,
-        "trendScore": 59,
-        "riskScore": 33
+        "price": 102850,
+        "changePercent": 0.0175,
+        "trendScore": 69,
+        "riskScore": 34
       },
       {
         "key": "aluminum",
         "ok": true,
-        "price": 24430,
-        "changePercent": -0.0057,
-        "trendScore": 48,
+        "price": 24755,
+        "changePercent": 0.0129,
+        "trendScore": 46,
         "riskScore": 95
       },
       {
         "key": "battery",
         "ok": true,
-        "price": 189080,
-        "changePercent": 0.0507,
+        "price": 198120,
+        "changePercent": 0.0662,
         "trendScore": 100,
         "riskScore": 95
       },
       {
         "key": "rareEarth",
         "ok": true,
-        "price": 3141.52,
-        "changePercent": 0.0107,
-        "trendScore": 71,
-        "riskScore": 61
+        "price": 3235.62,
+        "changePercent": 0.03,
+        "trendScore": 87,
+        "riskScore": 62
       }
     ]
   }
