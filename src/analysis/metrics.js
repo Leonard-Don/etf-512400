@@ -26,6 +26,8 @@ export {
   shanghaiDateString,
 } from './snapshotHealth.js'
 export {
+  LOCAL_REALTIME_KLINE_URL,
+  LOCAL_REALTIME_QUOTE_URL,
   parseRealtimeKline,
   parseRealtimeQuote,
   REALTIME_KLINE_URL,

@@ -48,6 +48,8 @@ import {
   formatSignedPercent,
   getScenarioAdjustment,
   groupHoldingsByBasket,
+  LOCAL_REALTIME_KLINE_URL,
+  LOCAL_REALTIME_QUOTE_URL,
   parseRealtimeKline,
   parseRealtimeQuote,
   REALTIME_KLINE_URL,
@@ -72,6 +74,18 @@ const scenarios = [
 const REALTIME_REFRESH_MS = 30000
 const REALTIME_TIMEOUT_MS = 8000
 const realtimeEndpoints = [
+  {
+    id: 'local-quote',
+    label: '本地盘口实时',
+    url: LOCAL_REALTIME_QUOTE_URL,
+    parse: parseRealtimeQuote,
+  },
+  {
+    id: 'local-kline',
+    label: '本地K线实时',
+    url: LOCAL_REALTIME_KLINE_URL,
+    parse: parseRealtimeKline,
+  },
   {
     id: 'quote',
     label: '盘口实时',
