@@ -19,3 +19,9 @@ export { buildTradingQualityProfile } from './tradingQuality.js'
 export { getScenarioAdjustment } from './scenario.js'
 export { mapSeriesToPolyline } from './charting.js'
 export { composePrimaryDecision } from './decision.js'
+export {
+  buildDataFreshness,
+  calendarDayGap,
+  describeMarketStatus,
+  shanghaiDateString,
+} from './snapshotHealth.js'

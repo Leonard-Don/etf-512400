@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generatedAt": "2026-05-05T13:32:01.419Z",
-    "mode": "refreshed",
+    "generatedAt": "2026-05-06T04:13:31.996Z",
+    "mode": "degraded",
     "sources": [
       "push2.eastmoney.com quote api",
       "push2his.eastmoney.com 512400 adjusted kline api",
@@ -10,6 +10,64 @@
       "push2his.eastmoney.com futures/index kline api",
       "fund.eastmoney.com pingzhongdata",
       "fundgz.1234567.com.cn estimated net value"
+    ],
+    "sourceHealth": [
+      {
+        "id": "quote",
+        "label": "ETF行情",
+        "required": true,
+        "ok": false,
+        "fetchedAt": "2026-05-06T04:13:13.965Z",
+        "fallback": true,
+        "error": "20: This operation was aborted"
+      },
+      {
+        "id": "etfKlines",
+        "label": "512400 日K",
+        "required": true,
+        "ok": false,
+        "fetchedAt": "2026-05-06T04:13:13.987Z",
+        "fallback": true,
+        "error": "20: This operation was aborted"
+      },
+      {
+        "id": "benchmarkKlines",
+        "label": "000819 基准日K",
+        "required": true,
+        "ok": true,
+        "fetchedAt": "2026-05-06T04:13:13.855Z",
+        "fallback": false
+      },
+      {
+        "id": "fundGauge",
+        "label": "盘中估算净值",
+        "required": false,
+        "ok": false,
+        "fetchedAt": "2026-05-06T04:13:09.989Z",
+        "fallback": true,
+        "error": "20: This operation was aborted"
+      },
+      {
+        "id": "fundTrend",
+        "label": "基金净值趋势",
+        "required": true,
+        "ok": false,
+        "fetchedAt": "2026-05-06T04:13:13.990Z",
+        "fallback": true,
+        "error": "20: This operation was aborted"
+      },
+      {
+        "id": "commodityDrivers",
+        "label": "商品驱动",
+        "required": false,
+        "ok": false,
+        "fallback": true,
+        "fetchedAt": "2026-05-06T04:13:31.996Z",
+        "okCount": 5,
+        "total": 5,
+        "fallbackCount": 5,
+        "error": "使用 5 个缓存商品驱动"
+      }
     ]
   },
   "quote": {
@@ -5099,18 +5157,6 @@
   ],
   "benchmarkKlines": [
     {
-      "date": "2025-03-07",
-      "open": 5131.92,
-      "close": 5200.95,
-      "high": 5257.37,
-      "low": 5130.52,
-      "volume": 32717945,
-      "amount": 42467135634.6,
-      "amplitude": 0.024700000000000003,
-      "changePercent": 0.013300000000000001,
-      "change": 68.16
-    },
-    {
       "date": "2025-03-10",
       "open": 5240.12,
       "close": 5262.55,
@@ -8457,6 +8503,18 @@
       "amplitude": 0.0248,
       "changePercent": -0.009399999999999999,
       "change": -97.31
+    },
+    {
+      "date": "2026-05-06",
+      "open": 10369.41,
+      "close": 10552.77,
+      "high": 10552.77,
+      "low": 10278.72,
+      "volume": 27159285,
+      "amount": 82385006159.8,
+      "amplitude": 0.026600000000000002,
+      "changePercent": 0.025699999999999997,
+      "change": 264.82
     }
   ],
   "commodityDrivers": [
@@ -8739,7 +8797,9 @@
           "changePercent": 0.004,
           "change": 4.02
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "20: This operation was aborted"
     },
     {
       "key": "copper",
@@ -9020,7 +9080,9 @@
           "changePercent": -0.0023,
           "change": -230
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "20: This operation was aborted"
     },
     {
       "key": "aluminum",
@@ -9301,7 +9363,9 @@
           "changePercent": -0.005699999999999999,
           "change": -140
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "20: This operation was aborted"
     },
     {
       "key": "battery",
@@ -9582,7 +9646,9 @@
           "changePercent": 0.0507,
           "change": 9120
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "20: This operation was aborted"
     },
     {
       "key": "rareEarth",
@@ -9863,13 +9929,15 @@
           "changePercent": 0.010700000000000001,
           "change": 33.15
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "20: This operation was aborted"
     }
   ],
   "history": {
     "path": "src/data/history/512400-snapshots.json",
     "count": 1,
-    "latestGeneratedAt": "2026-05-05T13:32:01.419Z",
+    "latestGeneratedAt": "2026-05-06T04:13:31.996Z",
     "latestTradeDate": "2026-04-30"
   }
 }

@@ -75,8 +75,21 @@ function App() {
   const topWeight = sumWeights(holdings)
   const basketGroups = groupHoldingsByBasket(holdings)
   const scenarioState = getScenarioAdjustment(scenario)
+  const dataFreshness = etfProfile.liveSnapshot.dataFreshness
+  const sourceHealth = etfProfile.liveSnapshot.sourceHealth ?? []
+  const degradedSources = sourceHealth.filter((source) => source.ok === false)
+  const snapshotStatusLabel =
+    etfProfile.liveSnapshot.mode === 'degraded'
+      ? '降级缓存'
+      : etfProfile.liveSnapshot.mode === 'partial'
+      ? '部分刷新'
+      : etfProfile.liveSnapshot.mode === 'refreshed'
+        ? '已刷新'
+        : '种子数据'
   const snapshotLabel =
-    etfProfile.liveSnapshot.mode === 'refreshed'
+    etfProfile.liveSnapshot.mode === 'refreshed' ||
+    etfProfile.liveSnapshot.mode === 'partial' ||
+    etfProfile.liveSnapshot.mode === 'degraded'
       ? `快照 ${formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)}`
       : '种子快照'
 
@@ -164,21 +177,35 @@ function App() {
             title="数据来源说明"
             onClick={() => {
               const stamp =
-                etfProfile.liveSnapshot.mode === 'refreshed'
+                etfProfile.liveSnapshot.mode === 'refreshed' ||
+                etfProfile.liveSnapshot.mode === 'partial' ||
+                etfProfile.liveSnapshot.mode === 'degraded'
                   ? formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)
                   : '种子数据'
+              const degradeNote = degradedSources.length
+                ? `；降级源：${degradedSources.map((source) => source.label).join('、')}`
+                : ''
               setRefreshNote(
-                `当前快照：${stamp}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev。`,
+                `当前快照：${stamp}，${dataFreshness.summary}${degradeNote}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev。`,
               )
             }}
           >
             <Info size={18} />
           </button>
-          <div className="status-chip">{etfProfile.marketStatus}</div>
-          <div className="snapshot-chip">{snapshotLabel}</div>
+          <div className={`status-chip ${dataFreshness.tone}`}>{etfProfile.marketStatus}</div>
+          <div className={`snapshot-chip ${dataFreshness.tone}`}>{snapshotLabel}</div>
         </div>
       </header>
       {refreshNote ? <div className="refresh-note">{refreshNote}</div> : null}
+      {dataFreshness.tone !== 'good' ? (
+        <section className={`data-alert ${dataFreshness.tone}`} aria-label="数据新鲜度提示">
+          <ShieldAlert size={18} />
+          <div>
+            <strong>{dataFreshness.summary}</strong>
+            <p>{dataFreshness.details.slice(0, 3).join(' · ')}</p>
+          </div>
+        </section>
+      ) : null}
 
       <section className="command-band">
         <div className="decision-panel">
@@ -346,7 +373,7 @@ function App() {
           <div className="snapshot-readout">
             <div>
               <span>快照状态</span>
-              <strong>{etfProfile.liveSnapshot.mode === 'refreshed' ? '已刷新' : '种子数据'}</strong>
+              <strong>{snapshotStatusLabel}</strong>
             </div>
             <div>
               <span>刷新时间</span>
@@ -360,7 +387,30 @@ function App() {
               <span>历史缓存</span>
               <strong>{snapshotHistory.length}条</strong>
             </div>
+            <div>
+              <span>健康状态</span>
+              <strong>{dataFreshness.summary}</strong>
+            </div>
+            <div>
+              <span>降级源</span>
+              <strong>{degradedSources.length}个</strong>
+            </div>
           </div>
+          {sourceHealth.length ? (
+            <div className="source-health-list" aria-label="数据源健康状态">
+              {sourceHealth.map((source) => (
+                <div
+                  className={`source-health-row ${
+                    source.ok ? 'ok' : source.required ? 'danger' : 'warning'
+                  }`}
+                  key={source.id}
+                >
+                  <span>{source.label}</span>
+                  <strong>{source.ok ? '正常' : source.fallback ? '缓存' : '失败'}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="source-list">
             {dataSources.map((source) => (
               <span key={source}>{source}</span>

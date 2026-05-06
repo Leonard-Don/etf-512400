@@ -86,6 +86,26 @@
   white-space: nowrap;
 }
 
+.status-chip.good {
+  background: #e9f3ef;
+  border-color: #cddbd5;
+  color: #426150;
+}
+
+.status-chip.warning,
+.snapshot-chip.warning {
+  background: #fff6e7;
+  border-color: #f1cf98;
+  color: #7b4f16;
+}
+
+.status-chip.danger,
+.snapshot-chip.danger {
+  background: #fbeeea;
+  border-color: #e9b4aa;
+  color: #8a332b;
+}
+
 .snapshot-chip {
   align-items: center;
   background: #e9f3ef;
@@ -100,6 +120,12 @@
   white-space: nowrap;
 }
 
+.snapshot-chip.good {
+  background: #e9f3ef;
+  border-color: #cddbd5;
+  color: #426150;
+}
+
 .refresh-note {
   background: #eaf4ef;
   border: 1px solid #c9dbd2;
@@ -110,6 +136,42 @@
   margin: -8px auto 18px;
   max-width: 1480px;
   padding: 10px 12px;
+}
+
+.data-alert {
+  align-items: flex-start;
+  background: #fbf8f2;
+  border: 1px solid #eee1ce;
+  border-radius: 8px;
+  color: #6f4f22;
+  display: flex;
+  gap: 10px;
+  margin: -8px auto 18px;
+  max-width: 1480px;
+  padding: 11px 12px;
+}
+
+.data-alert.danger {
+  background: #fbeeea;
+  border-color: #e9b4aa;
+  color: #8a332b;
+}
+
+.data-alert svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.data-alert strong {
+  display: block;
+  font-size: 13px;
+}
+
+.data-alert p {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 4px 0 0;
 }
 
 .command-band {
@@ -1560,6 +1622,53 @@ td:nth-child(4) {
   padding: 6px 8px;
 }
 
+.source-health-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.source-health-row {
+  align-items: center;
+  background: #f7faf8;
+  border: 1px solid #e4ebe7;
+  border-left: 3px solid #5f7f56;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 9px 10px;
+}
+
+.source-health-row.warning {
+  background: #fbf8f2;
+  border-color: #eee1ce;
+  border-left-color: #b96836;
+}
+
+.source-health-row.danger {
+  background: #fbeeea;
+  border-color: #e9b4aa;
+  border-left-color: #b4493d;
+}
+
+.source-health-row span {
+  color: #52615d;
+  font-size: 12px;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-health-row strong {
+  color: #17211e;
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
 @media (max-width: 1180px) {
   .decision-deck {
     grid-template-columns: 1fr 1fr;
@@ -1681,7 +1790,8 @@ td:nth-child(4) {
   .quality-detail-list,
   .backtest-summary,
   .stress-readout,
-  .snapshot-readout {
+  .snapshot-readout,
+  .source-health-list {
     grid-template-columns: 1fr;
   }
 
