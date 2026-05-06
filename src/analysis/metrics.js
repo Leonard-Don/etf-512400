@@ -25,3 +25,11 @@ export {
   describeMarketStatus,
   shanghaiDateString,
 } from './snapshotHealth.js'
+export {
+  parseRealtimeKline,
+  parseRealtimeQuote,
+  REALTIME_KLINE_URL,
+  REALTIME_QUOTE_URL,
+  shanghaiDateTimeFromDate,
+  shanghaiDateTimeFromEpoch,
+} from './realtimeQuote.js'
