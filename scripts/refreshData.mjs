@@ -1,6 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  percentFromEastmoney,
+  priceFromQuote,
+  shanghaiDateTimeFromEpoch,
+} from '../src/analysis/realtimeQuote.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const projectRoot = resolve(__dirname, '..')
@@ -189,44 +194,6 @@ async function fetchParsedSource(source) {
       }),
     }
   }
-}
-
-function priceFromEastmoney(value) {
-  if (typeof value !== 'number' || value <= 0) return null
-  return Number((value / 1000).toFixed(4))
-}
-
-function priceFromQuote(value, decimals) {
-  if (typeof value !== 'number' || value <= 0) return null
-  if (Number.isInteger(decimals) && decimals >= 0) {
-    return Number((value / 10 ** decimals).toFixed(Math.min(decimals, 4)))
-  }
-  return priceFromEastmoney(value)
-}
-
-function percentFromEastmoney(value) {
-  if (typeof value !== 'number') return null
-  return Number((value / 10000).toFixed(4))
-}
-
-function shanghaiDateTimeFromEpoch(seconds) {
-  if (!seconds) return { date: null, time: null }
-  const date = new Date(seconds * 1000)
-  const parts = new Intl.DateTimeFormat('zh-CN', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }).formatToParts(date)
-
-  const read = (type) => parts.find((part) => part.type === type)?.value
-  const day = `${read('year')}-${read('month')}-${read('day')}`
-  const time = `${read('hour')}:${read('minute')}:${read('second')}`
-  return { date: day, time: `${day} ${time}` }
 }
 
 function extractAssignment(text, name) {

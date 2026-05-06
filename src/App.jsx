@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Activity,
   AlertTriangle,
@@ -16,6 +16,7 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react'
+import { useRealtimeQuote } from './hooks/useRealtimeQuote'
 import {
   dataSources,
   etfProfile,
@@ -75,8 +76,6 @@ const scenarios = [
   { id: 'dollarUp', label: '美元利率' },
   { id: 'demandSoft', label: '需求走弱' },
 ]
-const REALTIME_REFRESH_MS = 30000
-const REALTIME_TIMEOUT_MS = 8000
 const realtimeEndpoints = [
   {
     id: 'local-quote',
@@ -121,96 +120,7 @@ function App() {
   const [scenario, setScenario] = useState('base')
   const [riskBudget, setRiskBudget] = useState(48)
   const [refreshNote, setRefreshNote] = useState('')
-  const [realtimeState, setRealtimeState] = useState({
-    status: 'idle',
-    quote: null,
-    lastUpdated: null,
-    error: null,
-  })
-
-  useEffect(() => {
-    let cancelled = false
-    let timer = null
-
-    async function fetchRealtimeEndpoint(endpoint) {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), REALTIME_TIMEOUT_MS)
-
-      try {
-        const response = await fetch(endpoint.url, {
-          headers: { Accept: 'application/json,*/*' },
-          signal: controller.signal,
-        })
-        if (!response.ok) {
-          throw new Error(`${endpoint.label}请求失败 ${response.status}`)
-        }
-        const fetchedAt = new Date()
-        return {
-          quote: {
-            ...endpoint.parse(await response.text(), fetchedAt),
-            runtimeSource: endpoint.id,
-            runtimeSourceLabel: endpoint.label,
-          },
-          fetchedAt,
-        }
-      } finally {
-        clearTimeout(timeout)
-      }
-    }
-
-    async function refreshRealtimeQuote() {
-      setRealtimeState((state) => ({
-        ...state,
-        status: state.quote ? 'refreshing' : 'loading',
-        error: null,
-      }))
-
-      try {
-        let realtimeResult = null
-        let lastError = null
-
-        for (const endpoint of realtimeEndpoints) {
-          try {
-            realtimeResult = await fetchRealtimeEndpoint(endpoint)
-            break
-          } catch (error) {
-            lastError = error
-          }
-        }
-
-        if (!realtimeResult) {
-          throw lastError ?? new Error('实时行情请求失败')
-        }
-        if (!cancelled) {
-          setRealtimeState({
-            status: 'success',
-            quote: realtimeResult.quote,
-            lastUpdated: realtimeResult.fetchedAt.toISOString(),
-            error: null,
-          })
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setRealtimeState((state) => ({
-            ...state,
-            status: 'error',
-            error: error.message,
-          }))
-        }
-      } finally {
-        if (!cancelled) {
-          timer = setTimeout(refreshRealtimeQuote, REALTIME_REFRESH_MS)
-        }
-      }
-    }
-
-    refreshRealtimeQuote()
-
-    return () => {
-      cancelled = true
-      clearTimeout(timer)
-    }
-  }, [])
+  const realtimeState = useRealtimeQuote(realtimeEndpoints)
 
   const snapshotQuote = useMemo(
     () => ({

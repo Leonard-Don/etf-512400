@@ -8,7 +8,7 @@ export const LOCAL_REALTIME_QUOTE_URL = '/api/realtime/quote'
 export const LOCAL_REALTIME_KLINE_URL = '/api/realtime/kline'
 export const LOCAL_REALTIME_TENCENT_URL = '/api/realtime/tencent'
 
-function priceFromQuote(value, decimals) {
+export function priceFromQuote(value, decimals) {
   if (typeof value !== 'number' || value <= 0) return null
   if (Number.isInteger(decimals) && decimals >= 0) {
     return Number((value / 10 ** decimals).toFixed(Math.min(decimals, 4)))
@@ -16,7 +16,7 @@ function priceFromQuote(value, decimals) {
   return Number((value / 1000).toFixed(4))
 }
 
-function percentFromEastmoney(value) {
+export function percentFromEastmoney(value) {
   if (typeof value !== 'number') return null
   return Number((value / 10000).toFixed(4))
 }
