@@ -60,6 +60,7 @@ import {
   sumWeights,
 } from './analysis/metrics'
 import { DecisionDeck } from './components/DecisionDeck'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { HoldingsTable } from './components/HoldingsTable'
 import { CommodityDriverPanel, FactorTile, MiniLineChart, RiskStack } from './components/MarketPanels'
 import { TradingQualityPanel } from './components/QualityPanels'
@@ -479,14 +480,16 @@ function App() {
         </label>
       </section>
 
-      <DecisionDeck
-        dailyChange={dailyChange}
-        premium={premium}
-        primaryDecision={primaryDecision}
-        signal={signal}
-        topRiskDrivers={topRiskDrivers}
-        trendProfile={trendProfile}
-      />
+      <ErrorBoundary label="今日决策台">
+        <DecisionDeck
+          dailyChange={dailyChange}
+          premium={premium}
+          primaryDecision={primaryDecision}
+          signal={signal}
+          topRiskDrivers={topRiskDrivers}
+          trendProfile={trendProfile}
+        />
+      </ErrorBoundary>
 
       <section className="metric-grid secondary-metrics" aria-label="ETF辅助指标">
         <MetricCard label="实时价格" value={activePrice.toFixed(3)} helper={activeQuote.tradeTime ?? activeQuote.tradeDate} icon={Target} />
@@ -499,6 +502,7 @@ function App() {
         <MetricCard label="季度跟踪差" value={formatSignedPercent(riskMetrics.trackingGapQ1)} helper={`基准 ${formatPercent(etfProfile.q1BenchmarkReturn)}`} icon={GitBranch} tone="neutral" />
       </section>
 
+      <ErrorBoundary label="工作区面板">
       <section className="workspace-grid">
         <Panel className="market-panel" title="趋势与因子" icon={BarChart3}>
           <div className="chart-header">
@@ -666,6 +670,7 @@ function App() {
           </div>
         </Panel>
       </section>
+      </ErrorBoundary>
     </main>
   )
 }
