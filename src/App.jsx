@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   AlertTriangle,
@@ -39,6 +39,8 @@ import {
   calculateDailyChange,
   calculatePremium,
   composePrimaryDecision,
+  buildDataFreshness,
+  describeMarketStatus,
   formatCnyAmount,
   formatNumber,
   formatPercent,
@@ -46,6 +48,10 @@ import {
   formatSignedPercent,
   getScenarioAdjustment,
   groupHoldingsByBasket,
+  parseRealtimeKline,
+  parseRealtimeQuote,
+  REALTIME_KLINE_URL,
+  REALTIME_QUOTE_URL,
   sumWeights,
 } from './analysis/metrics'
 import { DecisionDeck } from './components/DecisionDeck'
@@ -63,23 +69,217 @@ const scenarios = [
   { id: 'dollarUp', label: '美元利率' },
   { id: 'demandSoft', label: '需求走弱' },
 ]
+const REALTIME_REFRESH_MS = 30000
+const REALTIME_TIMEOUT_MS = 8000
+const realtimeEndpoints = [
+  {
+    id: 'quote',
+    label: '盘口实时',
+    url: REALTIME_QUOTE_URL,
+    parse: parseRealtimeQuote,
+  },
+  {
+    id: 'kline',
+    label: '当日K线实时',
+    url: REALTIME_KLINE_URL,
+    parse: parseRealtimeKline,
+  },
+]
 
 function App() {
   const [timeframe, setTimeframe] = useState('60日')
   const [scenario, setScenario] = useState('base')
   const [riskBudget, setRiskBudget] = useState(48)
   const [refreshNote, setRefreshNote] = useState('')
+  const [realtimeState, setRealtimeState] = useState({
+    status: 'idle',
+    quote: null,
+    lastUpdated: null,
+    error: null,
+  })
 
-  const premium = calculatePremium(etfProfile.price, etfProfile.nav)
-  const dailyChange = calculateDailyChange(etfProfile.price, etfProfile.previousClose)
+  useEffect(() => {
+    let cancelled = false
+    let timer = null
+
+    async function fetchRealtimeEndpoint(endpoint) {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), REALTIME_TIMEOUT_MS)
+
+      try {
+        const response = await fetch(endpoint.url, {
+          headers: { Accept: 'application/json,*/*' },
+          signal: controller.signal,
+        })
+        if (!response.ok) {
+          throw new Error(`${endpoint.label}请求失败 ${response.status}`)
+        }
+        const fetchedAt = new Date()
+        return {
+          quote: {
+            ...endpoint.parse(await response.text(), fetchedAt),
+            runtimeSource: endpoint.id,
+            runtimeSourceLabel: endpoint.label,
+          },
+          fetchedAt,
+        }
+      } finally {
+        clearTimeout(timeout)
+      }
+    }
+
+    async function refreshRealtimeQuote() {
+      setRealtimeState((state) => ({
+        ...state,
+        status: state.quote ? 'refreshing' : 'loading',
+        error: null,
+      }))
+
+      try {
+        let realtimeResult = null
+        let lastError = null
+
+        for (const endpoint of realtimeEndpoints) {
+          try {
+            realtimeResult = await fetchRealtimeEndpoint(endpoint)
+            break
+          } catch (error) {
+            lastError = error
+          }
+        }
+
+        if (!realtimeResult) {
+          throw lastError ?? new Error('实时行情请求失败')
+        }
+        if (!cancelled) {
+          setRealtimeState({
+            status: 'success',
+            quote: realtimeResult.quote,
+            lastUpdated: realtimeResult.fetchedAt.toISOString(),
+            error: null,
+          })
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setRealtimeState((state) => ({
+            ...state,
+            status: 'error',
+            error: error.message,
+          }))
+        }
+      } finally {
+        if (!cancelled) {
+          timer = setTimeout(refreshRealtimeQuote, REALTIME_REFRESH_MS)
+        }
+      }
+    }
+
+    refreshRealtimeQuote()
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [])
+
+  const snapshotQuote = useMemo(
+    () => ({
+      code: etfProfile.code,
+      name: etfProfile.name,
+      tradeDate: etfProfile.latestTradeDate,
+      tradeTime: etfProfile.quote.tradeTime,
+      price: etfProfile.price,
+      previousClose: etfProfile.previousClose,
+      ...etfProfile.quote,
+    }),
+    [],
+  )
+  const activeQuote = realtimeState.quote ?? snapshotQuote
+  const activePrice = activeQuote.price ?? etfProfile.price
+  const activePreviousClose = activeQuote.previousClose ?? etfProfile.previousClose
+  const useEstimatedNav =
+    Number.isFinite(etfProfile.estimate?.value) &&
+    etfProfile.estimate?.date &&
+    activeQuote.tradeDate &&
+    etfProfile.estimate.date === activeQuote.tradeDate
+  const valuationNav = useEstimatedNav ? etfProfile.estimate.value : etfProfile.nav
+  const valuationNavLabel = useEstimatedNav ? '估算净值' : '单位净值'
+  const valuationNavTime = useEstimatedNav
+    ? etfProfile.estimate.time ?? etfProfile.estimate.date
+    : etfProfile.latestNavDate
+  const quoteForAnalysis = useMemo(
+    () => ({
+      ...etfProfile.quote,
+      ...activeQuote,
+    }),
+    [activeQuote],
+  )
+  const premium = calculatePremium(activePrice, valuationNav)
+  const dailyChange = calculateDailyChange(activePrice, activePreviousClose)
   const topWeight = sumWeights(holdings)
   const basketGroups = groupHoldingsByBasket(holdings)
   const scenarioState = getScenarioAdjustment(scenario)
-  const dataFreshness = etfProfile.liveSnapshot.dataFreshness
-  const sourceHealth = etfProfile.liveSnapshot.sourceHealth ?? []
+  const sourceHealth = useMemo(
+    () =>
+      (etfProfile.liveSnapshot.sourceHealth ?? []).map((source) => {
+        if (source.id !== 'quote') return source
+        if (realtimeState.status === 'success') {
+          return {
+            ...source,
+            label: '实时ETF行情',
+            ok: true,
+            fallback: false,
+            runtime: true,
+            fetchedAt: realtimeState.lastUpdated,
+            error: null,
+          }
+        }
+        if (realtimeState.status === 'error') {
+          return {
+            ...source,
+            label: '实时ETF行情',
+            ok: false,
+            fallback: true,
+            runtime: true,
+            error: realtimeState.error ?? source.error,
+          }
+        }
+        return source
+      }),
+    [realtimeState.error, realtimeState.lastUpdated, realtimeState.status],
+  )
+  const dataFreshness = useMemo(
+    () =>
+      buildDataFreshness({
+        snapshotGeneratedAt: realtimeState.lastUpdated ?? etfProfile.liveSnapshot.generatedAt,
+        quoteTradeDate: activeQuote.tradeDate,
+        navDate: useEstimatedNav ? etfProfile.estimate.date : etfProfile.latestNavDate,
+        sourceHealth,
+      }),
+    [
+      activeQuote.tradeDate,
+      realtimeState.lastUpdated,
+      sourceHealth,
+      useEstimatedNav,
+    ],
+  )
   const degradedSources = sourceHealth.filter((source) => source.ok === false)
+  const realtimeStatusLabel =
+    realtimeState.status === 'success'
+      ? `${realtimeState.quote?.runtimeSourceLabel ?? '实时'} ${formatSnapshotTime(realtimeState.lastUpdated)}`
+      : realtimeState.status === 'loading' || realtimeState.status === 'refreshing'
+        ? '实时连接中'
+        : realtimeState.status === 'error'
+          ? '实时源降级'
+          : '实时待连接'
+  const marketStatus = describeMarketStatus({
+    quoteTradeDate: activeQuote.tradeDate,
+    statusCode: activeQuote.statusCode,
+  })
   const snapshotStatusLabel =
-    etfProfile.liveSnapshot.mode === 'degraded'
+    realtimeState.status === 'success'
+      ? '运行时实时'
+      : etfProfile.liveSnapshot.mode === 'degraded'
       ? '降级缓存'
       : etfProfile.liveSnapshot.mode === 'partial'
       ? '部分刷新'
@@ -102,9 +302,9 @@ function App() {
         riskBudget,
         factorBaskets,
         trendProfile,
-        quote: etfProfile.quote,
+        quote: quoteForAnalysis,
       }),
-    [dailyChange, premium, riskBudget, trendProfile],
+    [dailyChange, premium, quoteForAnalysis, riskBudget, trendProfile],
   )
   const backtestStrategies = useMemo(
     () =>
@@ -128,11 +328,11 @@ function App() {
         etfKlines,
         benchmarkKlines,
         navSeries,
-        price: etfProfile.price,
-        nav: etfProfile.nav,
-        quote: etfProfile.quote,
+        price: activePrice,
+        nav: valuationNav,
+        quote: quoteForAnalysis,
       }),
-    [],
+    [activePrice, quoteForAnalysis, valuationNav],
   )
   const primaryDecision = useMemo(
     () =>
@@ -154,7 +354,7 @@ function App() {
   )
   const benchmarkStrategy = backtestStrategies.find((strategy) => strategy.id === 'buyHold')
 
-  const stressedPrice = etfProfile.price * (1 + scenarioState.priceShock)
+  const stressedPrice = activePrice * (1 + scenarioState.priceShock)
   const stressedVol = riskMetrics.annualVolatility + scenarioState.volShock
 
   return (
@@ -177,22 +377,29 @@ function App() {
             title="数据来源说明"
             onClick={() => {
               const stamp =
-                etfProfile.liveSnapshot.mode === 'refreshed' ||
-                etfProfile.liveSnapshot.mode === 'partial' ||
-                etfProfile.liveSnapshot.mode === 'degraded'
-                  ? formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)
-                  : '种子数据'
+                realtimeState.status === 'success'
+                  ? formatSnapshotTime(realtimeState.lastUpdated)
+                  : etfProfile.liveSnapshot.mode === 'refreshed' ||
+                      etfProfile.liveSnapshot.mode === 'partial' ||
+                      etfProfile.liveSnapshot.mode === 'degraded'
+                    ? formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)
+                    : '种子数据'
               const degradeNote = degradedSources.length
                 ? `；降级源：${degradedSources.map((source) => source.label).join('、')}`
                 : ''
+              const quoteNote =
+                realtimeState.status === 'success'
+                  ? `实时行情：${activeQuote.tradeTime ?? activeQuote.tradeDate}`
+                  : '实时行情：暂用快照缓存'
               setRefreshNote(
-                `当前快照：${stamp}，${dataFreshness.summary}${degradeNote}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev。`,
+                `当前口径：${stamp}，${quoteNote}，${dataFreshness.summary}${degradeNote}。`,
               )
             }}
           >
             <Info size={18} />
           </button>
-          <div className={`status-chip ${dataFreshness.tone}`}>{etfProfile.marketStatus}</div>
+          <div className={`status-chip ${dataFreshness.tone}`}>{marketStatus}</div>
+          <div className={`live-chip ${realtimeState.status}`}>{realtimeStatusLabel}</div>
           <div className={`snapshot-chip ${dataFreshness.tone}`}>{snapshotLabel}</div>
         </div>
       </header>
@@ -253,10 +460,10 @@ function App() {
       />
 
       <section className="metric-grid secondary-metrics" aria-label="ETF辅助指标">
-        <MetricCard label="最新价格" value={etfProfile.price.toFixed(3)} helper={etfProfile.quote.tradeTime ?? etfProfile.latestTradeDate} icon={Target} />
-        <MetricCard label="单位净值" value={etfProfile.nav.toFixed(4)} helper={`折溢价 ${formatSignedPercent(premium)}`} icon={Activity} />
-        <MetricCard label="日涨跌" value={formatSignedPercent(dailyChange)} helper={`前收 ${etfProfile.previousClose.toFixed(3)}`} icon={TrendingUp} tone={dailyChange < 0 ? 'down' : 'up'} />
-        <MetricCard label="成交额" value={formatCnyAmount(etfProfile.quote.amountCny)} helper={`换手 ${formatPercent(etfProfile.quote.turnoverRate ?? 0)}`} icon={BarChart3} />
+        <MetricCard label="实时价格" value={activePrice.toFixed(3)} helper={activeQuote.tradeTime ?? activeQuote.tradeDate} icon={Target} />
+        <MetricCard label={valuationNavLabel} value={valuationNav.toFixed(4)} helper={`${valuationNavTime} · 折溢价 ${formatSignedPercent(premium)}`} icon={Activity} />
+        <MetricCard label="日涨跌" value={formatSignedPercent(dailyChange)} helper={`前收 ${activePreviousClose.toFixed(3)}`} icon={TrendingUp} tone={dailyChange < 0 ? 'down' : 'up'} />
+        <MetricCard label="成交额" value={formatCnyAmount(quoteForAnalysis.amountCny)} helper={`换手 ${formatPercent(quoteForAnalysis.turnoverRate ?? 0)}`} icon={BarChart3} />
         <MetricCard label="主仓位" value={formatPercent(primaryDecision.exposure, 0)} helper={`${primaryDecision.source} / ${primaryDecision.rule}`} icon={Gauge} />
         <MetricCard label="基金规模" value={`${formatNumber(etfProfile.netAssets, 2)}亿`} helper={`${formatNumber(etfProfile.shares, 2)}亿份`} icon={Database} />
         <MetricCard label="前十大权重" value={`${topWeight.toFixed(2)}%`} helper={`${etfProfile.sampleCount}只样本股`} icon={Layers3} />
@@ -376,6 +583,10 @@ function App() {
               <strong>{snapshotStatusLabel}</strong>
             </div>
             <div>
+              <span>实时行情</span>
+              <strong>{realtimeStatusLabel}</strong>
+            </div>
+            <div>
               <span>刷新时间</span>
               <strong>{formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)}</strong>
             </div>
@@ -406,7 +617,15 @@ function App() {
                   key={source.id}
                 >
                   <span>{source.label}</span>
-                  <strong>{source.ok ? '正常' : source.fallback ? '缓存' : '失败'}</strong>
+                  <strong>
+                    {source.runtime && source.ok
+                      ? '实时'
+                      : source.ok
+                        ? '正常'
+                        : source.fallback
+                          ? '缓存'
+                          : '失败'}
+                  </strong>
                 </div>
               ))}
             </div>

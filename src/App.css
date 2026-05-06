@@ -120,6 +120,39 @@
   white-space: nowrap;
 }
 
+.live-chip {
+  align-items: center;
+  background: #eef3f1;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  color: #52615d;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 750;
+  min-height: 36px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.live-chip.success {
+  background: #e9f3ef;
+  border-color: #cddbd5;
+  color: #315a3f;
+}
+
+.live-chip.loading,
+.live-chip.refreshing {
+  background: #eef3f8;
+  border-color: #cdd8e2;
+  color: #36546f;
+}
+
+.live-chip.error {
+  background: #fbeeea;
+  border-color: #e9b4aa;
+  color: #8a332b;
+}
+
 .snapshot-chip.good {
   background: #e9f3ef;
   border-color: #cddbd5;
