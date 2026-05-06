@@ -27,7 +27,7 @@ export function DecisionDeck({
         </div>
         <div className="primary-rule">
           <span>{primaryDecision.rule}</span>
-          <em>约束：{signal.action}</em>
+          <em>信号建议 {formatPercent(signal.suggestedExposure, 0)} · {signal.action}</em>
         </div>
       </article>
 

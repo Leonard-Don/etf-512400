@@ -273,20 +273,48 @@ export const navSeries = navTrendSnapshot.map((item) => ({
 
 export const snapshotHistory = Array.isArray(historySnapshots) ? historySnapshots : []
 
-export const trendSeries = [
-  { date: '2025-05', etf: 1.08, gold: 1.04, copper: 1.02, rareEarth: 0.98 },
-  { date: '2025-06', etf: 1.14, gold: 1.09, copper: 1.06, rareEarth: 1.02 },
-  { date: '2025-07', etf: 1.2, gold: 1.13, copper: 1.08, rareEarth: 1.05 },
-  { date: '2025-08', etf: 1.32, gold: 1.18, copper: 1.14, rareEarth: 1.17 },
-  { date: '2025-09', etf: 1.43, gold: 1.25, copper: 1.2, rareEarth: 1.3 },
-  { date: '2025-10', etf: 1.58, gold: 1.32, copper: 1.26, rareEarth: 1.45 },
-  { date: '2025-11', etf: 1.64, gold: 1.38, copper: 1.31, rareEarth: 1.5 },
-  { date: '2025-12', etf: 1.76, gold: 1.45, copper: 1.39, rareEarth: 1.58 },
-  { date: '2026-01', etf: 2.17, gold: 1.58, copper: 1.52, rareEarth: 1.89 },
-  { date: '2026-02', etf: 2.33, gold: 1.67, copper: 1.61, rareEarth: 2.05 },
-  { date: '2026-03', etf: 1.98, gold: 1.58, copper: 1.51, rareEarth: 1.73 },
-  { date: '2026-04', etf: 2.12, gold: 1.66, copper: 1.56, rareEarth: 1.9 },
+// 把 K 线压缩成月末归一化序列：按月份取最后一根，再用第一个月做基期。
+// 商品因子的 K 线长度可能不够月度数据时直接返回空数组（图上对应线消失）。
+function buildMonthlyClose(klines, months = 12) {
+  if (!Array.isArray(klines) || klines.length === 0) return []
+  const sorted = [...klines]
+    .filter((item) => item?.date && Number.isFinite(item.close))
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+  if (!sorted.length) return []
+  const monthEnd = new Map()
+  sorted.forEach((item) => {
+    const month = String(item.date).slice(0, 7)
+    if (month) monthEnd.set(month, item.close)
+  })
+  const entries = Array.from(monthEnd.entries()).slice(-months)
+  if (!entries.length) return []
+  const base = entries[0][1]
+  if (!base) return []
+  return entries.map(([month, close]) => ({ month, value: close / base }))
+}
+
+const trendKeyMap = [
+  { key: 'etf', source: klineSnapshot },
+  { key: 'gold', source: commoditySnapshot.find((d) => d.key === 'gold')?.klines ?? [] },
+  { key: 'copper', source: commoditySnapshot.find((d) => d.key === 'copper')?.klines ?? [] },
+  { key: 'rareEarth', source: commoditySnapshot.find((d) => d.key === 'rareEarth')?.klines ?? [] },
 ]
+
+const monthlyByKey = new Map(
+  trendKeyMap.map(({ key, source }) => [key, buildMonthlyClose(source)]),
+)
+const etfMonths = monthlyByKey.get('etf') ?? []
+
+export const trendSeries = etfMonths.length
+  ? etfMonths.map(({ month, value }) => {
+      const point = { date: month, etf: value }
+      ;['gold', 'copper', 'rareEarth'].forEach((key) => {
+        const match = monthlyByKey.get(key)?.find((item) => item.month === month)
+        if (match) point[key] = match.value
+      })
+      return point
+    })
+  : []
 
 export const riskMetrics = {
   annualVolatility: 0.356,

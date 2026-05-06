@@ -96,6 +96,14 @@ test('trailingHigh 取窗口内 close 最大值', () => {
   assert.equal(trailingHigh(k, 3, 2), 4)
 })
 
+test('trailingHigh 全部缺失或空数组时返回 null', () => {
+  assert.equal(trailingHigh([], 0, 5), null)
+  assert.equal(
+    trailingHigh([{ close: NaN }, { close: undefined }], 1, 5),
+    null,
+  )
+})
+
 test('buildFactorProfile 加权聚合 + 计数器', () => {
   const baskets = [
     { trend: 70, risk: 60, weight: 50 },

@@ -72,12 +72,6 @@
   transform: translateY(-1px);
 }
 
-.icon-button.is-active {
-  background: #e9f5ee;
-  border-color: #8eba9d;
-  color: #23613d;
-}
-
 .status-chip {
   align-items: center;
   background: #fff6e7;
@@ -713,6 +707,13 @@
   font-size: 13px;
   line-height: 1.55;
   margin: 0 0 14px;
+}
+
+.scenario-disclaimer {
+  color: #8a948f;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: -6px 0 12px;
 }
 
 .risk-stack {

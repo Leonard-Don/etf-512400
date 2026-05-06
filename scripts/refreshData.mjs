@@ -474,7 +474,8 @@ async function fetchCommodityDriver(contract) {
       },
       trendScore: trendScoreFromReturns(return20, return60),
       riskScore: riskScoreFromVolatility(volatility),
-      klines: klines.slice(-20),
+      // 保留近一年（约 280 个交易日）的 K 线，月度走势图需要月末数据
+      klines: klines.slice(-280),
     }
   } catch (error) {
     return {
