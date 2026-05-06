@@ -2,6 +2,8 @@ export const REALTIME_QUOTE_URL =
   'https://push2.eastmoney.com/api/qt/stock/get?secid=1.512400&fields=f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f116,f117,f168,f169,f170,f171,f292'
 export const REALTIME_KLINE_URL =
   'https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=101&fqt=1&lmt=1&end=20500101'
+export const LOCAL_REALTIME_QUOTE_URL = '/api/realtime/quote'
+export const LOCAL_REALTIME_KLINE_URL = '/api/realtime/kline'
 
 function priceFromQuote(value, decimals) {
   if (typeof value !== 'number' || value <= 0) return null
