@@ -2,8 +2,11 @@ export const REALTIME_QUOTE_URL =
   'https://push2.eastmoney.com/api/qt/stock/get?secid=1.512400&fields=f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f116,f117,f168,f169,f170,f171,f292'
 export const REALTIME_KLINE_URL =
   'https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=101&fqt=1&lmt=1&end=20500101'
+export const REALTIME_TENCENT_URL =
+  'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh512400,day,,,1,qfq'
 export const LOCAL_REALTIME_QUOTE_URL = '/api/realtime/quote'
 export const LOCAL_REALTIME_KLINE_URL = '/api/realtime/kline'
+export const LOCAL_REALTIME_TENCENT_URL = '/api/realtime/tencent'
 
 function priceFromQuote(value, decimals) {
   if (typeof value !== 'number' || value <= 0) return null
@@ -26,6 +29,17 @@ function numberFromKline(value) {
 function percentFromKline(value) {
   const number = numberFromKline(value)
   return number === null ? null : Number((number / 100).toFixed(4))
+}
+
+function parseTencentClock(value) {
+  if (!value || typeof value !== 'string' || value.length < 14) {
+    return { date: null, time: null }
+  }
+  const date = `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`
+  return {
+    date,
+    time: `${date} ${value.slice(8, 10)}:${value.slice(10, 12)}:${value.slice(12, 14)}`,
+  }
 }
 
 export function shanghaiDateTimeFromDate(date = new Date()) {
@@ -149,5 +163,50 @@ export function parseRealtimeKline(payloadOrText, fetchedAt = new Date()) {
     statusCode: 5,
     totalMarketValueCny: null,
     source: 'eastmoney-kline-runtime',
+  }
+}
+
+export function parseRealtimeTencent(payloadOrText) {
+  const payload =
+    typeof payloadOrText === 'string' ? JSON.parse(payloadOrText) : payloadOrText
+  const quote = payload?.data?.sh512400?.qt?.sh512400
+
+  if (!Array.isArray(quote)) {
+    throw new Error('Unexpected realtime Tencent payload')
+  }
+
+  const tradeClock = parseTencentClock(quote[30])
+  const quoteTuple = typeof quote[35] === 'string' ? quote[35].split('/') : []
+  const price = numberFromKline(quote[3])
+  const previousClose = numberFromKline(quote[4])
+  const amountFromTuple = numberFromKline(quoteTuple[2])
+  const amountInTenThousand = numberFromKline(quote[57])
+  const amountCny =
+    amountFromTuple ?? (amountInTenThousand === null ? null : amountInTenThousand * 10000)
+
+  if (!quote[2] || price === null || previousClose === null) {
+    throw new Error('Realtime Tencent quote missing code, price, or previous close')
+  }
+
+  return {
+    code: quote[2],
+    name: quote[1],
+    tradeDate: tradeClock.date,
+    tradeTime: tradeClock.time,
+    price,
+    previousClose,
+    open: numberFromKline(quote[5]),
+    high: numberFromKline(quote[33]),
+    low: numberFromKline(quote[34]),
+    averagePrice: numberFromKline(quote[88]),
+    change: numberFromKline(quote[31]),
+    changePercent: percentFromKline(quote[32]),
+    amountCny,
+    volumeLots: numberFromKline(quote[36]),
+    amplitude: percentFromKline(quote[43]),
+    turnoverRate: percentFromKline(quote[38]),
+    statusCode: 5,
+    totalMarketValueCny: numberFromKline(quote[73]),
+    source: 'tencent-runtime',
   }
 }

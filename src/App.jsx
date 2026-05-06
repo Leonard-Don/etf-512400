@@ -50,10 +50,13 @@ import {
   groupHoldingsByBasket,
   LOCAL_REALTIME_KLINE_URL,
   LOCAL_REALTIME_QUOTE_URL,
+  LOCAL_REALTIME_TENCENT_URL,
   parseRealtimeKline,
   parseRealtimeQuote,
+  parseRealtimeTencent,
   REALTIME_KLINE_URL,
   REALTIME_QUOTE_URL,
+  REALTIME_TENCENT_URL,
   sumWeights,
 } from './analysis/metrics'
 import { DecisionDeck } from './components/DecisionDeck'
@@ -87,6 +90,12 @@ const realtimeEndpoints = [
     parse: parseRealtimeKline,
   },
   {
+    id: 'local-tencent',
+    label: '本地腾讯实时',
+    url: LOCAL_REALTIME_TENCENT_URL,
+    parse: parseRealtimeTencent,
+  },
+  {
     id: 'quote',
     label: '盘口实时',
     url: REALTIME_QUOTE_URL,
@@ -97,6 +106,12 @@ const realtimeEndpoints = [
     label: '当日K线实时',
     url: REALTIME_KLINE_URL,
     parse: parseRealtimeKline,
+  },
+  {
+    id: 'tencent',
+    label: '腾讯实时',
+    url: REALTIME_TENCENT_URL,
+    parse: parseRealtimeTencent,
   },
 ]
 
