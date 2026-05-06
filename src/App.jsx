@@ -3,15 +3,14 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
-  Bell,
   ChevronsUpDown,
   Database,
   FlaskConical,
   Gauge,
   GitBranch,
+  Info,
   Layers3,
   LineChart,
-  RefreshCw,
   ShieldAlert,
   SlidersHorizontal,
   Target,
@@ -39,6 +38,7 @@ import {
   buildTrendProfile,
   calculateDailyChange,
   calculatePremium,
+  composePrimaryDecision,
   formatCnyAmount,
   formatNumber,
   formatPercent,
@@ -68,7 +68,6 @@ function App() {
   const [timeframe, setTimeframe] = useState('60日')
   const [scenario, setScenario] = useState('base')
   const [riskBudget, setRiskBudget] = useState(48)
-  const [alertsEnabled, setAlertsEnabled] = useState(true)
   const [refreshNote, setRefreshNote] = useState('')
 
   const premium = calculatePremium(etfProfile.price, etfProfile.nav)
@@ -122,32 +121,16 @@ function App() {
       }),
     [],
   )
-  const primaryDecision = useMemo(() => {
-    if (strategyOptimizer.ok) {
-      const best = strategyOptimizer.best
-      return {
-        action: best.current.action,
-        tone: best.current.tone,
-        score: best.stabilityScore,
-        exposure: Math.min(best.current.exposure, riskBudget / 100),
-        source: '自动优化',
-        rule: best.label,
-        overfitRisk: best.overfitRisk,
-        stabilityScore: best.stabilityScore,
-      }
-    }
-
-    return {
-      action: signal.action,
-      tone: signal.tone,
-      score: signal.score,
-      exposure: signal.suggestedExposure,
-      source: '信号引擎',
-      rule: trendProfile.state,
-      overfitRisk: '暂无',
-      stabilityScore: signal.confidence,
-    }
-  }, [riskBudget, signal, strategyOptimizer, trendProfile.state])
+  const primaryDecision = useMemo(
+    () =>
+      composePrimaryDecision({
+        signal,
+        optimizer: strategyOptimizer,
+        riskBudget,
+        trendProfile,
+      }),
+    [riskBudget, signal, strategyOptimizer, trendProfile],
+  )
   const topRiskDrivers = useMemo(
     () =>
       [...commodityDrivers]
@@ -175,30 +158,21 @@ function App() {
         </div>
         <div className="topbar-actions">
           <button
-            className={`icon-button ${alertsEnabled ? 'is-active' : ''}`}
-            type="button"
-            onClick={() => setAlertsEnabled((value) => !value)}
-            aria-label="切换预警"
-            title="切换预警"
-          >
-            <Bell size={18} />
-          </button>
-          <button
             className="icon-button"
             type="button"
-            aria-label="数据刷新说明"
-            title="数据刷新说明"
+            aria-label="数据来源说明"
+            title="数据来源说明"
             onClick={() => {
               const stamp =
                 etfProfile.liveSnapshot.mode === 'refreshed'
                   ? formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)
                   : '种子数据'
               setRefreshNote(
-                `当前快照：${stamp}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev`,
+                `当前快照：${stamp}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev。`,
               )
             }}
           >
-            <RefreshCw size={18} />
+            <Info size={18} />
           </button>
           <div className="status-chip">{etfProfile.marketStatus}</div>
           <div className="snapshot-chip">{snapshotLabel}</div>
@@ -279,7 +253,7 @@ function App() {
           </div>
         </Panel>
 
-        <Panel title="情景压力" icon={ShieldAlert}>
+        <Panel title="情景压力（What-If）" icon={ShieldAlert}>
           <div className="scenario-tabs">
             {scenarios.map((item) => (
               <button
@@ -303,6 +277,7 @@ function App() {
             </div>
           </div>
           <p className="scenario-note">{scenarioState.note}</p>
+          <p className="scenario-disclaimer">仅做静态投影，主决策与信号不会随情景重算。</p>
           <RiskStack riskMetrics={riskMetrics} />
         </Panel>
 

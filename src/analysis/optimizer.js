@@ -362,6 +362,16 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
     .filter((candidate) => candidate.test.periods >= MIN_PERIODS_FOR_RANKING)
     .sort((a, b) => b.score - a.score)
 
+  if (!ranked.length) {
+    return {
+      ok: false,
+      reason: `没有候选策略通过样本外门槛（至少 ${MIN_PERIODS_FOR_RANKING} 个测试日）`,
+      totalCandidates: candidates.length,
+      best: null,
+      leaderboard: [],
+    }
+  }
+
   const best = ranked[0]
   const latestRawExposure = optimizedExposure(best.params, cleaned, cleaned.length - 1)
   const factorOverlay = factorOverlayFor(factorProfile)

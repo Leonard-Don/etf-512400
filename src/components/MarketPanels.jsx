@@ -77,7 +77,7 @@ export function RiskStack({ riskMetrics }) {
           <div>
             <i style={{ width: `${item.width}%` }}></i>
           </div>
-          <strong>{item.label === '拥挤度' ? item.value.toFixed(2) : formatPercent(item.value)}</strong>
+          <strong>{formatPercent(item.value)}</strong>
         </div>
       ))}
     </div>

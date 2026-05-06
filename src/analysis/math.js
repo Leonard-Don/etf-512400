@@ -15,7 +15,11 @@ export function movingAverage(klines, endIndex, days) {
 
 export function trailingHigh(klines, endIndex, days) {
   const start = Math.max(0, endIndex - days + 1)
-  const highs = klines.slice(start, endIndex + 1).map((item) => item.close)
+  const highs = klines
+    .slice(start, endIndex + 1)
+    .map((item) => item.close)
+    .filter((value) => Number.isFinite(value))
+  if (!highs.length) return null
   return Math.max(...highs)
 }
 
