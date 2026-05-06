@@ -1,5 +1,6 @@
 import liveSnapshot from './liveSnapshot.json'
 import historySnapshots from './history/512400-snapshots.json'
+import { buildDataFreshness, describeMarketStatus } from '../analysis/snapshotHealth'
 
 const quoteSnapshot = liveSnapshot.quote ?? {}
 const navSnapshot = liveSnapshot.nav ?? {}
@@ -9,6 +10,14 @@ const commoditySnapshot = liveSnapshot.commodityDrivers ?? []
 const klineSnapshot = liveSnapshot.etfKlines ?? []
 const benchmarkKlineSnapshot = liveSnapshot.benchmarkKlines ?? []
 const navTrendSnapshot = liveSnapshot.navTrend ?? []
+const sourceHealthSnapshot = liveSnapshot.meta?.sourceHealth ?? []
+
+const dataFreshness = buildDataFreshness({
+  snapshotGeneratedAt: liveSnapshot.meta?.generatedAt,
+  quoteTradeDate: quoteSnapshot.tradeDate,
+  navDate: navSnapshot.date,
+  sourceHealth: sourceHealthSnapshot,
+})
 
 function driverFor(key) {
   return commoditySnapshot.find((driver) => driver.key === key && driver.ok)
@@ -39,7 +48,10 @@ export const etfProfile = {
   inceptionDate: '2017-08-03',
   latestTradeDate: quoteSnapshot.tradeDate ?? '2026-04-30',
   latestNavDate: navSnapshot.date ?? '2026-04-30',
-  marketStatus: '五一休市，5月6日起开市',
+  marketStatus: describeMarketStatus({
+    quoteTradeDate: quoteSnapshot.tradeDate,
+    statusCode: quoteSnapshot.statusCode,
+  }),
   price: quoteSnapshot.price ?? 2.119,
   previousClose: quoteSnapshot.previousClose ?? 2.14,
   nav: navSnapshot.unit ?? 2.117,
@@ -62,6 +74,7 @@ export const etfProfile = {
     amountCny: quoteSnapshot.amountCny,
     turnoverRate: quoteSnapshot.turnoverRate,
     totalMarketValueCny: quoteSnapshot.totalMarketValueCny,
+    statusCode: quoteSnapshot.statusCode,
   },
   navSnapshot: {
     dailyReturn: navSnapshot.dailyReturn,
@@ -74,6 +87,8 @@ export const etfProfile = {
     generatedAt: liveSnapshot.meta?.generatedAt,
     mode: liveSnapshot.meta?.mode ?? 'seed',
     sources: liveSnapshot.meta?.sources ?? [],
+    sourceHealth: sourceHealthSnapshot,
+    dataFreshness,
     history: liveSnapshot.history,
   },
 }

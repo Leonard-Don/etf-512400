@@ -19,6 +19,14 @@ const etfKlineUrl =
   `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=280&end=20500101&${klineFields}`
 const benchmarkKlineUrl =
   `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.000819&klt=101&fqt=1&lmt=280&end=20500101&${klineFields}`
+const sourceLabels = {
+  quote: 'ETF行情',
+  etfKlines: '512400 日K',
+  benchmarkKlines: '000819 基准日K',
+  fundGauge: '盘中估算净值',
+  fundTrend: '基金净值趋势',
+  commodityDrivers: '商品驱动',
+}
 
 const commodityContracts = [
   {
@@ -59,9 +67,11 @@ const commodityContracts = [
 ]
 
 // 指数退避重试 fetchText：429/5xx/网络抖动重试 3 次，4xx 立即失败
-async function fetchText(url, { attempts = 3 } = {}) {
+async function fetchText(url, { attempts = 3, timeoutMs = 8000 } = {}) {
   let lastError = null
   for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const response = await fetch(url, {
         headers: {
@@ -69,15 +79,21 @@ async function fetchText(url, { attempts = 3 } = {}) {
           'User-Agent':
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125 Safari/537.36',
         },
+        signal: controller.signal,
       })
 
-      if (response.ok) return await response.text()
+      if (response.ok) {
+        const text = await response.text()
+        clearTimeout(timeout)
+        return text
+      }
 
       const retryable = response.status === 429 || response.status >= 500
       const error = new Error(`Fetch failed ${response.status} ${url}`)
       if (!retryable) throw error
       lastError = error
     } catch (error) {
+      clearTimeout(timeout)
       lastError = error
     }
 
@@ -111,6 +127,67 @@ async function readJsonFile(path, fallback) {
   } catch (error) {
     if (error.code === 'ENOENT') return fallback
     throw error
+  }
+}
+
+function hasUsableValue(value) {
+  if (Array.isArray(value)) return value.length > 0
+  if (value && typeof value === 'object') return Object.keys(value).length > 0
+  return value !== null && value !== undefined
+}
+
+function summarizeError(error) {
+  const code = error?.cause?.code ?? error?.code
+  if (code && error?.message) return `${code}: ${error.message}`
+  return error?.message ?? String(error)
+}
+
+function sourceHealth(source, ok, extra = {}) {
+  return {
+    id: source.id,
+    label: source.label,
+    required: source.required,
+    ok,
+    fetchedAt: new Date().toISOString(),
+    ...extra,
+  }
+}
+
+async function fetchParsedSource(source) {
+  try {
+    const text = await fetchText(source.url, {
+      attempts: source.attempts ?? 3,
+      timeoutMs: source.timeoutMs ?? 8000,
+    })
+    const value = source.parse(text)
+    if (!hasUsableValue(value)) {
+      throw new Error(`${source.label} 解析结果为空`)
+    }
+    return {
+      id: source.id,
+      value,
+      health: sourceHealth(source, true, { fallback: false }),
+    }
+  } catch (error) {
+    if (hasUsableValue(source.fallback)) {
+      return {
+        id: source.id,
+        value: source.fallback,
+        health: sourceHealth(source, false, {
+          fallback: true,
+          error: summarizeError(error),
+        }),
+      }
+    }
+
+    return {
+      id: source.id,
+      value: null,
+      health: sourceHealth(source, false, {
+        fallback: false,
+        error: summarizeError(error),
+      }),
+    }
   }
 }
 
@@ -445,13 +522,15 @@ async function writeSnapshotHistory(snapshot) {
   }
 }
 
-async function fetchCommodityDriver(contract) {
+async function fetchCommodityDriver(contract, fallbackDriver) {
   try {
     const quoteRequest = fetchText(
       `https://push2.eastmoney.com/api/qt/stock/get?secid=${contract.secid}&fields=${quoteFields}`,
+      { attempts: 1, timeoutMs: 6000 },
     )
     const klineRequest = fetchText(
       `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${contract.secid}&klt=101&fqt=0&lmt=70&end=20500101&${klineFields}`,
+      { attempts: 1, timeoutMs: 6000 },
     )
 
     const [quoteText, klineText] = await Promise.all([quoteRequest, klineRequest])
@@ -478,33 +557,143 @@ async function fetchCommodityDriver(contract) {
       klines: klines.slice(-280),
     }
   } catch (error) {
+    if (hasUsableValue(fallbackDriver)) {
+      return {
+        ...fallbackDriver,
+        fallback: true,
+        error: summarizeError(error),
+      }
+    }
+
     return {
       ...contract,
       ok: false,
-      error: error.message,
+      fallback: false,
+      error: summarizeError(error),
     }
   }
 }
 
 async function main() {
-  // 限制并发，避免一次性向东方财富/天天基金抛过多请求触发风控
-  const [quoteText, etfKlineText, benchmarkKlineText, gaugeText, trendText] = await runLimited(
-    [quoteUrl, etfKlineUrl, benchmarkKlineUrl, fundGaugeUrl, fundTrendUrl],
-    4,
-    (url) => fetchText(url),
-  )
-  const commodityDrivers = await runLimited(commodityContracts, 2, fetchCommodityDriver)
+  const previousSnapshot = await readJsonFile(outputPath, null)
+  const fundTrendFallback =
+    previousSnapshot?.nav || previousSnapshot?.navTrend || previousSnapshot?.performance
+      ? {
+          nav: previousSnapshot.nav,
+          navTrend: previousSnapshot.navTrend,
+          performance: previousSnapshot.performance,
+        }
+      : null
 
-  const quote = parseQuote(quoteText)
-  const etfKlines = parseKlines(etfKlineText)
-  const benchmarkKlines = parseKlines(benchmarkKlineText)
-  const estimate = parseFundGauge(gaugeText)
-  const { nav, navTrend, performance } = parseFundTrend(trendText)
+  const coreSources = [
+    {
+      id: 'quote',
+      label: sourceLabels.quote,
+      required: true,
+      url: quoteUrl,
+      parse: parseQuote,
+      fallback: previousSnapshot?.quote,
+      attempts: 1,
+      timeoutMs: 10000,
+    },
+    {
+      id: 'etfKlines',
+      label: sourceLabels.etfKlines,
+      required: true,
+      url: etfKlineUrl,
+      parse: parseKlines,
+      fallback: previousSnapshot?.etfKlines,
+      attempts: 1,
+      timeoutMs: 10000,
+    },
+    {
+      id: 'benchmarkKlines',
+      label: sourceLabels.benchmarkKlines,
+      required: true,
+      url: benchmarkKlineUrl,
+      parse: parseKlines,
+      fallback: previousSnapshot?.benchmarkKlines,
+      attempts: 1,
+      timeoutMs: 10000,
+    },
+    {
+      id: 'fundGauge',
+      label: sourceLabels.fundGauge,
+      required: false,
+      url: fundGaugeUrl,
+      parse: parseFundGauge,
+      fallback: previousSnapshot?.estimate,
+      attempts: 1,
+      timeoutMs: 6000,
+    },
+    {
+      id: 'fundTrend',
+      label: sourceLabels.fundTrend,
+      required: true,
+      url: fundTrendUrl,
+      parse: parseFundTrend,
+      fallback: fundTrendFallback,
+      attempts: 1,
+      timeoutMs: 10000,
+    },
+  ]
+
+  // 限制并发，避免一次性向东方财富/天天基金抛过多请求触发风控
+  const sourceResults = await runLimited(coreSources, 5, fetchParsedSource)
+  const sourceById = new Map(sourceResults.map((result) => [result.id, result]))
+  const missingRequired = sourceResults.filter(
+    (result) =>
+      coreSources.find((source) => source.id === result.id)?.required &&
+      !hasUsableValue(result.value),
+  )
+
+  if (missingRequired.length > 0) {
+    throw new Error(
+      `核心数据源不可用且无缓存：${missingRequired
+        .map((result) => result.health.label)
+        .join('、')}`,
+    )
+  }
+
+  const previousDriversByKey = new Map(
+    (previousSnapshot?.commodityDrivers ?? []).map((driver) => [driver.key, driver]),
+  )
+  const commodityDrivers = await runLimited(commodityContracts, 2, (contract) =>
+    fetchCommodityDriver(contract, previousDriversByKey.get(contract.key)),
+  )
+  const commodityOkCount = commodityDrivers.filter((item) => item.ok).length
+  const commodityFallbackCount = commodityDrivers.filter((item) => item.fallback).length
+  const commodityHealth = {
+    id: 'commodityDrivers',
+    label: sourceLabels.commodityDrivers,
+    required: false,
+    ok: commodityOkCount >= 3 && commodityFallbackCount === 0,
+    fallback: commodityFallbackCount > 0,
+    fetchedAt: new Date().toISOString(),
+    okCount: commodityOkCount,
+    total: commodityDrivers.length,
+    fallbackCount: commodityFallbackCount,
+    error:
+      commodityOkCount < 3
+        ? '可用商品驱动少于 3 个'
+        : commodityFallbackCount > 0
+          ? `使用 ${commodityFallbackCount} 个缓存商品驱动`
+          : undefined,
+  }
+
+  const quote = sourceById.get('quote').value
+  const etfKlines = sourceById.get('etfKlines').value
+  const benchmarkKlines = sourceById.get('benchmarkKlines').value
+  const estimate = sourceById.get('fundGauge').value
+  const { nav, navTrend, performance } = sourceById.get('fundTrend').value
+  const sourceHealthList = [...sourceResults.map((result) => result.health), commodityHealth]
+  const hasSourceDegradation = sourceHealthList.some((source) => !source.ok)
+  const hasRequiredDegradation = sourceHealthList.some((source) => source.required && !source.ok)
 
   const snapshotDraft = {
     meta: {
       generatedAt: new Date().toISOString(),
-      mode: 'refreshed',
+      mode: hasRequiredDegradation ? 'degraded' : hasSourceDegradation ? 'partial' : 'refreshed',
       sources: [
         'push2.eastmoney.com quote api',
         'push2his.eastmoney.com 512400 adjusted kline api',
@@ -514,6 +703,7 @@ async function main() {
         'fund.eastmoney.com pingzhongdata',
         'fundgz.1234567.com.cn estimated net value',
       ],
+      sourceHealth: sourceHealthList,
     },
     quote,
     nav,
@@ -541,6 +731,7 @@ async function main() {
       `klines=${etfKlines.length}`,
       `benchmark=${benchmarkKlines.length}`,
       `drivers=${commodityDrivers.filter((item) => item.ok).length}/${commodityDrivers.length}`,
+      `mode=${snapshot.meta.mode}`,
       `history=${history.count}`,
       `tradeDate=${quote.tradeDate}`,
       `generatedAt=${snapshot.meta.generatedAt}`,
