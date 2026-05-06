@@ -1,9 +1,18 @@
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import {
   REALTIME_KLINE_URL,
   REALTIME_QUOTE_URL,
+  REALTIME_TENCENT_URL,
 } from './src/analysis/realtimeQuote.js'
+
+const execFileAsync = promisify(execFile)
+const marketHeaders = {
+  accept: 'application/json,*/*',
+  'user-agent': 'Mozilla/5.0',
+}
 
 function writeJson(res, status, payload) {
   res.statusCode = status
@@ -12,23 +21,32 @@ function writeJson(res, status, payload) {
   res.end(JSON.stringify(payload))
 }
 
-async function proxyMarketJson(res, url) {
+async function fetchWithCurl(url) {
+  const { stdout } = await execFileAsync(
+    'curl',
+    ['--http1.1', '-sS', '--max-time', '8', '-A', marketHeaders['user-agent'], url],
+    { maxBuffer: 1024 * 1024 },
+  )
+  return stdout
+}
+
+async function fetchMarketText(url) {
   try {
-    const response = await fetch(url, {
-      headers: {
-        accept: 'application/json,*/*',
-        'user-agent': 'Mozilla/5.0',
-      },
-    })
+    const response = await fetch(url, { headers: marketHeaders })
     const text = await response.text()
 
     if (!response.ok) {
-      writeJson(res, response.status, {
-        rc: response.status,
-        error: `Upstream market request failed ${response.status}`,
-      })
-      return
+      throw new Error(`Upstream market request failed ${response.status}`)
     }
+    return text
+  } catch {
+    return fetchWithCurl(url)
+  }
+}
+
+async function proxyMarketJson(res, url) {
+  try {
+    const text = await fetchMarketText(url)
 
     res.statusCode = 200
     res.setHeader('content-type', 'application/json; charset=utf-8')
@@ -51,6 +69,9 @@ function realtimeProxyPlugin() {
       )
       server.middlewares.use('/api/realtime/kline', (_req, res) =>
         proxyMarketJson(res, REALTIME_KLINE_URL),
+      )
+      server.middlewares.use('/api/realtime/tencent', (_req, res) =>
+        proxyMarketJson(res, REALTIME_TENCENT_URL),
       )
     },
   }

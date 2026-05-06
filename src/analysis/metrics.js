@@ -28,10 +28,13 @@ export {
 export {
   LOCAL_REALTIME_KLINE_URL,
   LOCAL_REALTIME_QUOTE_URL,
+  LOCAL_REALTIME_TENCENT_URL,
   parseRealtimeKline,
   parseRealtimeQuote,
+  parseRealtimeTencent,
   REALTIME_KLINE_URL,
   REALTIME_QUOTE_URL,
+  REALTIME_TENCENT_URL,
   shanghaiDateTimeFromDate,
   shanghaiDateTimeFromEpoch,
 } from './realtimeQuote.js'
