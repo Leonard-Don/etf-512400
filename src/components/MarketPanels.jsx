@@ -60,9 +60,12 @@ export function FactorTile({ factor }) {
 }
 
 export function RiskStack({ riskMetrics }) {
+  // 标度：回撤 50% → 满格；单日 VaR 10% → 满格
+  const drawdownWidth = Math.min(Math.abs(riskMetrics.maxDrawdown ?? 0) * 200, 100)
+  const varWidth = Math.min(Math.abs(riskMetrics.oneDayVar95 ?? 0) * 1000, 100)
   const items = [
-    { label: '最大回撤', value: riskMetrics.maxDrawdown, width: 74 },
-    { label: '单日VaR', value: riskMetrics.oneDayVar95, width: 42 },
+    { label: '最大回撤', value: riskMetrics.maxDrawdown, width: drawdownWidth },
+    { label: '单日VaR', value: riskMetrics.oneDayVar95, width: varWidth },
     { label: '拥挤度', value: riskMetrics.crowdingScore / 100, width: riskMetrics.crowdingScore },
   ]
 

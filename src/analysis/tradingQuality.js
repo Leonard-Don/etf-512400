@@ -1,5 +1,40 @@
 import { average, cleanKlines, clamp, realizedVolatilityFromReturns } from './math.js'
 
+// 跟踪质量评分参数：deviation20/60 与 trackingError60 的惩罚权重
+const TRACKING_SCORE = {
+  base: 88,
+  deviation20Penalty: 650,
+  deviation60Penalty: 950,
+  trackingErrorPenalty: 380,
+  defaultTrackingError: 0.04, // trackingError60 缺失时的兜底
+  scoreStable: 76,
+  scoreAcceptable: 55,
+  minSampleForGrading: 20,
+}
+
+// 折溢价温度：currentPremium 阈值 0.4%，z-score 阈值 1.4
+const PREMIUM_TEMP = {
+  hotPremium: 0.004,
+  hotZ: 1.4,
+  scoreBase: 90,
+  premiumPenalty: 6500,
+  zPenalty: 12,
+}
+
+// 流动性温度：成交额分位 + 20日比 + 换手
+const LIQUIDITY_TEMP = {
+  scoreBase: 34,
+  percentileWeight: 0.48,
+  ratio20Weight: 16,
+  ratio20Cap: 2,
+  turnoverWeight: 420,
+  turnoverCap: 0.06,
+  activePercentile: 70,
+  activeRatio20: 0.9,
+  shrinkPercentile: 30,
+  shrinkRatio20: 0.7,
+}
+
 function cleanNavSeries(navSeries) {
   return navSeries
     .filter((item) => item.date && Number.isFinite(item.unit) && item.unit > 0)
@@ -114,17 +149,17 @@ function buildTrackingQuality({ etfKlines, benchmarkKlines, navSeries }) {
   const deviation20 = difference(primaryReturn20, indexReturn20)
   const deviation60 = difference(primaryReturn60, indexReturn60)
   const rawScore =
-    88 -
-    Math.abs(deviation20 ?? 0) * 650 -
-    Math.abs(deviation60 ?? 0) * 950 -
-    (trackingError60 ?? 0.04) * 380
+    TRACKING_SCORE.base -
+    Math.abs(deviation20 ?? 0) * TRACKING_SCORE.deviation20Penalty -
+    Math.abs(deviation60 ?? 0) * TRACKING_SCORE.deviation60Penalty -
+    (trackingError60 ?? TRACKING_SCORE.defaultTrackingError) * TRACKING_SCORE.trackingErrorPenalty
   const score = Math.round(clamp(rawScore, 0, 100))
   const status =
-    trackingDiffs.length < 20
+    trackingDiffs.length < TRACKING_SCORE.minSampleForGrading
       ? '样本不足'
-      : score >= 76
+      : score >= TRACKING_SCORE.scoreStable
         ? '跟踪稳'
-        : score >= 55
+        : score >= TRACKING_SCORE.scoreAcceptable
           ? '可接受'
           : '偏离放大'
   const tone = status === '偏离放大' ? 'warning' : status === '跟踪稳' ? 'positive' : 'neutral'
@@ -187,13 +222,19 @@ function buildPremiumTemperature({ etfKlines, navSeries, price, nav }) {
   const status =
     !Number.isFinite(currentPremium)
       ? '样本不足'
-      : currentPremium > 0.004 || (zScore ?? 0) > 1.4
+      : currentPremium > PREMIUM_TEMP.hotPremium || (zScore ?? 0) > PREMIUM_TEMP.hotZ
         ? '溢价偏热'
-        : currentPremium < -0.004 || (zScore ?? 0) < -1.4
+        : currentPremium < -PREMIUM_TEMP.hotPremium || (zScore ?? 0) < -PREMIUM_TEMP.hotZ
           ? '折价偏深'
           : '贴近净值'
   const score = Math.round(
-    clamp(90 - Math.abs(currentPremium ?? 0) * 6500 - Math.abs(zScore ?? 0) * 12, 0, 100),
+    clamp(
+      PREMIUM_TEMP.scoreBase -
+        Math.abs(currentPremium ?? 0) * PREMIUM_TEMP.premiumPenalty -
+        Math.abs(zScore ?? 0) * PREMIUM_TEMP.zPenalty,
+      0,
+      100,
+    ),
   )
 
   return {
@@ -233,10 +274,10 @@ function buildLiquidityTemperature({ etfKlines, quote }) {
       : null
   const score = Math.round(
     clamp(
-      34 +
-        (amountPercentile ?? 50) * 0.48 +
-        Math.min(amountRatio20 ?? 1, 2) * 16 +
-        Math.min(quote?.turnoverRate ?? 0, 0.06) * 420,
+      LIQUIDITY_TEMP.scoreBase +
+        (amountPercentile ?? 50) * LIQUIDITY_TEMP.percentileWeight +
+        Math.min(amountRatio20 ?? 1, LIQUIDITY_TEMP.ratio20Cap) * LIQUIDITY_TEMP.ratio20Weight +
+        Math.min(quote?.turnoverRate ?? 0, LIQUIDITY_TEMP.turnoverCap) * LIQUIDITY_TEMP.turnoverWeight,
       0,
       100,
     ),
@@ -244,9 +285,11 @@ function buildLiquidityTemperature({ etfKlines, quote }) {
   const status =
     amountPercentile === null
       ? '样本不足'
-      : amountPercentile >= 70 && (amountRatio20 ?? 1) >= 0.9
+      : amountPercentile >= LIQUIDITY_TEMP.activePercentile &&
+          (amountRatio20 ?? 1) >= LIQUIDITY_TEMP.activeRatio20
         ? '成交活跃'
-        : amountPercentile <= 30 || (amountRatio20 ?? 1) < 0.7
+        : amountPercentile <= LIQUIDITY_TEMP.shrinkPercentile ||
+            (amountRatio20 ?? 1) < LIQUIDITY_TEMP.shrinkRatio20
           ? '成交收缩'
           : '正常换手'
 

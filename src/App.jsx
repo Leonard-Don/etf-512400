@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   BarChart3,
   Bell,
-  CheckCircle2,
   ChevronsUpDown,
   Database,
   FlaskConical,
@@ -187,9 +186,17 @@ function App() {
           <button
             className="icon-button"
             type="button"
-            aria-label="刷新快照"
-            title="刷新快照"
-            onClick={() => setRefreshNote(`页面已读取 ${snapshotLabel}`)}
+            aria-label="数据刷新说明"
+            title="数据刷新说明"
+            onClick={() => {
+              const stamp =
+                etfProfile.liveSnapshot.mode === 'refreshed'
+                  ? formatSnapshotTime(etfProfile.liveSnapshot.generatedAt)
+                  : '种子数据'
+              setRefreshNote(
+                `当前快照：${stamp}。数据在构建时打包载入，更新请本地运行 npm run refresh:data 后重启 dev`,
+              )
+            }}
           >
             <RefreshCw size={18} />
           </button>
@@ -378,15 +385,6 @@ function App() {
               <span>历史缓存</span>
               <strong>{snapshotHistory.length}条</strong>
             </div>
-          </div>
-          <div className="pipeline">
-            {['行情快照', 'ETF日线', '基准跟踪', '净值核算', '商品驱动', '历史缓存', '持仓映射', '因子归因', '策略回测', '自动优化', '风险输出'].map((item, index) => (
-              <div className="pipeline-step" key={item}>
-                <CheckCircle2 size={17} />
-                <span>{index + 1}</span>
-                <strong>{item}</strong>
-              </div>
-            ))}
           </div>
           <div className="source-list">
             {dataSources.map((source) => (

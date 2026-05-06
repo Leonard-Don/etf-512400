@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "refresh:data": "node scripts/refreshData.mjs",
-    "test:smoke": "node scripts/smokeTest.mjs"
+    "test:smoke": "node scripts/smokeTest.mjs",
+    "test:unit": "node --test tests/*.test.mjs",
+    "test": "npm run test:unit && npm run test:smoke"
   },
   "dependencies": {
     "lucide-react": "^1.14.0",
