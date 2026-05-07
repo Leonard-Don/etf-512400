@@ -3,9 +3,18 @@
 [![CI](https://github.com/Leonard-Don/etf-512400/actions/workflows/ci.yml/badge.svg)](https://github.com/Leonard-Don/etf-512400/actions/workflows/ci.yml)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=1d1d1f)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Realtime Quotes](https://img.shields.io/badge/quotes-runtime%20fallback-0969da)
+![Research Snapshot](https://img.shields.io/badge/snapshot-local%20research-6a7f64)
 ![Status](https://img.shields.io/badge/status-personal%20research-6a7f64)
 
 有色金属 ETF 南方（512400）的本地实时行情与研究决策台。它把盘中行情、估算净值、折溢价、流动性、商品驱动、跟踪质量和历史策略验证放到一个单页控制台里，用于自用研究、复盘和交易前检查。
+
+## GitHub 首页速览
+
+- **盘中看板**：实时价格、涨跌幅、成交额、换手、估算净值和折溢价集中展示。
+- **降级可见**：东方财富、腾讯行情、天天基金估值等数据源失败或回退时，页面会明确标出来源和新鲜度。
+- **策略实验**：趋势跟随、回撤低吸、因子共振和自动优化规则都保留历史验证口径。
+- **本地优先**：不提供交易入口，数据刷新、历史缓存和复盘全部在本地研究 workflow 中完成。
 
 ![512400 ETF Research Console](docs/assets/github-console.png)
 
