@@ -23,6 +23,13 @@ export function calendarDayGap(fromDate, toDate) {
   return Math.round((to - from) / DAY_MS)
 }
 
+function sourceLabels(sources) {
+  return sources
+    .map((source) => source.label || source.id)
+    .filter(Boolean)
+    .join('、')
+}
+
 export function describeMarketStatus({ quoteTradeDate, statusCode, now = new Date() }) {
   if (!quoteTradeDate) return '行情日期未知'
 
@@ -77,10 +84,13 @@ export function buildDataFreshness({
   if (quoteGap !== null && quoteGap > 0) details.push(`行情距今天 ${quoteGap} 天`)
   if (navGap !== null && navGap > 0) details.push(`净值距今天 ${navGap} 天`)
   if (fallbackSources.length > 0) {
-    details.push(`${fallbackSources.length} 个源使用缓存`)
+    const labels = sourceLabels(fallbackSources)
+    details.push(labels ? `缓存源：${labels}` : `${fallbackSources.length} 个源使用缓存`)
   }
-  if (failedSources.some((source) => !source.fallback)) {
-    details.push('存在无缓存失败源')
+  const failedWithoutFallback = failedSources.filter((source) => !source.fallback)
+  if (failedWithoutFallback.length > 0) {
+    const labels = sourceLabels(failedWithoutFallback)
+    details.push(labels ? `失败源：${labels}` : '存在无缓存失败源')
   }
   if (snapshotGeneratedAt) {
     details.push(`快照 ${snapshotGeneratedAt}`)

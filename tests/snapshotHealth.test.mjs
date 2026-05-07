@@ -50,6 +50,7 @@ test('buildDataFreshness 标出辅助源降级和缓存使用', () => {
   assert.equal(result.tone, 'warning')
   assert.equal(result.failedCount, 1)
   assert.equal(result.fallbackCount, 1)
+  assert.ok(result.details.includes('缓存源：盘中估算净值'))
 })
 
 test('buildDataFreshness 对核心源降级给出 danger', () => {
@@ -70,4 +71,25 @@ test('buildDataFreshness 对核心源降级给出 danger', () => {
   assert.equal(result.status, 'degraded')
   assert.equal(result.tone, 'danger')
   assert.equal(result.requiredFailedCount, 1)
+  assert.ok(result.details.includes('缓存源：ETF行情'))
+})
+
+test('buildDataFreshness 标出无缓存失败源名称', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      {
+        id: 'runtimeQuote',
+        label: '实时ETF行情',
+        required: true,
+        ok: false,
+        fallback: false,
+      },
+    ],
+  })
+  assert.equal(result.status, 'degraded')
+  assert.equal(result.tone, 'danger')
+  assert.ok(result.details.includes('失败源：实时ETF行情'))
 })
