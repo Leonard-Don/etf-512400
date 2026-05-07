@@ -58,10 +58,12 @@
 ```bash
 npm install
 npm run refresh:data
+npm run memo:export -- --format=text
 npm run dev
 ```
 
 开发服务器默认由 Vite 启动。实时行情代理只在本地开发服务器中启用，用于规避浏览器跨域限制。
+`npm run memo:export` 会基于本地 `src/data/liveSnapshot.json` 导出研究备忘，支持 `--format=markdown`、`--format=json` 和 `--format=text`。
 
 ## 验证
 

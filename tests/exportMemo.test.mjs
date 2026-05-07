@@ -1,10 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const scriptUrl = new URL('../scripts/exportMemo.mjs', import.meta.url)
 const scriptPath = fileURLToPath(scriptUrl)
+const packageUrl = new URL('../package.json', import.meta.url)
 
 function runExportMemo(args = []) {
   return spawnSync(process.execPath, [scriptPath, ...args], {
@@ -12,6 +14,11 @@ function runExportMemo(args = []) {
     timeout: 30_000,
   })
 }
+
+test('exportMemo CLI: package script 暴露 npm 入口', () => {
+  const packageJson = JSON.parse(readFileSync(packageUrl, 'utf8'))
+  assert.equal(packageJson.scripts?.['memo:export'], 'node scripts/exportMemo.mjs')
+})
 
 test('exportMemo CLI: 默认输出 Markdown，含标题与四大区块', () => {
   const result = runExportMemo()
