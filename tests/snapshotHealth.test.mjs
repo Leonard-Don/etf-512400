@@ -18,6 +18,12 @@ test('calendarDayGap 计算自然日差', () => {
   assert.equal(calendarDayGap('2026-05-06', '2026-05-06'), 0)
 })
 
+test('calendarDayGap 对缺失或非法日期返回 null', () => {
+  assert.equal(calendarDayGap('', '2026-05-06'), null)
+  assert.equal(calendarDayGap('not-a-date', '2026-05-06'), null)
+  assert.equal(calendarDayGap('2026-05-06', undefined), null)
+})
+
 test('describeMarketStatus 不再依赖固定休市文案', () => {
   assert.equal(
     describeMarketStatus({ quoteTradeDate: '2026-04-30', now: MAY_6_SHANGHAI }),
