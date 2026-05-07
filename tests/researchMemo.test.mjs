@@ -1,0 +1,161 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { composeResearchMemo } from '../src/analysis/researchMemo.js'
+
+const baseSignal = {
+  action: '小仓跟踪',
+  tone: 'positive',
+  score: 70,
+  suggestedExposure: 0.4,
+  confidence: 75,
+  reasons: [
+    '趋势状态：上升趋势，20日+5.0%，60日+12.0%',
+    '因子状态：3个因子向上，1个因子处于高风险',
+    '折溢价：+0.10%，成交额8.00亿',
+  ],
+  invalidationRules: [
+    '价格跌破60日均线且商品驱动没有修复，信号降为风险降档',
+    '折溢价高于0.8%或单日急涨超过4.5%，禁止新增追价仓位',
+    '高风险因子达到3个及以上，只保留观察仓或等待回撤',
+  ],
+  factorProfile: { highRiskFactors: 1, positiveFactors: 3 },
+}
+
+const baseQuality = {
+  action: '可正常执行',
+  tone: 'positive',
+  score: 78,
+  watchPoints: [
+    '跟踪口径采用净值，样本 60 日',
+    '折溢价 贴近净值，2日溢价',
+    '成交额处于近120日 65 分位',
+  ],
+}
+
+const basePrimary = {
+  action: '主仓持有',
+  tone: 'positive',
+  exposure: 0.6,
+  source: '自动优化',
+  rule: '20/60日趋势，5%/12%回撤',
+  overfitRisk: '低',
+  stabilityScore: 78,
+  score: 78,
+}
+
+const baseTrend = { state: '上升趋势' }
+
+test('composeResearchMemo: headline 含动作 + 仓位百分比', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+  })
+  assert.match(memo.headline, /主仓持有/)
+  assert.match(memo.headline, /60%/)
+  assert.equal(memo.tone, 'positive')
+  assert.equal(memo.source, '自动优化')
+  assert.equal(memo.rule, '20/60日趋势，5%/12%回撤')
+})
+
+test('composeResearchMemo: drivers 列出 信号/质量/趋势 三条线', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+  })
+  assert.equal(memo.drivers.length, 3)
+  assert.ok(memo.drivers.some((d) => d.includes('小仓跟踪') && d.includes('70')))
+  assert.ok(memo.drivers.some((d) => d.includes('可正常执行') && d.includes('78')))
+  assert.ok(memo.drivers.some((d) => d.includes('上升趋势')))
+})
+
+test('composeResearchMemo: reasons = signal.reasons + tradingQuality.watchPoints（保持顺序）', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+  })
+  assert.equal(memo.reasons.length, 6)
+  assert.deepEqual(memo.reasons.slice(0, 3), baseSignal.reasons)
+  assert.deepEqual(memo.reasons.slice(3), baseQuality.watchPoints)
+})
+
+test('composeResearchMemo: invalidations 来自 signal.invalidationRules（解释链一致性）', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+  })
+  assert.deepEqual(memo.invalidations, baseSignal.invalidationRules)
+})
+
+test('composeResearchMemo: 信号 warning 时 tone 与 headline 同步降级', () => {
+  const warningPrimary = {
+    ...basePrimary,
+    action: '禁止追高',
+    tone: 'warning',
+    exposure: 0.1,
+    rule: '20/60日趋势，5%/12%回撤 · 信号 禁止追高',
+  }
+  const warningSignal = {
+    ...baseSignal,
+    action: '禁止追高',
+    tone: 'warning',
+    suggestedExposure: 0.1,
+  }
+  const memo = composeResearchMemo({
+    primaryDecision: warningPrimary,
+    signal: warningSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.012,
+    dailyChange: 0.05,
+  })
+  assert.equal(memo.tone, 'warning')
+  assert.match(memo.headline, /禁止追高/)
+  assert.match(memo.headline, /10%/)
+  assert.match(memo.rule, /信号 禁止追高/)
+})
+
+test('composeResearchMemo: metrics 与输入一致', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.0023,
+    dailyChange: 0.015,
+  })
+  assert.equal(memo.metrics.score, 78)
+  assert.equal(memo.metrics.exposure, 0.6)
+  assert.equal(memo.metrics.confidence, 75)
+  assert.ok(Math.abs(memo.metrics.premium - 0.0023) < 1e-12)
+  assert.ok(Math.abs(memo.metrics.dailyChange - 0.015) < 1e-12)
+})
+
+test('composeResearchMemo: 缺少 reasons/watchPoints/invalidationRules 时返回空数组、不抛错', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: { ...baseSignal, reasons: undefined, invalidationRules: undefined },
+    tradingQuality: { ...baseQuality, watchPoints: undefined },
+    trendProfile: baseTrend,
+    premium: 0,
+    dailyChange: 0,
+  })
+  assert.deepEqual(memo.reasons, [])
+  assert.deepEqual(memo.invalidations, [])
+  assert.equal(memo.drivers.length, 3)
+})
