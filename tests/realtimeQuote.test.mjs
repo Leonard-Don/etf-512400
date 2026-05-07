@@ -36,6 +36,39 @@ const EASTMONEY_SAMPLE = {
   },
 }
 
+function buildTencentPayload(overrides = {}) {
+  const quote = Array.from({ length: 89 }, () => '')
+  Object.assign(quote, {
+    1: '有色金属ETF南方',
+    2: '512400',
+    3: '2.199',
+    4: '2.119',
+    5: '2.134',
+    30: '20260506145507',
+    31: '0.080',
+    32: '3.78',
+    33: '2.200',
+    34: '2.114',
+    35: '2.199/6733741/1457507202',
+    36: '6733741',
+    38: '5.09',
+    43: '4.06',
+    57: '145750.7202',
+    73: '13219039000',
+    ...overrides,
+  })
+
+  return {
+    data: {
+      sh512400: {
+        qt: {
+          sh512400: quote,
+        },
+      },
+    },
+  }
+}
+
 test('parseRealtimeQuote 标准化 Eastmoney 运行时行情', () => {
   const quote = parseRealtimeQuote(JSON.stringify(EASTMONEY_SAMPLE))
 
@@ -104,6 +137,22 @@ test('parseRealtimeKline 使用当日 K 线作为浏览器实时兜底', () => {
   assert.equal(quote.amountCny, 1357180173)
   assert.equal(quote.volumeLots, 6277464)
   assert.equal(quote.source, 'eastmoney-kline-runtime')
+})
+
+test('parseRealtimeKline 拒绝空字符串占位的核心价格', () => {
+  assert.throws(
+    () =>
+      parseRealtimeKline({
+        rc: 0,
+        data: {
+          code: '512400',
+          name: '有色金属ETF南方',
+          preKPrice: 2.119,
+          klines: ['2026-05-06,2.134,,2.199,2.114,6277464,1357180173.000,4.01,3.68,0.078,4.75'],
+        },
+      }),
+    /missing code, date, price, or previous close/,
+  )
 })
 
 test('parseRealtimeTencent 使用腾讯实时行情作为跨源兜底', () => {
@@ -202,4 +251,21 @@ test('parseRealtimeTencent 使用腾讯实时行情作为跨源兜底', () => {
   assert.equal(quote.volumeLots, 6733741)
   assert.equal(quote.turnoverRate, 0.0509)
   assert.equal(quote.source, 'tencent-runtime')
+})
+
+test('parseRealtimeTencent 对空金额元组回退到万元字段', () => {
+  const quote = parseRealtimeTencent(
+    buildTencentPayload({
+      35: '2.199/6733741/',
+    }),
+  )
+
+  assert.equal(quote.amountCny, 1457507202)
+})
+
+test('parseRealtimeTencent 拒绝空字符串占位的核心价格', () => {
+  assert.throws(
+    () => parseRealtimeTencent(buildTencentPayload({ 3: '' })),
+    /missing code, price, or previous close/,
+  )
 })
