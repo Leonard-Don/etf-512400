@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "refresh:data": "node scripts/refreshData.mjs",
+    "memo:export": "node scripts/exportMemo.mjs",
     "test:smoke": "node scripts/smokeTest.mjs",
     "test:unit": "node --test tests/*.test.mjs",
     "test:components": "vitest run",
