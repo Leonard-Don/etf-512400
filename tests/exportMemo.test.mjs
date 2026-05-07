@@ -56,3 +56,10 @@ test('exportMemo CLI: 未知 --format 时退出码非零并报错', () => {
   assert.notEqual(result.status, 0, 'unknown format should exit non-zero')
   assert.match(result.stderr, /format/i)
 })
+
+test('exportMemo CLI: 重复 --format 时退出码非零并提示只传一次', () => {
+  const result = runExportMemo(['--format=json', '--format=text'])
+  assert.notEqual(result.status, 0, 'duplicate format should exit non-zero')
+  assert.match(result.stderr, /--format only once/i)
+  assert.equal(result.stdout, '')
+})
