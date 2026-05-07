@@ -15,13 +15,16 @@ import { formatMemoMarkdown, formatMemoText } from '../src/analysis/memoFormatte
 const SUPPORTED_FORMATS = new Set(['markdown', 'json', 'text'])
 
 function parseFormat(argv) {
-  const formatArg = argv.find((arg) => arg === '--format' || arg.startsWith('--format='))
-  if (!formatArg) return 'markdown'
+  const formatArgs = argv.filter((arg) => arg === '--format' || arg.startsWith('--format='))
+  if (formatArgs.length > 1) return { error: 'Specify --format only once.' }
+
+  const formatArg = formatArgs[0]
+  if (!formatArg) return { format: 'markdown' }
   if (formatArg === '--format') {
     const index = argv.indexOf(formatArg)
-    return argv[index + 1] ?? ''
+    return { format: argv[index + 1] ?? '' }
   }
-  return formatArg.slice('--format='.length)
+  return { format: formatArg.slice('--format='.length) }
 }
 
 function buildFactorBaskets() {
@@ -76,7 +79,12 @@ async function buildMemo() {
   })
 }
 
-const format = parseFormat(process.argv.slice(2))
+const { error, format } = parseFormat(process.argv.slice(2))
+if (error) {
+  console.error(error)
+  process.exit(1)
+}
+
 if (!SUPPORTED_FORMATS.has(format)) {
   console.error(`Unsupported format: ${format || '(missing)'}. Use markdown, json, or text.`)
   process.exit(1)
