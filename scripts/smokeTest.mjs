@@ -8,6 +8,8 @@ import {
   buildTrendProfile,
   calculateDailyChange,
   calculatePremium,
+  composePrimaryDecision,
+  composeResearchMemo,
 } from '../src/analysis/metrics.js'
 
 const snapshot = JSON.parse(await readFile(new URL('../src/data/liveSnapshot.json', import.meta.url), 'utf8'))
@@ -75,6 +77,41 @@ assert.ok(
   'liquidity percentile should stay in range',
 )
 
+const primaryDecision = composePrimaryDecision({
+  signal,
+  optimizer,
+  riskBudget: 48,
+  trendProfile,
+})
+assert.ok(primaryDecision.action, 'primary decision action should exist')
+assert.ok(primaryDecision.exposure >= 0 && primaryDecision.exposure <= 0.48, 'primary exposure should respect risk budget cap')
+
+const memo = composeResearchMemo({
+  primaryDecision,
+  signal,
+  tradingQuality,
+  trendProfile,
+  premium,
+  dailyChange,
+})
+const expectedExposurePercent = Math.round((primaryDecision.exposure ?? 0) * 100)
+assert.ok(memo.headline.includes(primaryDecision.action), 'memo headline should carry the primary action')
+assert.ok(memo.headline.includes(`${expectedExposurePercent}%`), 'memo headline should carry rounded exposure %')
+assert.equal(memo.drivers.length, 3, 'memo should expose three driver lines (signal/quality/trend)')
+assert.ok(memo.drivers.some((d) => d.includes(signal.action)), 'memo drivers should reflect signal action')
+assert.ok(memo.drivers.some((d) => d.includes(tradingQuality.action)), 'memo drivers should reflect quality action')
+assert.ok(memo.drivers.some((d) => d.includes(trendProfile.state)), 'memo drivers should reflect trend state')
+assert.equal(
+  memo.reasons.length,
+  (signal.reasons?.length ?? 0) + (tradingQuality.watchPoints?.length ?? 0),
+  'memo reasons should concatenate signal reasons + quality watch points',
+)
+assert.deepEqual(memo.invalidations, signal.invalidationRules ?? [], 'memo invalidations should mirror signal invalidationRules')
+assert.equal(memo.metrics.score, primaryDecision.score, 'memo should expose primary decision score')
+assert.equal(memo.metrics.exposure, primaryDecision.exposure, 'memo should expose primary decision exposure')
+assert.ok(Number.isFinite(memo.metrics.confidence), 'memo confidence should be finite')
+assert.ok(['positive', 'neutral', 'warning'].includes(memo.tone), 'memo tone should be a known severity')
+
 console.log(
   [
     'smoke ok',
@@ -83,5 +120,6 @@ console.log(
     `signal=${signal.action}`,
     `optimizer=${optimizer.best.label}`,
     `quality=${tradingQuality.action}`,
+    `memo=${primaryDecision.action}/${memo.drivers.length}drivers/${memo.reasons.length}reasons`,
   ].join(' | '),
 )
