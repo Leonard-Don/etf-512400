@@ -53,6 +53,33 @@ test('buildDataFreshness 标出辅助源降级和缓存使用', () => {
   assert.ok(result.details.includes('缓存源：盘中估算净值'))
 })
 
+test('buildDataFreshness 对无标签源使用 id 标注缓存和失败细节', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      {
+        id: 'cacheOnlyQuote',
+        required: false,
+        ok: false,
+        fallback: true,
+      },
+      {
+        id: 'liveNav',
+        required: false,
+        ok: false,
+        fallback: false,
+      },
+    ],
+  })
+  assert.equal(result.status, 'partial')
+  assert.equal(result.failedCount, 2)
+  assert.equal(result.fallbackCount, 1)
+  assert.ok(result.details.includes('缓存源：cacheOnlyQuote'))
+  assert.ok(result.details.includes('失败源：liveNav'))
+})
+
 test('buildDataFreshness 对核心源降级给出 danger', () => {
   const result = buildDataFreshness({
     quoteTradeDate: '2026-05-06',
