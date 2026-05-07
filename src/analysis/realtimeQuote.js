@@ -22,8 +22,23 @@ export function percentFromEastmoney(value) {
 }
 
 function numberFromKline(value) {
-  const number = Number(value)
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null
+  }
+  if (typeof value !== 'string') {
+    return null
+  }
+  const normalized = value.trim()
+  if (!normalized) {
+    return null
+  }
+  const number = Number(normalized)
   return Number.isFinite(number) ? number : null
+}
+
+function positiveNumberFromKline(value) {
+  const number = numberFromKline(value)
+  return number !== null && number > 0 ? number : null
 }
 
 function percentFromKline(value) {
@@ -135,8 +150,8 @@ export function parseRealtimeKline(payloadOrText, fetchedAt = new Date()) {
     change,
     turnoverRate,
   ] = line.split(',')
-  const price = numberFromKline(close)
-  const previousClose = numberFromKline(data.preKPrice)
+  const price = positiveNumberFromKline(close)
+  const previousClose = positiveNumberFromKline(data.preKPrice)
   const fetchedClock = shanghaiDateTimeFromDate(fetchedAt)
 
   if (!data.code || !tradeDate || price === null || previousClose === null) {
@@ -177,8 +192,8 @@ export function parseRealtimeTencent(payloadOrText) {
 
   const tradeClock = parseTencentClock(quote[30])
   const quoteTuple = typeof quote[35] === 'string' ? quote[35].split('/') : []
-  const price = numberFromKline(quote[3])
-  const previousClose = numberFromKline(quote[4])
+  const price = positiveNumberFromKline(quote[3])
+  const previousClose = positiveNumberFromKline(quote[4])
   const amountFromTuple = numberFromKline(quoteTuple[2])
   const amountInTenThousand = numberFromKline(quote[57])
   const amountCny =
