@@ -254,3 +254,118 @@ test('buildHistoryReplay 单条归档下峰谷为同一帧且方向 flat', () =>
   assert.equal(replay.summary.peakTrend.date, '2026-04-30')
   assert.equal(replay.summary.troughTrend.date, '2026-04-30')
 })
+
+test('buildHistoryReplay 空骨架 selection 标 no-frames 且无可用日期', () => {
+  for (const input of [null, undefined, {}, 42, 'archive', []]) {
+    const replay = buildHistoryReplay(input)
+    assert.deepEqual(replay.selection, {
+      requestedAsOf: null,
+      matchedDate: null,
+      fallbackReason: 'no-frames',
+      availableDates: [],
+    })
+  }
+})
+
+test('buildHistoryReplay 默认 selection 为最新帧 + fallbackReason=no-as-of', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+    snapshot({ tradeDate: '2026-04-29' }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.deepEqual(replay.selection, {
+    requestedAsOf: null,
+    matchedDate: '2026-04-30',
+    fallbackReason: 'no-as-of',
+    availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+  })
+})
+
+test('buildHistoryReplay 命中 asOf 时 selection.fallbackReason 为 null 且 requestedAsOf 已 trim', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+  const replay = buildHistoryReplay(archive, { asOf: '  2026-04-29  ' })
+  assert.deepEqual(replay.selection, {
+    requestedAsOf: '2026-04-29',
+    matchedDate: '2026-04-29',
+    fallbackReason: null,
+    availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+  })
+})
+
+test('buildHistoryReplay asOf 未匹配时 selection 标 no-match 但 availableDates 仍完整', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+  const replay = buildHistoryReplay(archive, { asOf: '2025-01-01' })
+  assert.deepEqual(replay.selection, {
+    requestedAsOf: '2025-01-01',
+    matchedDate: null,
+    fallbackReason: 'no-match',
+    availableDates: ['2026-04-29', '2026-04-30'],
+  })
+})
+
+test('buildHistoryReplay 非字符串/空白 asOf 时 selection 标 invalid-as-of 并落到最新帧', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+
+  for (const blankAsOf of ['   ', '\t', '\n']) {
+    const replay = buildHistoryReplay(archive, { asOf: blankAsOf })
+    assert.deepEqual(
+      replay.selection,
+      {
+        requestedAsOf: null,
+        matchedDate: '2026-04-30',
+        fallbackReason: 'invalid-as-of',
+        availableDates: ['2026-04-29', '2026-04-30'],
+      },
+      `blank asOf ${JSON.stringify(blankAsOf)} 应标 invalid-as-of`,
+    )
+  }
+
+  for (const nonString of [42, true, {}, []]) {
+    const replay = buildHistoryReplay(archive, { asOf: nonString })
+    assert.deepEqual(
+      replay.selection,
+      {
+        requestedAsOf: null,
+        matchedDate: '2026-04-30',
+        fallbackReason: 'invalid-as-of',
+        availableDates: ['2026-04-29', '2026-04-30'],
+      },
+      `非字符串 asOf ${JSON.stringify(nonString)} 应标 invalid-as-of`,
+    )
+  }
+})
+
+test('buildHistoryReplay selection.availableDates 是排序后的副本，不被外部突变污染', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.deepEqual(replay.selection.availableDates, ['2026-04-28', '2026-04-30'])
+
+  replay.selection.availableDates.push('hacked')
+  const replay2 = buildHistoryReplay(archive)
+  assert.deepEqual(replay2.selection.availableDates, ['2026-04-28', '2026-04-30'])
+})
+
+test('buildHistoryReplay generatedAt 命中时 matchedDate 为对应 date 而非时间戳', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-29', generatedAt: '2026-04-29T07:00:00.000Z' }),
+    snapshot({ tradeDate: '2026-04-30', generatedAt: '2026-04-30T07:30:00.000Z' }),
+  ])
+  const replay = buildHistoryReplay(archive, { asOf: '2026-04-29T07:00:00.000Z' })
+  assert.equal(replay.selection.requestedAsOf, '2026-04-29T07:00:00.000Z')
+  assert.equal(replay.selection.matchedDate, '2026-04-29')
+  assert.equal(replay.selection.fallbackReason, null)
+})

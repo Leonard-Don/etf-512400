@@ -16,12 +16,22 @@ function emptySummary() {
   }
 }
 
+function emptySelection() {
+  return {
+    requestedAsOf: null,
+    matchedDate: null,
+    fallbackReason: 'no-frames',
+    availableDates: [],
+  }
+}
+
 function emptyReplay() {
   return {
     frames: [],
     currentIndex: null,
     currentFrame: null,
     summary: emptySummary(),
+    selection: emptySelection(),
   }
 }
 
@@ -98,16 +108,24 @@ export function buildHistoryReplay(snapshots, options = {}) {
   const sorted = [...valid].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   const frames = sorted.map((entry, index) => ({ ...entry, index }))
 
+  const asOfProvided = Object.prototype.hasOwnProperty.call(options, 'asOf')
   const asOfQuery = normalizeAsOf(options.asOf)
+  const availableDates = frames.map((frame) => frame.date)
   let currentIndex
   let currentFrame
+  let fallbackReason
+  let requestedAsOf
   if (asOfQuery) {
     const matchIndex = frames.findIndex((frame) => matchesAsOf(frame, asOfQuery))
     currentIndex = matchIndex === -1 ? null : matchIndex
     currentFrame = matchIndex === -1 ? null : frames[matchIndex]
+    fallbackReason = matchIndex === -1 ? 'no-match' : null
+    requestedAsOf = asOfQuery
   } else {
     currentIndex = frames.length - 1
     currentFrame = frames[currentIndex]
+    fallbackReason = asOfProvided ? 'invalid-as-of' : 'no-as-of'
+    requestedAsOf = null
   }
 
   return {
@@ -115,5 +133,11 @@ export function buildHistoryReplay(snapshots, options = {}) {
     currentIndex,
     currentFrame,
     summary: buildSummary(frames),
+    selection: {
+      requestedAsOf,
+      matchedDate: currentFrame ? currentFrame.date : null,
+      fallbackReason,
+      availableDates,
+    },
   }
 }
