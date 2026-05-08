@@ -46,6 +46,29 @@ function isFrameLike(entry) {
   )
 }
 
+function compareGeneratedAt(a, b) {
+  const aValid = typeof a === 'string' && a.length > 0
+  const bValid = typeof b === 'string' && b.length > 0
+  if (!aValid && !bValid) return 0
+  if (!aValid) return -1
+  if (!bValid) return 1
+  if (a < b) return -1
+  if (a > b) return 1
+  return 0
+}
+
+// 同 date 多帧时保留 generatedAt 最新的一帧，确保 as-of 选择确定且 availableDates 唯一。
+function dedupeByDate(frames) {
+  const byDate = new Map()
+  for (const frame of frames) {
+    const existing = byDate.get(frame.date)
+    if (!existing || compareGeneratedAt(frame.generatedAt, existing.generatedAt) > 0) {
+      byDate.set(frame.date, frame)
+    }
+  }
+  return Array.from(byDate.values())
+}
+
 function normalizeAsOf(asOf) {
   if (typeof asOf !== 'string') return ''
   return asOf.trim()
@@ -105,7 +128,8 @@ export function buildHistoryReplay(snapshots, options = {}) {
   const valid = snapshots.filter(isFrameLike)
   if (valid.length === 0) return emptyReplay()
 
-  const sorted = [...valid].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  const unique = dedupeByDate(valid)
+  const sorted = unique.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   const frames = sorted.map((entry, index) => ({ ...entry, index }))
 
   const asOfProvided = Object.prototype.hasOwnProperty.call(options, 'asOf')
