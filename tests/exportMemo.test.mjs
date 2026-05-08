@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { normalizeHistoryArchive } from '../src/analysis/historyArchive.js'
 import { composeResearchMemo } from '../src/analysis/researchMemo.js'
 
 const scriptUrl = new URL('../scripts/exportMemo.mjs', import.meta.url)
@@ -78,6 +79,41 @@ test('exportMemo CLI: --format=json 锁定顶层与 metrics 的 schema 形态', 
     assert.equal(typeof driver, 'string', 'driver 必须是 string')
     assert.ok(driver.length > 0, 'driver 不能为空字符串')
   }
+})
+
+test('exportMemo CLI: --as-of 从匹配历史归档快照导出 JSON memo', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshot = normalizeHistoryArchive(archive)[0]
+  assert.ok(archivedSnapshot, 'fixture archive should contain at least one normalized snapshot')
+
+  const liveResult = runExportMemo(['--format=json'])
+  assert.equal(liveResult.status, 0, `expected live export exit 0, got ${liveResult.status}\n${liveResult.stderr}`)
+  const liveMemo = JSON.parse(liveResult.stdout)
+
+  const result = runExportMemo(['--format=json', `--as-of=${archivedSnapshot.date}`])
+  assert.equal(result.status, 0, `expected archived export exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+
+  assert.deepEqual(Object.keys(memo).sort(), Object.keys(liveMemo).sort())
+  assert.deepEqual(Object.keys(memo.metrics).sort(), Object.keys(liveMemo.metrics).sort())
+  assert.match(memo.source, new RegExp(archivedSnapshot.date))
+  assert.equal(memo.headline, `${archivedSnapshot.decision.action}（仓位 ${Math.round(archivedSnapshot.exposure * 100)}%）`)
+  assert.equal(memo.metrics.premium, archivedSnapshot.premium)
+  assert.equal(memo.metrics.dailyChange, archivedSnapshot.quote.changePercent)
+  assert.equal(memo.metrics.exposure, archivedSnapshot.exposure)
+  assert.notEqual(
+    memo.metrics.dailyChange,
+    liveMemo.metrics.dailyChange,
+    '--as-of must not use liveSnapshot previousClose-derived dailyChange',
+  )
+
+  const timestampResult = runExportMemo(['--format=json', `--as-of=${archivedSnapshot.generatedAt}`])
+  assert.equal(
+    timestampResult.status,
+    0,
+    `expected archived timestamp export exit 0, got ${timestampResult.status}\n${timestampResult.stderr}`,
+  )
+  assert.deepEqual(JSON.parse(timestampResult.stdout).metrics, memo.metrics)
 })
 
 test('exportMemo JSON pipeline: sparse-but-valid zero metrics remain numeric through serialization', () => {
