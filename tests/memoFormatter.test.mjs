@@ -135,6 +135,41 @@ test('formatMemoText: warning tone 时附带风险前缀', () => {
   assert.ok(text.includes('禁止追高'))
 })
 
+test('formatMemoMarkdown/Text: 零值/0% 等 sparse-but-valid 字段应原样渲染，而非被当作缺失', () => {
+  // 当指标合法地为 0（如 0% 仓位、平盘 0.00% 当日涨跌、0 分中性日），必须按 0 渲染。
+  // 守卫 `if (!value)` 之类的截断式实现把 0 误判为缺失而回退到 暂无 占位。
+  const zeroMemo = {
+    headline: '观察持有（仓位 0%）',
+    drivers: ['信号 暂时观望（0）', '交易质量 平稳（0）', '趋势 横盘'],
+    reasons: ['折溢价：+0.00%'],
+    invalidations: ['价格跌破60日均线触发降档'],
+    metrics: {
+      score: 0,
+      exposure: 0,
+      confidence: 0,
+      premium: 0,
+      dailyChange: 0,
+    },
+    source: '自动优化',
+    rule: '20/60日趋势',
+    tone: 'neutral',
+  }
+
+  const md = formatMemoMarkdown(zeroMemo)
+  assert.match(md, /评分:\s*0$/m, 'metrics.score=0 应渲染为 0 而非 暂无')
+  assert.match(md, /仓位:\s*0%$/m, 'metrics.exposure=0 应渲染为 0% 而非 暂无')
+  assert.match(md, /置信度:\s*0$/m, 'metrics.confidence=0 应渲染为 0 而非 暂无')
+  assert.match(md, /折溢价:\s*0\.00%$/m, 'metrics.premium=0 应渲染为 0.00% 而非 暂无')
+  assert.match(md, /当日涨跌:\s*0\.00%$/m, 'metrics.dailyChange=0 应渲染为 0.00% 而非 暂无')
+  assert.ok(!md.includes('暂无'), '全部字段均为合法值（含 0），不应出现 暂无 占位')
+
+  const text = formatMemoText(zeroMemo)
+  assert.equal(text.split('\n').length, 1, '单行摘要')
+  assert.ok(text.includes('观察持有'), '应保留 headline')
+  assert.ok(text.includes('信号 暂时观望（0）'), '零值的 driver 文案应原样保留')
+  assert.equal(text.startsWith('[警告]'), false, 'neutral tone 不应触发 [警告] 前缀')
+})
+
 test('formatMemoMarkdown/Text: 顶层 source/rule/tone 与整个 metrics 对象缺失时仍稳定渲染', () => {
   // 上游 memo 在离线/降级路径下可能不带 source/rule/tone，且 metrics 对象整体缺失。
   // 守卫这些场景下不泄漏 undefined/NaN，并稳定渲染 "暂无" 占位与无前缀单行摘要。
