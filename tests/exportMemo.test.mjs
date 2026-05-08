@@ -207,6 +207,25 @@ test('exportMemo CLI: --output 写入失败时不打印 Node 堆栈', () => {
   assert.doesNotMatch(result.stderr, /Error:|at async|node:internal/i)
 })
 
+test('exportMemo CLI: --output 父目录不存在时退出码非零、stderr 干净不含 Node 堆栈或 errno 细节', () => {
+  const outputDir = mkdtempSync(join(tmpdir(), 'etf-memo-export-no-parent-'))
+  const missingParentPath = join(outputDir, 'does-not-exist-yet', 'memo.md')
+
+  try {
+    const result = runExportMemo(['--output', missingParentPath])
+    assert.notEqual(result.status, 0, 'missing parent dir should exit non-zero')
+    assert.equal(result.stdout, '', 'stdout 必须为空')
+    assert.match(result.stderr, /Unable to write memo output/i)
+    assert.doesNotMatch(
+      result.stderr,
+      /Error:|at async|node:internal|ENOENT|errno|syscall/i,
+      'stderr 不应含 Node 堆栈或 errno/syscall 细节',
+    )
+  } finally {
+    rmSync(outputDir, { recursive: true, force: true })
+  }
+})
+
 test('exportMemo CLI: 未知 --format 时退出码非零并报错', () => {
   const result = runExportMemo(['--format=yaml'])
   assert.notEqual(result.status, 0, 'unknown format should exit non-zero')
