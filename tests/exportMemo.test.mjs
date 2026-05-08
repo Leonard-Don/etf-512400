@@ -157,3 +157,19 @@ test('exportMemo CLI: 重复 --format 时退出码非零并提示只传一次', 
   assert.match(result.stderr, /--format only once/i)
   assert.equal(result.stdout, '')
 })
+
+test('exportMemo CLI: 三种 format 输出无 undefined/NaN/Infinity 哨兵且 stderr 干净', () => {
+  for (const format of ['markdown', 'json', 'text']) {
+    const result = runExportMemo([`--format=${format}`])
+    assert.equal(result.status, 0, `[${format}] expected exit 0, got ${result.status}\n${result.stderr}`)
+    assert.equal(result.stderr, '', `[${format}] stderr 应为空，得到: ${result.stderr}`)
+    assert.ok(result.stdout.length > 0, `[${format}] stdout 不能为空`)
+    for (const sentinel of ['undefined', 'NaN', 'Infinity']) {
+      assert.equal(
+        result.stdout.includes(sentinel),
+        false,
+        `[${format}] stdout 不应包含 "${sentinel}" 哨兵字符串:\n${result.stdout}`,
+      )
+    }
+  }
+})
