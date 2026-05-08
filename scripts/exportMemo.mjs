@@ -171,16 +171,6 @@ function buildFactorBaskets() {
   ]
 }
 
-function calendarDate(value) {
-  const text = String(value ?? '').trim()
-  const datePrefix = text.match(/^(\d{4}-\d{2}-\d{2})/)
-  if (datePrefix) return datePrefix[1]
-
-  const parsed = Date.parse(text)
-  if (Number.isNaN(parsed)) return null
-  return new Date(parsed).toISOString().slice(0, 10)
-}
-
 function finiteMetric(value, fallback = 0) {
   return Number.isFinite(value) ? value : fallback
 }
@@ -202,15 +192,6 @@ function historyRiskAction(risk) {
   return '历史风险可控'
 }
 
-function matchesAsOf(snapshot, asOf) {
-  const asOfText = String(asOf ?? '').trim()
-  const asOfDate = calendarDate(asOfText)
-  return (
-    snapshot.generatedAt === asOfText ||
-    (asOfDate !== null && (snapshot.date === asOfDate || calendarDate(snapshot.generatedAt) === asOfDate))
-  )
-}
-
 function formatAvailableDates(dates) {
   if (!dates.length) return '(none archived)'
   return dates.join(', ')
@@ -220,9 +201,8 @@ async function loadArchivedSnapshot(asOf) {
   const archive = JSON.parse(await readFile(HISTORY_ARCHIVE_URL, 'utf8'))
   const snapshots = normalizeHistoryArchive(archive)
   const replay = buildHistoryReplay(snapshots, { asOf })
-  const snapshot = snapshots.find((entry) => matchesAsOf(entry, asOf))
 
-  if (!snapshot) {
+  if (!replay.currentFrame) {
     const dateList = formatAvailableDates(replay.selection.availableDates)
     const error = new Error(
       `No archived snapshot for --as-of=${asOf}. Available dates: ${dateList}.`,
@@ -231,7 +211,7 @@ async function loadArchivedSnapshot(asOf) {
     throw error
   }
 
-  return { snapshot, replaySelection: replay.selection }
+  return { snapshot: replay.currentFrame, replaySelection: replay.selection }
 }
 
 function buildArchivedMemo(snapshot, replaySelection) {
