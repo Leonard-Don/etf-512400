@@ -220,6 +220,24 @@ test('exportMemo CLI: 重复 --format 时退出码非零并提示只传一次', 
   assert.equal(result.stdout, '')
 })
 
+test('exportMemo CLI: 重复 --output 时退出码非零、stdout 为空且 stderr 不打印 Node 堆栈或路径', () => {
+  const outputDir = mkdtempSync(join(tmpdir(), 'etf-memo-export-dup-out-'))
+  const firstPath = join(outputDir, 'first.md')
+  const secondPath = join(outputDir, 'second.md')
+
+  try {
+    const result = runExportMemo(['--output', firstPath, '--output', secondPath])
+    assert.notEqual(result.status, 0, 'duplicate --output should exit non-zero')
+    assert.match(result.stderr, /--output only once/i)
+    assert.equal(result.stdout, '')
+    assert.doesNotMatch(result.stderr, /Error:|at async|node:internal/i)
+    assert.equal(result.stderr.includes(firstPath), false, 'stderr should not leak first --output path')
+    assert.equal(result.stderr.includes(secondPath), false, 'stderr should not leak second --output path')
+  } finally {
+    rmSync(outputDir, { recursive: true, force: true })
+  }
+})
+
 test('exportMemo CLI: 三种 format 输出无 undefined/NaN/Infinity 哨兵且 stderr 干净', () => {
   for (const format of ['markdown', 'json', 'text']) {
     const result = runExportMemo([`--format=${format}`])
