@@ -78,6 +78,35 @@ test('formatMemoMarkdown: 缺少 reasons/invalidations 时仍生成有效输出'
   assert.match(md, /暂无/)
 })
 
+test('formatMemoMarkdown/Text: 缺少三类列表字段时保留区块与 fallback 文案', () => {
+  const sparse = {
+    headline: '观察持有（仓位 暂无）',
+    metrics: {
+      score: Number.NaN,
+      exposure: undefined,
+      confidence: null,
+      premium: undefined,
+      dailyChange: Number.NaN,
+    },
+  }
+
+  const md = formatMemoMarkdown(sparse)
+  assert.match(md, /^### 解释链\n暂无/m)
+  assert.match(md, /^### 关键依据\n暂无/m)
+  assert.match(md, /^### 失效条件\n暂无/m)
+  assert.match(md, /评分:\s*暂无/)
+  assert.match(md, /仓位:\s*暂无/)
+  assert.match(md, /置信度:\s*暂无/)
+  assert.ok(!md.includes('undefined'), 'markdown should not leak undefined for missing list fields')
+  assert.ok(!md.includes('NaN'), 'markdown should not leak NaN for non-finite sparse metrics')
+
+  const text = formatMemoText(sparse)
+  assert.equal(text.split('\n').length, 1, 'text format should stay a single line')
+  assert.ok(text.includes(sparse.headline), 'text format should still include headline')
+  assert.ok(!text.includes('undefined'), 'text should not leak undefined when drivers are missing')
+  assert.ok(!text.includes('NaN'), 'text should not leak NaN when drivers are missing')
+})
+
 test('formatMemoMarkdown: 缺失 metrics 字段时显示 暂无 而非 NaN/undefined', () => {
   const memo = {
     ...baseMemo,
