@@ -238,6 +238,32 @@ test('exportMemo CLI: 重复 --output 时退出码非零、stdout 为空且 stde
   }
 })
 
+test('exportMemo CLI: 重复 --output 在 --output=<path> 与混合形式下同样安全拒绝', () => {
+  const outputDir = mkdtempSync(join(tmpdir(), 'etf-memo-export-dup-out-eq-'))
+  const firstPath = join(outputDir, 'first.md')
+  const secondPath = join(outputDir, 'second.md')
+
+  try {
+    const argVariants = [
+      [`--output=${firstPath}`, `--output=${secondPath}`],
+      ['--output', firstPath, `--output=${secondPath}`],
+      [`--output=${firstPath}`, '--output', secondPath],
+    ]
+    for (const args of argVariants) {
+      const label = args.join(' ')
+      const result = runExportMemo(args)
+      assert.notEqual(result.status, 0, `[${label}] duplicate --output should exit non-zero`)
+      assert.equal(result.stdout, '', `[${label}] stdout 必须为空`)
+      assert.match(result.stderr, /--output only once/i, `[${label}] stderr 应提示只传一次`)
+      assert.doesNotMatch(result.stderr, /Error:|at async|node:internal/i, `[${label}] stderr 不应含 Node 堆栈`)
+      assert.equal(result.stderr.includes(firstPath), false, `[${label}] stderr 不应泄漏首个 --output 路径`)
+      assert.equal(result.stderr.includes(secondPath), false, `[${label}] stderr 不应泄漏第二个 --output 路径`)
+    }
+  } finally {
+    rmSync(outputDir, { recursive: true, force: true })
+  }
+})
+
 test('exportMemo CLI: 三种 format 输出无 undefined/NaN/Infinity 哨兵且 stderr 干净', () => {
   for (const format of ['markdown', 'json', 'text']) {
     const result = runExportMemo([`--format=${format}`])
