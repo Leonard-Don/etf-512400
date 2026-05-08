@@ -56,7 +56,17 @@ test('exportMemo CLI: --format=json 锁定顶层与 metrics 的 schema 形态', 
 
   assert.deepEqual(
     Object.keys(memo).sort(),
-    ['drivers', 'headline', 'invalidations', 'metrics', 'reasons', 'rule', 'source', 'tone'],
+    [
+      'drivers',
+      'headline',
+      'invalidations',
+      'metrics',
+      'reasons',
+      'replaySelection',
+      'rule',
+      'source',
+      'tone',
+    ],
     'memo 顶层键集合发生漂移',
   )
 
@@ -79,6 +89,17 @@ test('exportMemo CLI: --format=json 锁定顶层与 metrics 的 schema 形态', 
     assert.equal(typeof driver, 'string', 'driver 必须是 string')
     assert.ok(driver.length > 0, 'driver 不能为空字符串')
   }
+})
+
+test('exportMemo CLI: --format=json live memo 暴露 replaySelection=null（保持形状一致）', () => {
+  const result = runExportMemo(['--format=json'])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+  assert.ok(
+    Object.prototype.hasOwnProperty.call(memo, 'replaySelection'),
+    'live memo 必须始终包含 replaySelection 字段（即使为 null）',
+  )
+  assert.equal(memo.replaySelection, null)
 })
 
 test('exportMemo CLI: --as-of 从匹配历史归档快照导出 JSON memo', () => {
@@ -114,6 +135,48 @@ test('exportMemo CLI: --as-of 从匹配历史归档快照导出 JSON memo', () =
     `expected archived timestamp export exit 0, got ${timestampResult.status}\n${timestampResult.stderr}`,
   )
   assert.deepEqual(JSON.parse(timestampResult.stdout).metrics, memo.metrics)
+})
+
+test('exportMemo CLI: --as-of JSON memo 暴露 replaySelection 元数据，便于下游审计', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshots = normalizeHistoryArchive(archive)
+  const archivedSnapshot = archivedSnapshots[0]
+  assert.ok(archivedSnapshot, 'fixture archive should contain at least one normalized snapshot')
+
+  const expectedAvailableDates = archivedSnapshots.map((entry) => entry.date).sort()
+
+  const result = runExportMemo(['--format=json', `--as-of=${archivedSnapshot.date}`])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+
+  assert.ok(memo.replaySelection, 'archived memo 必须暴露 replaySelection 元数据')
+  assert.equal(memo.replaySelection.requestedAsOf, archivedSnapshot.date)
+  assert.equal(memo.replaySelection.matchedDate, archivedSnapshot.date)
+  assert.equal(memo.replaySelection.fallbackReason, null)
+  assert.deepEqual(
+    [...memo.replaySelection.availableDates].sort(),
+    expectedAvailableDates,
+    'availableDates 必须包含归档中所有日期，便于审计',
+  )
+  for (const date of memo.replaySelection.availableDates) {
+    assert.equal(typeof date, 'string', 'availableDates 元素必须是 string')
+    assert.match(date, /^\d{4}-\d{2}-\d{2}$/, 'availableDates 元素必须是 ISO 日期')
+  }
+})
+
+test('exportMemo CLI: --as-of 完整时间戳时 replaySelection 回显请求值并锁定 matchedDate', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshot = normalizeHistoryArchive(archive)[0]
+  assert.ok(archivedSnapshot?.generatedAt, 'fixture snapshot must expose a generatedAt timestamp')
+
+  const result = runExportMemo(['--format=json', `--as-of=${archivedSnapshot.generatedAt}`])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+
+  assert.ok(memo.replaySelection, 'timestamp 命中也必须暴露 replaySelection')
+  assert.equal(memo.replaySelection.requestedAsOf, archivedSnapshot.generatedAt)
+  assert.equal(memo.replaySelection.matchedDate, archivedSnapshot.date)
+  assert.equal(memo.replaySelection.fallbackReason, null)
 })
 
 test('exportMemo CLI: --as-of 无匹配时 stderr 含可用日期且不泄漏归档路径或 Node 堆栈', () => {

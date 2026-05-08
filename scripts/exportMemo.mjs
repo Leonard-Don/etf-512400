@@ -231,10 +231,10 @@ async function loadArchivedSnapshot(asOf) {
     throw error
   }
 
-  return snapshot
+  return { snapshot, replaySelection: replay.selection }
 }
 
-function buildArchivedMemo(snapshot) {
+function buildArchivedMemo(snapshot, replaySelection) {
   const premium = finiteMetric(snapshot.premium)
   const dailyChange = finiteMetric(snapshot.quote.changePercent)
   const signalScore = boundedPercent(snapshot.signal.avgTrend)
@@ -278,6 +278,7 @@ function buildArchivedMemo(snapshot) {
     },
     premium,
     dailyChange,
+    replaySelection,
   })
 }
 
@@ -324,7 +325,10 @@ async function buildLiveMemo() {
 }
 
 async function buildMemo({ asOf } = {}) {
-  if (asOf) return buildArchivedMemo(await loadArchivedSnapshot(asOf))
+  if (asOf) {
+    const { snapshot, replaySelection } = await loadArchivedSnapshot(asOf)
+    return buildArchivedMemo(snapshot, replaySelection)
+  }
   return buildLiveMemo()
 }
 
