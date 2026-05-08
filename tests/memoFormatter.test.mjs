@@ -170,6 +170,37 @@ test('formatMemoMarkdown/Text: 零值/0% 等 sparse-but-valid 字段应原样渲
   assert.equal(text.startsWith('[警告]'), false, 'neutral tone 不应触发 [警告] 前缀')
 })
 
+test('formatMemoMarkdown: 同一 metrics 中 0 与缺失值并存时按字段独立渲染，互不串味', () => {
+  // 守卫 `if (!value)` 类截断式判断：0 不能被误归到 暂无。
+  // 当 score/exposure/dailyChange=0（合法稀疏）与 confidence=NaN/premium=undefined（真缺失）
+  // 共存于同一 metrics 时，每个字段必须按其自身语义独立渲染。
+  const memo = {
+    headline: '观察持有（仓位 0%）',
+    drivers: ['信号 暂时观望（0）', '交易质量 平稳（55）', '趋势 横盘'],
+    reasons: ['折溢价：+0.00%'],
+    invalidations: ['价格跌破60日均线触发降档'],
+    metrics: {
+      score: 0,
+      exposure: 0,
+      confidence: Number.NaN,
+      premium: undefined,
+      dailyChange: 0,
+    },
+    source: '自动优化',
+    rule: '20/60日趋势',
+    tone: 'neutral',
+  }
+
+  const md = formatMemoMarkdown(memo)
+  assert.match(md, /^- 评分: 0$/m, 'score=0 必须渲染为 0，不被截断式守卫归到 暂无')
+  assert.match(md, /^- 仓位: 0%$/m, 'exposure=0 必须渲染为 0%')
+  assert.match(md, /^- 当日涨跌: 0\.00%$/m, 'dailyChange=0 必须渲染为 0.00%')
+  assert.match(md, /^- 置信度: 暂无$/m, 'confidence=NaN 必须独立回退到 暂无')
+  assert.match(md, /^- 折溢价: 暂无$/m, 'premium=undefined 必须独立回退到 暂无')
+  assert.ok(!md.includes('NaN'), 'markdown 不应泄漏 NaN 哨兵')
+  assert.ok(!md.includes('undefined'), 'markdown 不应泄漏 undefined 哨兵')
+})
+
 test('formatMemoMarkdown/Text: 顶层 source/rule/tone 与整个 metrics 对象缺失时仍稳定渲染', () => {
   // 上游 memo 在离线/降级路径下可能不带 source/rule/tone，且 metrics 对象整体缺失。
   // 守卫这些场景下不泄漏 undefined/NaN，并稳定渲染 "暂无" 占位与无前缀单行摘要。
