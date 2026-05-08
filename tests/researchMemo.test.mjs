@@ -159,3 +159,62 @@ test('composeResearchMemo: 缺少 reasons/watchPoints/invalidationRules 时返�
   assert.deepEqual(memo.invalidations, [])
   assert.equal(memo.drivers.length, 3)
 })
+
+test('composeResearchMemo: 默认未提供 replaySelection 时字段为 null', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+  })
+  assert.ok(
+    Object.prototype.hasOwnProperty.call(memo, 'replaySelection'),
+    'memo 必须始终暴露 replaySelection 字段以保持形状一致',
+  )
+  assert.equal(memo.replaySelection, null)
+})
+
+test('composeResearchMemo: 显式 replaySelection 透传给 memo 输出', () => {
+  const replaySelection = {
+    requestedAsOf: '2026-04-30',
+    matchedDate: '2026-04-30',
+    fallbackReason: null,
+    availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+  }
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+    replaySelection,
+  })
+  assert.deepEqual(memo.replaySelection, replaySelection)
+  assert.notEqual(
+    memo.replaySelection,
+    replaySelection,
+    'replaySelection 应是副本而非同引用，避免外部突变污染 memo',
+  )
+  assert.notEqual(
+    memo.replaySelection.availableDates,
+    replaySelection.availableDates,
+    'availableDates 必须深拷贝，防止下游 push 污染原档',
+  )
+})
+
+test('composeResearchMemo: replaySelection=null 时显式保留 null 而不丢字段', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0,
+    dailyChange: 0,
+    replaySelection: null,
+  })
+  assert.ok(Object.prototype.hasOwnProperty.call(memo, 'replaySelection'))
+  assert.equal(memo.replaySelection, null)
+})
