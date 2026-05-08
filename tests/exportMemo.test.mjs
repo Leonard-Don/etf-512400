@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { composeResearchMemo } from '../src/analysis/researchMemo.js'
 
 const scriptUrl = new URL('../scripts/exportMemo.mjs', import.meta.url)
 const scriptPath = fileURLToPath(scriptUrl)
@@ -76,6 +77,46 @@ test('exportMemo CLI: --format=json 锁定顶层与 metrics 的 schema 形态', 
   for (const driver of memo.drivers) {
     assert.equal(typeof driver, 'string', 'driver 必须是 string')
     assert.ok(driver.length > 0, 'driver 不能为空字符串')
+  }
+})
+
+test('exportMemo JSON pipeline: sparse-but-valid zero metrics remain numeric through serialization', () => {
+  const memo = composeResearchMemo({
+    primaryDecision: {
+      action: '观察持有',
+      exposure: 0,
+      score: 0,
+      source: 'fixture',
+      rule: 'zero-metric-guard',
+      tone: 'neutral',
+    },
+    signal: {
+      action: '观望',
+      score: 0,
+      confidence: 0,
+      reasons: ['信号为零但仍是有效数值'],
+      invalidationRules: ['跌破均线'],
+    },
+    tradingQuality: {
+      action: '平稳',
+      score: 0,
+      watchPoints: ['成交量观察'],
+    },
+    trendProfile: { state: '横盘' },
+    premium: 0,
+    dailyChange: 0,
+  })
+
+  const exportedMemo = JSON.parse(JSON.stringify(memo))
+  assert.deepEqual(exportedMemo.metrics, {
+    score: 0,
+    exposure: 0,
+    confidence: 0,
+    premium: 0,
+    dailyChange: 0,
+  })
+  for (const key of Object.keys(exportedMemo.metrics)) {
+    assert.equal(typeof exportedMemo.metrics[key], 'number', `metrics.${key} 必须保持 number`)
   }
 })
 
