@@ -29,6 +29,12 @@ function readOptionValue(argv, index, optionName) {
   return { value, nextIndex: index + 1 }
 }
 
+function normalizeAsOfValue(value) {
+  const normalizedValue = String(value ?? '').trim()
+  if (!normalizedValue) return { error: 'Missing value for --as-of.' }
+  return { value: normalizedValue }
+}
+
 function parseArgs(argv) {
   let format = 'markdown'
   let outputPath = null
@@ -67,13 +73,16 @@ function parseArgs(argv) {
       sawAsOf = true
       const { error, value, nextIndex } = readOptionValue(argv, i, '--as-of')
       if (error) return { error }
-      asOf = value
+      const asOfValue = normalizeAsOfValue(value)
+      if (asOfValue.error) return { error: asOfValue.error }
+      asOf = asOfValue.value
       i = nextIndex
     } else if (arg.startsWith('--as-of=')) {
       if (sawAsOf) return { error: 'Specify --as-of only once.' }
       sawAsOf = true
-      asOf = arg.slice('--as-of='.length)
-      if (!asOf) return { error: 'Missing value for --as-of.' }
+      const asOfValue = normalizeAsOfValue(arg.slice('--as-of='.length))
+      if (asOfValue.error) return { error: asOfValue.error }
+      asOf = asOfValue.value
     } else {
       return { error: `Unknown argument: ${arg}` }
     }

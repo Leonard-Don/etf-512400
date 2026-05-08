@@ -116,6 +116,36 @@ test('exportMemo CLI: --as-of 从匹配历史归档快照导出 JSON memo', () =
   assert.deepEqual(JSON.parse(timestampResult.stdout).metrics, memo.metrics)
 })
 
+test('exportMemo CLI: 重复或空白 --as-of 时安全拒绝且 stderr 干净', () => {
+  const duplicateVariants = [
+    ['--as-of', '/tmp/first-as-of', '--as-of', '/var/folders/second-as-of'],
+    ['--as-of=/tmp/first-as-of', '--as-of', '/var/folders/second-as-of'],
+  ]
+
+  for (const args of duplicateVariants) {
+    const label = args.join(' ')
+    const result = runExportMemo(args)
+    assert.notEqual(result.status, 0, `[${label}] duplicate --as-of should exit non-zero`)
+    assert.equal(result.stdout, '', `[${label}] stdout 必须为空`)
+    assert.match(result.stderr, /--as-of only once/i, `[${label}] stderr 应提示只传一次`)
+    assert.doesNotMatch(
+      result.stderr,
+      /Error:|at async|node:internal|\/tmp\/|\/var\/folders/i,
+      `[${label}] stderr 不应含 Node 堆栈或路径`,
+    )
+  }
+
+  const blankResult = runExportMemo(['--as-of', '   '])
+  assert.notEqual(blankResult.status, 0, 'blank --as-of should exit non-zero')
+  assert.equal(blankResult.stdout, '', 'blank --as-of stdout 必须为空')
+  assert.match(blankResult.stderr, /Missing value for --as-of/i)
+  assert.doesNotMatch(
+    blankResult.stderr,
+    /No archived snapshot|Error:|at async|node:internal|\/tmp\/|\/var\/folders/i,
+    'blank --as-of stderr 不应含归档查找失败、Node 堆栈或路径',
+  )
+})
+
 test('exportMemo JSON pipeline: sparse-but-valid zero metrics remain numeric through serialization', () => {
   const memo = composeResearchMemo({
     primaryDecision: {
