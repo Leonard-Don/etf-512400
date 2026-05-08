@@ -116,6 +116,57 @@ test('exportMemo CLI: --as-of 从匹配历史归档快照导出 JSON memo', () =
   assert.deepEqual(JSON.parse(timestampResult.stdout).metrics, memo.metrics)
 })
 
+test('exportMemo CLI: --as-of 无匹配时 stderr 含可用日期且不泄漏归档路径或 Node 堆栈', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const availableDates = normalizeHistoryArchive(archive)
+    .map((entry) => entry.date)
+    .sort()
+  assert.ok(availableDates.length > 0, 'fixture archive should expose at least one date')
+
+  const missingAsOf = '2099-12-31'
+  assert.equal(
+    availableDates.includes(missingAsOf),
+    false,
+    'sentinel as-of must not exist in the archive',
+  )
+
+  const result = runExportMemo([`--as-of=${missingAsOf}`])
+  assert.notEqual(result.status, 0, 'unmatched --as-of should exit non-zero')
+  assert.equal(result.stdout, '', 'stdout 必须为空')
+
+  assert.match(
+    result.stderr,
+    /no archived snapshot/i,
+    'stderr 应说明未找到归档快照',
+  )
+  assert.ok(
+    result.stderr.includes(missingAsOf),
+    'stderr 应回显请求的 --as-of 值',
+  )
+  assert.match(
+    result.stderr,
+    /available dates/i,
+    'stderr 应给出可选日期清单的提示',
+  )
+  for (const date of availableDates) {
+    assert.ok(
+      result.stderr.includes(date),
+      `stderr 应列出可用日期 ${date}`,
+    )
+  }
+
+  assert.doesNotMatch(
+    result.stderr,
+    /Error:|at async|node:internal/i,
+    'stderr 不应包含 Node 堆栈',
+  )
+  assert.doesNotMatch(
+    result.stderr,
+    /\/private\/|\/Users\/|\/var\/folders\/|512400-snapshots\.json/,
+    'stderr 不应泄漏归档绝对路径或文件名',
+  )
+})
+
 test('exportMemo CLI: 重复或空白 --as-of 时安全拒绝且 stderr 干净', () => {
   const duplicateVariants = [
     ['--as-of', '/tmp/first-as-of', '--as-of', '/var/folders/second-as-of'],

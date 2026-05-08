@@ -13,6 +13,7 @@ import {
   composeResearchMemo,
 } from '../src/analysis/metrics.js'
 import { normalizeHistoryArchive } from '../src/analysis/historyArchive.js'
+import { buildHistoryReplay } from '../src/analysis/historyReplay.js'
 import { formatMemoMarkdown, formatMemoText } from '../src/analysis/memoFormatter.js'
 
 const SUPPORTED_FORMATS = new Set(['markdown', 'json', 'text'])
@@ -210,13 +211,22 @@ function matchesAsOf(snapshot, asOf) {
   )
 }
 
+function formatAvailableDates(dates) {
+  if (!dates.length) return '(none archived)'
+  return dates.join(', ')
+}
+
 async function loadArchivedSnapshot(asOf) {
   const archive = JSON.parse(await readFile(HISTORY_ARCHIVE_URL, 'utf8'))
   const snapshots = normalizeHistoryArchive(archive)
+  const replay = buildHistoryReplay(snapshots, { asOf })
   const snapshot = snapshots.find((entry) => matchesAsOf(entry, asOf))
 
   if (!snapshot) {
-    const error = new Error(`No archived snapshot found for --as-of=${asOf}.`)
+    const dateList = formatAvailableDates(replay.selection.availableDates)
+    const error = new Error(
+      `No archived snapshot for --as-of=${asOf}. Available dates: ${dateList}.`,
+    )
     error.code = 'AS_OF_NOT_FOUND'
     throw error
   }
