@@ -47,6 +47,38 @@ test('exportMemo CLI: --format=json 输出可解析的对象，含必要字段',
   assert.ok(['positive', 'neutral', 'warning'].includes(memo.tone))
 })
 
+test('exportMemo CLI: --format=json 锁定顶层与 metrics 的 schema 形态', () => {
+  const result = runExportMemo(['--format=json'])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+
+  assert.deepEqual(
+    Object.keys(memo).sort(),
+    ['drivers', 'headline', 'invalidations', 'metrics', 'reasons', 'rule', 'source', 'tone'],
+    'memo 顶层键集合发生漂移',
+  )
+
+  assert.deepEqual(
+    Object.keys(memo.metrics).sort(),
+    ['confidence', 'dailyChange', 'exposure', 'premium', 'score'],
+    'memo.metrics 键集合发生漂移',
+  )
+  for (const key of Object.keys(memo.metrics)) {
+    assert.equal(typeof memo.metrics[key], 'number', `metrics.${key} 必须是 number`)
+    assert.ok(Number.isFinite(memo.metrics[key]), `metrics.${key} 必须是有限数`)
+  }
+
+  assert.equal(typeof memo.source, 'string')
+  assert.ok(memo.source.length > 0, 'memo.source 不能为空字符串')
+  assert.equal(typeof memo.rule, 'string')
+  assert.ok(memo.rule.length > 0, 'memo.rule 不能为空字符串')
+
+  for (const driver of memo.drivers) {
+    assert.equal(typeof driver, 'string', 'driver 必须是 string')
+    assert.ok(driver.length > 0, 'driver 不能为空字符串')
+  }
+})
+
 test('exportMemo CLI: --format=text 输出单行摘要', () => {
   const result = runExportMemo(['--format=text'])
   assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
