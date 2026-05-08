@@ -36,6 +36,11 @@ function isFrameLike(entry) {
   )
 }
 
+function normalizeAsOf(asOf) {
+  if (typeof asOf !== 'string') return ''
+  return asOf.trim()
+}
+
 function matchesAsOf(frame, asOf) {
   if (frame.date === asOf) return true
   if (frame.generatedAt === asOf) return true
@@ -93,10 +98,11 @@ export function buildHistoryReplay(snapshots, options = {}) {
   const sorted = [...valid].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   const frames = sorted.map((entry, index) => ({ ...entry, index }))
 
+  const asOfQuery = normalizeAsOf(options.asOf)
   let currentIndex
   let currentFrame
-  if (options.asOf) {
-    const matchIndex = frames.findIndex((frame) => matchesAsOf(frame, options.asOf))
+  if (asOfQuery) {
+    const matchIndex = frames.findIndex((frame) => matchesAsOf(frame, asOfQuery))
     currentIndex = matchIndex === -1 ? null : matchIndex
     currentFrame = matchIndex === -1 ? null : frames[matchIndex]
   } else {

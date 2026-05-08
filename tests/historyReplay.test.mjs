@@ -207,6 +207,37 @@ test('buildHistoryReplay summary 标记 avgTrend 的峰谷帧', () => {
   assert.equal(replay.summary.troughTrend.avgTrend, 40)
 })
 
+test('buildHistoryReplay 把空白或非字符串 asOf 视作未指定，回到最新帧', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+
+  for (const blankAsOf of ['   ', '\t', '\n']) {
+    const replay = buildHistoryReplay(archive, { asOf: blankAsOf })
+    assert.equal(replay.currentIndex, 2, `blank asOf ${JSON.stringify(blankAsOf)} 应回到最新帧`)
+    assert.equal(replay.currentFrame.date, '2026-04-30')
+  }
+
+  for (const nonString of [42, true, {}, []]) {
+    const replay = buildHistoryReplay(archive, { asOf: nonString })
+    assert.equal(replay.currentIndex, 2, `非字符串 asOf ${JSON.stringify(nonString)} 应回到最新帧`)
+    assert.equal(replay.currentFrame.date, '2026-04-30')
+  }
+})
+
+test('buildHistoryReplay 把带前后空白的 asOf 当作 trim 后的日期匹配', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+  const replay = buildHistoryReplay(archive, { asOf: '  2026-04-29  ' })
+  assert.equal(replay.currentIndex, 1)
+  assert.equal(replay.currentFrame.date, '2026-04-29')
+})
+
 test('buildHistoryReplay 单条归档下峰谷为同一帧且方向 flat', () => {
   const archive = normalizeHistoryArchive([
     snapshot({
