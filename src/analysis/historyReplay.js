@@ -22,6 +22,7 @@ function emptySelection() {
     matchedDate: null,
     fallbackReason: 'no-frames',
     availableDates: [],
+    dedupedDates: [],
   }
 }
 
@@ -58,15 +59,23 @@ function compareGeneratedAt(a, b) {
 }
 
 // 同 date 多帧时保留 generatedAt 最新的一帧，确保 as-of 选择确定且 availableDates 唯一。
+// 同时回报哪些日期触发了去重，供下游审计（safe metadata，无路径/堆栈泄漏）。
 function dedupeByDate(frames) {
   const byDate = new Map()
+  const counts = new Map()
   for (const frame of frames) {
+    counts.set(frame.date, (counts.get(frame.date) ?? 0) + 1)
     const existing = byDate.get(frame.date)
     if (!existing || compareGeneratedAt(frame.generatedAt, existing.generatedAt) > 0) {
       byDate.set(frame.date, frame)
     }
   }
-  return Array.from(byDate.values())
+  const dedupedDates = []
+  for (const [date, count] of counts) {
+    if (count > 1) dedupedDates.push(date)
+  }
+  dedupedDates.sort()
+  return { unique: Array.from(byDate.values()), dedupedDates }
 }
 
 function normalizeAsOf(asOf) {
@@ -128,7 +137,7 @@ export function buildHistoryReplay(snapshots, options = {}) {
   const valid = snapshots.filter(isFrameLike)
   if (valid.length === 0) return emptyReplay()
 
-  const unique = dedupeByDate(valid)
+  const { unique, dedupedDates } = dedupeByDate(valid)
   const sorted = unique.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
   const frames = sorted.map((entry, index) => ({ ...entry, index }))
 
@@ -162,6 +171,7 @@ export function buildHistoryReplay(snapshots, options = {}) {
       matchedDate: currentFrame ? currentFrame.date : null,
       fallbackReason,
       availableDates,
+      dedupedDates: [...dedupedDates],
     },
   }
 }
