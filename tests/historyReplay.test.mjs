@@ -359,6 +359,67 @@ test('buildHistoryReplay selection.availableDates 是排序后的副本，不被
   assert.deepEqual(replay2.selection.availableDates, ['2026-04-28', '2026-04-30'])
 })
 
+test('buildHistoryReplay 同日多个归档帧时按最新 generatedAt 去重，避免 as-of 命中歧义', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+    snapshot({ tradeDate: '2026-04-29' }),
+  ])
+
+  const replay = buildHistoryReplay(archive)
+  assert.equal(replay.frames.length, 2, '同日多帧必须去重为唯一一帧')
+  assert.deepEqual(
+    replay.selection.availableDates,
+    ['2026-04-29', '2026-04-30'],
+    'availableDates 必须按日期唯一升序，避免审计提示重复',
+  )
+  const winning = replay.frames.find((frame) => frame.date === '2026-04-30')
+  assert.equal(
+    winning.generatedAt,
+    '2026-04-30T08:00:00.000Z',
+    '保留最新 generatedAt 帧，确保 as-of 选择确定',
+  )
+  assert.equal(winning.signal.avgTrend, 80, '保留的帧指标应来自最新 generatedAt 的归档记录')
+
+  // 默认当前帧 = 最新日期 = 去重后的那一帧
+  assert.equal(replay.currentFrame.date, '2026-04-30')
+  assert.equal(replay.currentFrame.generatedAt, '2026-04-30T08:00:00.000Z')
+
+  // asOf 命中应锁定到去重后的那一帧
+  const matched = buildHistoryReplay(archive, { asOf: '2026-04-30' })
+  assert.equal(matched.currentFrame.generatedAt, '2026-04-30T08:00:00.000Z')
+  assert.equal(matched.selection.matchedDate, '2026-04-30')
+  assert.equal(matched.selection.fallbackReason, null)
+
+  // 输入顺序反转后结果应保持一致（去重不依赖输入排序）
+  const reversed = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({ tradeDate: '2026-04-29' }),
+  ])
+  const reversedReplay = buildHistoryReplay(reversed)
+  assert.equal(reversedReplay.frames.length, 2)
+  const reversedWinning = reversedReplay.frames.find((frame) => frame.date === '2026-04-30')
+  assert.equal(reversedWinning.generatedAt, '2026-04-30T08:00:00.000Z')
+  assert.equal(reversedWinning.signal.avgTrend, 80)
+})
+
 test('buildHistoryReplay generatedAt 命中时 matchedDate 为对应 date 而非时间戳', () => {
   const archive = normalizeHistoryArchive([
     snapshot({ tradeDate: '2026-04-29', generatedAt: '2026-04-29T07:00:00.000Z' }),
