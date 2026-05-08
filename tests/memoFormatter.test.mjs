@@ -105,3 +105,31 @@ test('formatMemoText: warning tone 时附带风险前缀', () => {
   assert.match(text, /^\[警告\]/)
   assert.ok(text.includes('禁止追高'))
 })
+
+test('formatMemoMarkdown/Text: 顶层 source/rule/tone 与整个 metrics 对象缺失时仍稳定渲染', () => {
+  // 上游 memo 在离线/降级路径下可能不带 source/rule/tone，且 metrics 对象整体缺失。
+  // 守卫这些场景下不泄漏 undefined/NaN，并稳定渲染 "暂无" 占位与无前缀单行摘要。
+  const partial = {
+    headline: '观察持有（仓位 30%）',
+    drivers: ['信号 小仓跟踪（55）', '交易质量 谨慎（60）', '趋势 震荡'],
+    reasons: ['折溢价：+0.10%'],
+    invalidations: ['价格跌破60日均线'],
+  }
+
+  const md = formatMemoMarkdown(partial)
+  assert.ok(!md.includes('undefined'), 'markdown 缺失顶层字段时不应泄漏 undefined')
+  assert.ok(!md.includes('NaN'), 'markdown 缺失 metrics 对象时不应泄漏 NaN')
+  assert.match(md, /来源:\s*暂无/, 'source 缺失应回退到 暂无')
+  assert.match(md, /规则:\s*暂无/, 'rule 缺失应回退到 暂无')
+  assert.match(md, /风险标签:\s*暂无/, 'tone 缺失应回退到 暂无')
+  assert.match(md, /评分:\s*暂无/, 'metrics 整体缺失时 score 应回退到 暂无')
+  assert.match(md, /仓位:\s*暂无/, 'metrics 整体缺失时 exposure 应回退到 暂无')
+  assert.match(md, /置信度:\s*暂无/, 'metrics 整体缺失时 confidence 应回退到 暂无')
+  assert.match(md, /折溢价:\s*暂无/, 'metrics 整体缺失时 premium 应回退到 暂无')
+  assert.match(md, /当日涨跌:\s*暂无/, 'metrics 整体缺失时 dailyChange 应回退到 暂无')
+
+  const text = formatMemoText(partial)
+  assert.ok(!text.includes('undefined'), 'text 缺失 tone/drivers 时不应泄漏 undefined')
+  assert.equal(text.startsWith('[警告]'), false, '缺失 tone 不应触发 [警告] 前缀')
+  assert.ok(text.includes(partial.headline), '单行摘要仍应包含 headline')
+})
