@@ -179,6 +179,39 @@ test('exportMemo CLI: --as-of 完整时间戳时 replaySelection 回显请求值
   assert.equal(memo.replaySelection.fallbackReason, null)
 })
 
+test('exportMemo CLI: --as-of 同日不匹配时间戳被严格拒绝，避免与 replaySelection 自相矛盾', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshots = normalizeHistoryArchive(archive)
+  const archivedSnapshot = archivedSnapshots[0]
+  assert.ok(archivedSnapshot?.generatedAt, 'fixture snapshot must expose a generatedAt timestamp')
+
+  const offTimestamp = `${archivedSnapshot.date}T23:59:59.999Z`
+  assert.notEqual(
+    offTimestamp,
+    archivedSnapshot.generatedAt,
+    'sentinel timestamp must differ from archive generatedAt to exercise divergence',
+  )
+
+  const result = runExportMemo(['--format=json', `--as-of=${offTimestamp}`])
+  assert.notEqual(
+    result.status,
+    0,
+    '同日但与 generatedAt 不一致的完整时间戳必须退出非零，避免输出与 replaySelection 自相矛盾的 memo',
+  )
+  assert.equal(result.stdout, '', 'stdout 必须为空')
+  assert.match(result.stderr, /no archived snapshot/i, 'stderr 应说明未找到归档快照')
+  assert.ok(result.stderr.includes(offTimestamp), 'stderr 应回显请求的 --as-of 值')
+  assert.match(result.stderr, /available dates/i, 'stderr 应给出可用日期清单')
+  for (const date of archivedSnapshots.map((entry) => entry.date)) {
+    assert.ok(result.stderr.includes(date), `stderr 应列出可用日期 ${date}`)
+  }
+  assert.doesNotMatch(
+    result.stderr,
+    /Error:|at async|node:internal|\/private\/|\/Users\/|\/var\/folders\/|512400-snapshots\.json/i,
+    'stderr 不应含 Node 堆栈或归档路径泄漏',
+  )
+})
+
 test('exportMemo CLI: --as-of 无匹配时 stderr 含可用日期且不泄漏归档路径或 Node 堆栈', () => {
   const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
   const availableDates = normalizeHistoryArchive(archive)
