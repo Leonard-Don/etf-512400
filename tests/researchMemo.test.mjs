@@ -182,6 +182,7 @@ test('composeResearchMemo: 显式 replaySelection 透传给 memo 输出', () => 
     matchedDate: '2026-04-30',
     fallbackReason: null,
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+    dedupedDates: [],
   }
   const memo = composeResearchMemo({
     primaryDecision: basePrimary,
@@ -217,4 +218,52 @@ test('composeResearchMemo: replaySelection=null 时显式保留 null 而不丢�
   })
   assert.ok(Object.prototype.hasOwnProperty.call(memo, 'replaySelection'))
   assert.equal(memo.replaySelection, null)
+})
+
+test('composeResearchMemo: replaySelection.dedupedDates 透传并深拷贝（防外部突变）', () => {
+  const replaySelection = {
+    requestedAsOf: '2026-04-30',
+    matchedDate: '2026-04-30',
+    fallbackReason: null,
+    availableDates: ['2026-04-29', '2026-04-30'],
+    dedupedDates: ['2026-04-30'],
+  }
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+    replaySelection,
+  })
+  assert.deepEqual(memo.replaySelection.dedupedDates, ['2026-04-30'])
+  assert.notEqual(
+    memo.replaySelection.dedupedDates,
+    replaySelection.dedupedDates,
+    'dedupedDates 必须深拷贝，防止下游 push 污染原档',
+  )
+})
+
+test('composeResearchMemo: replaySelection 缺 dedupedDates 时填 [] 保持形状一致', () => {
+  const replaySelection = {
+    requestedAsOf: '2026-04-30',
+    matchedDate: '2026-04-30',
+    fallbackReason: null,
+    availableDates: ['2026-04-30'],
+  }
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0,
+    dailyChange: 0,
+    replaySelection,
+  })
+  assert.ok(
+    Object.prototype.hasOwnProperty.call(memo.replaySelection, 'dedupedDates'),
+    'memo.replaySelection 必须始终暴露 dedupedDates 字段',
+  )
+  assert.deepEqual(memo.replaySelection.dedupedDates, [])
 })

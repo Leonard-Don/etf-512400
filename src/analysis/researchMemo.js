@@ -6,11 +6,15 @@ function cloneReplaySelection(replaySelection) {
   const availableDates = Array.isArray(replaySelection.availableDates)
     ? [...replaySelection.availableDates]
     : []
+  const dedupedDates = Array.isArray(replaySelection.dedupedDates)
+    ? [...replaySelection.dedupedDates]
+    : []
   return {
     requestedAsOf: replaySelection.requestedAsOf ?? null,
     matchedDate: replaySelection.matchedDate ?? null,
     fallbackReason: replaySelection.fallbackReason ?? null,
     availableDates,
+    dedupedDates,
   }
 }
 

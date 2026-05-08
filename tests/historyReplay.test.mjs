@@ -263,6 +263,7 @@ test('buildHistoryReplay 空骨架 selection 标 no-frames 且无可用日期', 
       matchedDate: null,
       fallbackReason: 'no-frames',
       availableDates: [],
+      dedupedDates: [],
     })
   }
 })
@@ -279,6 +280,7 @@ test('buildHistoryReplay 默认 selection 为最新帧 + fallbackReason=no-as-of
     matchedDate: '2026-04-30',
     fallbackReason: 'no-as-of',
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+    dedupedDates: [],
   })
 })
 
@@ -294,6 +296,7 @@ test('buildHistoryReplay 命中 asOf 时 selection.fallbackReason 为 null 且 r
     matchedDate: '2026-04-29',
     fallbackReason: null,
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+    dedupedDates: [],
   })
 })
 
@@ -308,6 +311,7 @@ test('buildHistoryReplay asOf 未匹配时 selection 标 no-match 但 availableD
     matchedDate: null,
     fallbackReason: 'no-match',
     availableDates: ['2026-04-29', '2026-04-30'],
+    dedupedDates: [],
   })
 })
 
@@ -326,6 +330,7 @@ test('buildHistoryReplay 非字符串/空白 asOf 时 selection 标 invalid-as-o
         matchedDate: '2026-04-30',
         fallbackReason: 'invalid-as-of',
         availableDates: ['2026-04-29', '2026-04-30'],
+        dedupedDates: [],
       },
       `blank asOf ${JSON.stringify(blankAsOf)} 应标 invalid-as-of`,
     )
@@ -340,6 +345,7 @@ test('buildHistoryReplay 非字符串/空白 asOf 时 selection 标 invalid-as-o
         matchedDate: '2026-04-30',
         fallbackReason: 'invalid-as-of',
         availableDates: ['2026-04-29', '2026-04-30'],
+        dedupedDates: [],
       },
       `非字符串 asOf ${JSON.stringify(nonString)} 应标 invalid-as-of`,
     )
@@ -429,4 +435,131 @@ test('buildHistoryReplay generatedAt 命中时 matchedDate 为对应 date 而非
   assert.equal(replay.selection.requestedAsOf, '2026-04-29T07:00:00.000Z')
   assert.equal(replay.selection.matchedDate, '2026-04-29')
   assert.equal(replay.selection.fallbackReason, null)
+})
+
+test('buildHistoryReplay 无重复日期时 selection.dedupedDates 为空数组（保持形状一致）', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({ tradeDate: '2026-04-28' }),
+    snapshot({ tradeDate: '2026-04-29' }),
+    snapshot({ tradeDate: '2026-04-30' }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.ok(
+    Object.prototype.hasOwnProperty.call(replay.selection, 'dedupedDates'),
+    'selection 必须始终暴露 dedupedDates 字段',
+  )
+  assert.deepEqual(replay.selection.dedupedDates, [])
+})
+
+test('buildHistoryReplay 空骨架 selection.dedupedDates 为空数组（保持形状一致）', () => {
+  for (const input of [null, undefined, {}, 42, 'archive', []]) {
+    const replay = buildHistoryReplay(input)
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(replay.selection, 'dedupedDates'),
+      'selection 必须始终暴露 dedupedDates 字段',
+    )
+    assert.deepEqual(replay.selection.dedupedDates, [])
+  }
+})
+
+test('buildHistoryReplay 同日多帧时 selection.dedupedDates 列出去重日期且唯一升序', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-28',
+      generatedAt: '2026-04-28T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-28',
+      generatedAt: '2026-04-28T07:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 50, riskScore: 30 }],
+    }),
+    snapshot({ tradeDate: '2026-04-29' }),
+  ])
+
+  const replay = buildHistoryReplay(archive)
+  assert.deepEqual(
+    replay.selection.dedupedDates,
+    ['2026-04-28', '2026-04-30'],
+    'dedupedDates 必须列出曾经出现 >1 帧的日期，唯一升序',
+  )
+})
+
+test('buildHistoryReplay 同日三帧时 selection.dedupedDates 仍只列该日期一次', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T07:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 60, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.deepEqual(replay.selection.dedupedDates, ['2026-04-30'])
+})
+
+test('buildHistoryReplay no-match 时 selection.dedupedDates 仍揭示归档中存在的去重日期', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+  ])
+  const replay = buildHistoryReplay(archive, { asOf: '2099-12-31' })
+  assert.equal(replay.selection.fallbackReason, 'no-match')
+  assert.deepEqual(
+    replay.selection.dedupedDates,
+    ['2026-04-30'],
+    '即使未匹配，dedupedDates 也应反映归档侧的去重状态以便审计',
+  )
+})
+
+test('buildHistoryReplay selection.dedupedDates 是副本，不被外部突变污染', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.deepEqual(replay.selection.dedupedDates, ['2026-04-30'])
+  replay.selection.dedupedDates.push('hacked')
+
+  const replay2 = buildHistoryReplay(archive)
+  assert.deepEqual(
+    replay2.selection.dedupedDates,
+    ['2026-04-30'],
+    '后续调用不应受先前突变污染',
+  )
 })

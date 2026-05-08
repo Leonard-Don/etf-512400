@@ -164,6 +164,37 @@ test('exportMemo CLI: --as-of JSON memo 暴露 replaySelection 元数据，便�
   }
 })
 
+test('exportMemo CLI: --as-of JSON memo 的 replaySelection 暴露 dedupedDates 数组（审计用）', () => {
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshot = normalizeHistoryArchive(archive)[0]
+  assert.ok(archivedSnapshot, 'fixture archive should contain at least one normalized snapshot')
+
+  const result = runExportMemo(['--format=json', `--as-of=${archivedSnapshot.date}`])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+
+  assert.ok(memo.replaySelection, 'archived memo 必须暴露 replaySelection 元数据')
+  assert.ok(
+    Object.prototype.hasOwnProperty.call(memo.replaySelection, 'dedupedDates'),
+    'memo.replaySelection 必须始终暴露 dedupedDates 字段（即使无去重）',
+  )
+  assert.ok(
+    Array.isArray(memo.replaySelection.dedupedDates),
+    'dedupedDates 必须是数组',
+  )
+  for (const date of memo.replaySelection.dedupedDates) {
+    assert.equal(typeof date, 'string', 'dedupedDates 元素必须是 string')
+    assert.match(date, /^\d{4}-\d{2}-\d{2}$/, 'dedupedDates 元素必须是 ISO 日期')
+  }
+})
+
+test('exportMemo CLI: live memo replaySelection=null 时不需要 dedupedDates 字段（不强制注入）', () => {
+  const result = runExportMemo(['--format=json'])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const memo = JSON.parse(result.stdout)
+  assert.equal(memo.replaySelection, null, 'live memo replaySelection 仍为 null 以维持现有契约')
+})
+
 test('exportMemo CLI: --as-of 完整时间戳时 replaySelection 回显请求值并锁定 matchedDate', () => {
   const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
   const archivedSnapshot = normalizeHistoryArchive(archive)[0]
