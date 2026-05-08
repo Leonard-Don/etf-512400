@@ -1,6 +1,6 @@
 // 把 composeResearchMemo 的结构化输出渲染为 Markdown / 单行文本，便于本地导出与对话粘贴。
 // 仅依赖 memo 对象，不读数据，保持纯函数。
-import { formatPercent, formatSignedPercent } from './formatters.js'
+import { formatSignedPercent } from './formatters.js'
 
 const TONE_PREFIX = {
   warning: '[警告] ',
