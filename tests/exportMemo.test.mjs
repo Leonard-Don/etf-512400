@@ -150,6 +150,27 @@ test('exportMemo CLI: --output 写入与 stdout 一致，且不改动数据 JSON
   }
 })
 
+
+test('exportMemo CLI: --output 可写入 repo-local 临时目录且不泄漏路径', () => {
+  const repoTempPrefix = fileURLToPath(new URL('../.tmp-memo-export-', import.meta.url))
+  const outputDir = mkdtempSync(repoTempPrefix)
+  const outputPath = join(outputDir, 'memo.md')
+
+  try {
+    const result = runExportMemo(['--format=markdown', '--output', outputPath])
+    assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+    assert.equal(result.stdout, '')
+    assert.equal(result.stderr, '')
+
+    const memoText = readFileSync(outputPath, 'utf8')
+    assert.match(memoText, /^# ETF 512400 研究备忘/m)
+    assert.doesNotMatch(memoText, /undefined|NaN|Infinity/)
+    assert.doesNotMatch(memoText, /\.tmp-memo-export-|\/tmp\/|\/var\/folders\//)
+  } finally {
+    rmSync(outputDir, { recursive: true, force: true })
+  }
+})
+
 test('exportMemo CLI: --output 拒绝覆盖受保护的数据 JSON', () => {
   for (const protectedUrl of [liveSnapshotUrl, historySnapshotsUrl]) {
     const protectedBefore = readFileSync(protectedUrl, 'utf8')
