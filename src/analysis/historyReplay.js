@@ -175,7 +175,9 @@ export function buildHistoryReplay(snapshots, options = {}) {
       requestedAsOf,
       matchedDate: currentFrame ? currentFrame.date : null,
       matchedGeneratedAt:
-        currentFrame && isValidGeneratedAt(currentFrame.generatedAt)
+        currentFrame &&
+        isValidGeneratedAt(currentFrame.generatedAt) &&
+        currentFrame.generatedAt.trim().length > 0
           ? currentFrame.generatedAt
           : null,
       fallbackReason,
