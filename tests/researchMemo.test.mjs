@@ -247,6 +247,36 @@ test('composeResearchMemo: replaySelection.dedupedDates 透传并深拷贝（防
   )
 })
 
+test('composeResearchMemo: replaySelection.matchedGeneratedAt 仅含空白时归一为 null（与 buildHistoryReplay 对齐）', () => {
+  // buildHistoryReplay 已把空白 generatedAt 归一为 null，避免 memo/export 把空白当真时间戳。
+  // composeResearchMemo 必须沿用同样契约：上游若绕开 buildHistoryReplay 直接构造 replaySelection，
+  // memo.replaySelection.matchedGeneratedAt 仍要归一为 null，否则 JSON 序列化会输出空白伪时间戳，
+  // markdown 的 "- 生成时间: " 行也会渲染出可见空白当作真值。
+  for (const matchedGeneratedAt of ['   ', '\t', '\n', '  \t\n  ']) {
+    const memo = composeResearchMemo({
+      primaryDecision: basePrimary,
+      signal: baseSignal,
+      tradingQuality: baseQuality,
+      trendProfile: baseTrend,
+      premium: 0.001,
+      dailyChange: 0.012,
+      replaySelection: {
+        requestedAsOf: '2026-04-30',
+        matchedDate: '2026-04-30',
+        matchedGeneratedAt,
+        fallbackReason: null,
+        availableDates: ['2026-04-30'],
+        dedupedDates: [],
+      },
+    })
+    assert.equal(
+      memo.replaySelection.matchedGeneratedAt,
+      null,
+      `matchedGeneratedAt=${JSON.stringify(matchedGeneratedAt)} 应归一为 null（空白等同无效时间戳）`,
+    )
+  }
+})
+
 test('composeResearchMemo: replaySelection 缺 dedupedDates 时填 [] 保持形状一致', () => {
   const replaySelection = {
     requestedAsOf: '2026-04-30',
