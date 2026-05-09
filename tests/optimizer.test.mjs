@@ -113,3 +113,46 @@ test('best.current.exposure 落在 [0, 1]', () => {
     `exposure should clamp to [0,1], got ${result.best.current.exposure}`,
   )
 })
+
+test('空因子篮 → factorOverlay 退化为 1，exposure 等于 rawExposure', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0008 ** i)
+  const result = buildStrategyOptimizer({ klines, factorBaskets: [] })
+  assert.equal(result.ok, true)
+  assert.equal(result.best.current.factorOverlay, 1)
+  assert.match(result.best.current.factorNote, /不/)
+  assert.ok(result.best.current.rawExposure > 0, 'raw exposure 必须非零，否则该断言无意义')
+  assert.ok(
+    Math.abs(result.best.current.exposure - result.best.current.rawExposure) < 1e-9,
+    `expected exposure==rawExposure when overlay=1, got ${result.best.current.exposure} vs ${result.best.current.rawExposure}`,
+  )
+})
+
+test('完全平盘数据 → 年化与回撤皆 0，仓位归零、tone=neutral、action=空仓等待', () => {
+  const klines = syntheticKlines(260, () => 100)
+  const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
+  assert.equal(result.ok, true)
+  assert.ok(result.leaderboard.length > 0)
+  result.leaderboard.forEach((item) => {
+    assert.equal(item.testAnnualReturn, 0)
+    assert.equal(item.testMaxDrawdown, 0)
+    assert.equal(item.testExposure, 0)
+  })
+  assert.equal(result.best.current.rawExposure, 0)
+  assert.equal(result.best.current.exposure, 0)
+  assert.equal(result.best.current.action, '空仓等待')
+  assert.equal(result.best.current.tone, 'neutral')
+})
+
+test('leaderboard 按 score 降序排列且长度不超过 5', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
+  assert.equal(result.ok, true)
+  assert.ok(result.leaderboard.length > 1, '需要至少 2 个候选才能验证排序')
+  assert.ok(result.leaderboard.length <= 5)
+  for (let i = 1; i < result.leaderboard.length; i += 1) {
+    assert.ok(
+      result.leaderboard[i - 1].score >= result.leaderboard[i].score,
+      `leaderboard[${i - 1}].score=${result.leaderboard[i - 1].score} 应 ≥ leaderboard[${i}].score=${result.leaderboard[i].score}`,
+    )
+  }
+})
