@@ -207,6 +207,37 @@ test('composeResearchMemo: 显式 replaySelection 透传给 memo 输出', () => 
   )
 })
 
+test('composeResearchMemo: 源 replaySelection.availableDates 后续突变不会污染 memo（防御性拷贝不变量）', () => {
+  // 上游可能在调用 composeResearchMemo 之后继续把新的回放日期 push 进同一份 selection（例如轮询拉到新档），
+  // 但 memo 必须代表"组装那一刻"的快照——下游 push/splice/index 赋值都不能回灌进 memo.replaySelection.availableDates，
+  // 否则导出/分享出去的备忘会出现"未来日期穿越回当时决策"的错觉。
+  const sourceAvailableDates = ['2026-04-28', '2026-04-29', '2026-04-30']
+  const replaySelection = {
+    requestedAsOf: '2026-04-30',
+    matchedDate: '2026-04-30',
+    matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
+    fallbackReason: null,
+    availableDates: sourceAvailableDates,
+    dedupedDates: [],
+  }
+  const memo = composeResearchMemo({
+    primaryDecision: basePrimary,
+    signal: baseSignal,
+    tradingQuality: baseQuality,
+    trendProfile: baseTrend,
+    premium: 0.001,
+    dailyChange: 0.012,
+    replaySelection,
+  })
+  sourceAvailableDates.push('2026-05-01')
+  sourceAvailableDates[0] = 'MUTATED'
+  assert.deepEqual(
+    memo.replaySelection.availableDates,
+    ['2026-04-28', '2026-04-29', '2026-04-30'],
+    'memo.replaySelection.availableDates 必须独立于源数组：下游 push/赋值 不能污染 memo 快照',
+  )
+})
+
 test('composeResearchMemo: replaySelection=null 时显式保留 null 而不丢字段', () => {
   const memo = composeResearchMemo({
     primaryDecision: basePrimary,
