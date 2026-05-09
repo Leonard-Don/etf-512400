@@ -311,6 +311,40 @@ test('formatMemoMarkdown: matchedDate/matchedGeneratedAt=null 时使用占位文
   assert.ok(!md.includes('null'), 'markdown 不应泄漏 null 字面量')
 })
 
+test('formatMemoMarkdown/Text: 旧档命中（matchedDate 有效但 matchedGeneratedAt=null）不漏 null 且保留来源标记', () => {
+  // PR #3 之前归档的快照可能没有 generatedAt 字段；命中后 matchedDate 仍是有效 ISO 日期，
+  // 但 matchedGeneratedAt 为 null。markdown 必须在 生成时间 行用 "暂无" 占位、命中日期/可用日期/请求 as-of
+  // 不受影响；text 仍要带 归档自 matchedDate 后缀让历史复盘可追溯，不能让 null 漏到任一格式。
+  const legacyArchivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-30',
+      matchedDate: '2026-04-30',
+      matchedGeneratedAt: null,
+      fallbackReason: null,
+      availableDates: ['2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+
+  const md = formatMemoMarkdown(legacyArchivedMemo)
+  assert.match(md, /^###\s*归档来源/m, '旧档命中仍必须渲染归档来源区块')
+  assert.match(md, /^- 请求 as-of:\s*2026-04-30$/m, '请求 as-of 必须正常回显')
+  assert.match(md, /^- 命中日期:\s*2026-04-30$/m, '命中日期必须正常回显，不受 generatedAt 缺失影响')
+  assert.match(md, /^- 生成时间:\s*暂无$/m, 'matchedGeneratedAt=null 必须回退到 暂无 占位')
+  assert.match(md, /^- 可用日期:\s*2026-04-29,\s*2026-04-30$/m, '可用日期不受 generatedAt 缺失影响')
+  assert.doesNotMatch(md, /^- 回退原因:/m, 'fallbackReason=null 时不应出现回退原因行')
+  assert.ok(!md.includes('null'), 'markdown 不应泄漏 null 字面量')
+  assert.ok(!md.includes('undefined'), 'markdown 不应泄漏 undefined 字面量')
+
+  const text = formatMemoText(legacyArchivedMemo)
+  assert.equal(text.split('\n').length, 1, '旧档命中仍是单行摘要')
+  assert.ok(text.endsWith('｜归档自 2026-04-30'), '只要 matchedDate 有效，text 仍以 归档自 matchedDate 结尾')
+  assert.ok(!text.includes('null'), 'text 不应泄漏 null 字面量')
+  assert.ok(!text.includes('undefined'), 'text 不应泄漏 undefined 字面量')
+  assert.ok(!text.includes('暂无'), 'text 单行摘要不应把 markdown 的 暂无 占位漏出来')
+})
+
 test('formatMemoMarkdown: dedupedDates 非空时单独列出去重日期供审计', () => {
   const archivedMemo = {
     ...baseMemo,
