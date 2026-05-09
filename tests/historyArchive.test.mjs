@@ -154,6 +154,10 @@ test('normalizeHistorySnapshot 对 null 或缺失输入返回 null', () => {
   assert.equal(normalizeHistorySnapshot({}), null)
 })
 
+test('normalizeHistorySnapshot 空字符串 tradeDate 视为缺失日期返回 null', () => {
+  assert.equal(normalizeHistorySnapshot({ ...SAMPLE_RECORD, tradeDate: '' }), null)
+})
+
 test('normalizeHistorySnapshot 缺驱动数组时仍可计算（信号视为零驱动）', () => {
   const entry = normalizeHistorySnapshot({
     tradeDate: '2026-04-29',

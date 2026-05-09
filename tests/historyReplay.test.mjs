@@ -238,6 +238,30 @@ test('buildHistoryReplay 把带前后空白的 asOf 当作 trim 后的日期匹�
   assert.equal(replay.currentFrame.date, '2026-04-29')
 })
 
+test('buildHistoryReplay 多帧趋势全等时峰谷锁定到首帧（避免选择歧义）', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-28',
+      drivers: [{ key: 'gold', ok: true, trendScore: 60, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-29',
+      drivers: [{ key: 'gold', ok: true, trendScore: 60, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      drivers: [{ key: 'gold', ok: true, trendScore: 60, riskScore: 30 }],
+    }),
+  ])
+  const replay = buildHistoryReplay(archive)
+  assert.equal(replay.summary.peakTrend.date, '2026-04-28')
+  assert.equal(replay.summary.peakTrend.avgTrend, 60)
+  assert.equal(replay.summary.troughTrend.date, '2026-04-28')
+  assert.equal(replay.summary.troughTrend.avgTrend, 60)
+  assert.equal(replay.summary.trendDelta, 0)
+  assert.equal(replay.summary.trendDirection, 'flat')
+})
+
 test('buildHistoryReplay 单条归档下峰谷为同一帧且方向 flat', () => {
   const archive = normalizeHistoryArchive([
     snapshot({
@@ -430,6 +454,39 @@ test('buildHistoryReplay 同日多个归档帧时按最新 generatedAt 去重，
   const reversedWinning = reversedReplay.frames.find((frame) => frame.date === '2026-04-30')
   assert.equal(reversedWinning.generatedAt, '2026-04-30T08:00:00.000Z')
   assert.equal(reversedWinning.signal.avgTrend, 80)
+})
+
+test('buildHistoryReplay 同日多帧时缺 generatedAt 的记录始终让位给有 generatedAt 的记录', () => {
+  // 没有 generatedAt 的原始记录，归一化后 generatedAt 为 null；不应顶掉有时间戳的同日帧
+  const sansGenAt = {
+    tradeDate: '2026-04-30',
+    price: 2.0,
+    nav: 2.0,
+    premium: 0.001,
+    changePercent: 0,
+    amountCny: 100,
+    turnoverRate: 0.01,
+    drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+  }
+  const withGenAt = snapshot({
+    tradeDate: '2026-04-30',
+    generatedAt: '2026-04-30T08:00:00.000Z',
+    drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+  })
+
+  // 有 generatedAt 的帧先到，仍胜出
+  const provenanceFirst = buildHistoryReplay(normalizeHistoryArchive([withGenAt, sansGenAt]))
+  assert.equal(provenanceFirst.frames.length, 1)
+  assert.equal(provenanceFirst.frames[0].generatedAt, '2026-04-30T08:00:00.000Z')
+  assert.equal(provenanceFirst.frames[0].signal.avgTrend, 80)
+  assert.deepEqual(provenanceFirst.selection.dedupedDates, ['2026-04-30'])
+
+  // 缺 generatedAt 的帧先到，也不该把有时间戳的帧顶掉
+  const provenanceLast = buildHistoryReplay(normalizeHistoryArchive([sansGenAt, withGenAt]))
+  assert.equal(provenanceLast.frames.length, 1)
+  assert.equal(provenanceLast.frames[0].generatedAt, '2026-04-30T08:00:00.000Z')
+  assert.equal(provenanceLast.frames[0].signal.avgTrend, 80)
+  assert.deepEqual(provenanceLast.selection.dedupedDates, ['2026-04-30'])
 })
 
 test('buildHistoryReplay generatedAt 命中时 matchedDate 为对应 date 而非时间戳', () => {
