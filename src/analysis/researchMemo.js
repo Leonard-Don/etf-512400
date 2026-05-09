@@ -9,10 +9,15 @@ function cloneReplaySelection(replaySelection) {
   const dedupedDates = Array.isArray(replaySelection.dedupedDates)
     ? [...replaySelection.dedupedDates]
     : []
+  const rawMatchedGeneratedAt = replaySelection.matchedGeneratedAt
+  const matchedGeneratedAt =
+    typeof rawMatchedGeneratedAt === 'string' && rawMatchedGeneratedAt.trim().length === 0
+      ? null
+      : (rawMatchedGeneratedAt ?? null)
   return {
     requestedAsOf: replaySelection.requestedAsOf ?? null,
     matchedDate: replaySelection.matchedDate ?? null,
-    matchedGeneratedAt: replaySelection.matchedGeneratedAt ?? null,
+    matchedGeneratedAt,
     fallbackReason: replaySelection.fallbackReason ?? null,
     availableDates,
     dedupedDates,
