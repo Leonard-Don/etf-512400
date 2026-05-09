@@ -645,6 +645,22 @@ test('buildHistoryReplay selection.matchedGeneratedAt 暴露被选中帧的 gene
   assert.equal(empty.selection.matchedGeneratedAt, null, '空骨架 matchedGeneratedAt 必须为 null')
 })
 
+test('buildHistoryReplay selection.matchedGeneratedAt 在 generatedAt 非字符串/空字符串时归一为 null', () => {
+  // 防止审计元数据泄漏哨兵：保持与 compareGeneratedAt 一致的有效性判断
+  // 否则 memoFormatter 会把 42/NaN/[object Object] 当作"生成时间"打印出来
+  const baseSignal = { avgTrend: 70, avgRisk: 30 }
+  for (const generatedAt of ['', 42, true, {}, Number.NaN, []]) {
+    const replay = buildHistoryReplay([
+      { date: '2026-04-30', generatedAt, signal: baseSignal },
+    ])
+    assert.equal(
+      replay.selection.matchedGeneratedAt,
+      null,
+      `generatedAt=${String(generatedAt)} 应归一为 null（避免泄漏哨兵）`,
+    )
+  }
+})
+
 test('buildHistoryReplay selection.dedupedDates 是副本，不被外部突变污染', () => {
   const archive = normalizeHistoryArchive([
     snapshot({

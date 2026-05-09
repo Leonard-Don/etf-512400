@@ -48,9 +48,13 @@ function isFrameLike(entry) {
   )
 }
 
+function isValidGeneratedAt(value) {
+  return typeof value === 'string' && value.length > 0
+}
+
 function compareGeneratedAt(a, b) {
-  const aValid = typeof a === 'string' && a.length > 0
-  const bValid = typeof b === 'string' && b.length > 0
+  const aValid = isValidGeneratedAt(a)
+  const bValid = isValidGeneratedAt(b)
   if (!aValid && !bValid) return 0
   if (!aValid) return -1
   if (!bValid) return 1
@@ -170,7 +174,10 @@ export function buildHistoryReplay(snapshots, options = {}) {
     selection: {
       requestedAsOf,
       matchedDate: currentFrame ? currentFrame.date : null,
-      matchedGeneratedAt: currentFrame ? currentFrame.generatedAt ?? null : null,
+      matchedGeneratedAt:
+        currentFrame && isValidGeneratedAt(currentFrame.generatedAt)
+          ? currentFrame.generatedAt
+          : null,
       fallbackReason,
       availableDates,
       dedupedDates: [...dedupedDates],
