@@ -20,6 +20,7 @@ function emptySelection() {
   return {
     requestedAsOf: null,
     matchedDate: null,
+    matchedGeneratedAt: null,
     fallbackReason: 'no-frames',
     availableDates: [],
     dedupedDates: [],
@@ -169,6 +170,7 @@ export function buildHistoryReplay(snapshots, options = {}) {
     selection: {
       requestedAsOf,
       matchedDate: currentFrame ? currentFrame.date : null,
+      matchedGeneratedAt: currentFrame ? currentFrame.generatedAt ?? null : null,
       fallbackReason,
       availableDates,
       dedupedDates: [...dedupedDates],
