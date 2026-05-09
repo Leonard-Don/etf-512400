@@ -493,3 +493,82 @@ test('formatMemoText: warning tone 与归档后缀同时出现时各自独立渲
   assert.ok(text.includes('禁止追高'), 'headline 仍包含')
   assert.ok(text.endsWith('｜归档自 2026-04-30'), '归档自 matchedDate 后缀必须保留')
 })
+
+test('formatMemoMarkdown: 负值 premium/dailyChange 携带原生 - 号且不附加 +', () => {
+  // 折价交易（负 premium）与下跌日（负 dailyChange）是常见场景；
+  // formatSignedPercent 仅对正值附加 +，负值必须保留原生 - 号且不出现 +- 这种连号。
+  const downMemo = {
+    ...baseMemo,
+    metrics: {
+      ...baseMemo.metrics,
+      premium: -0.005,
+      dailyChange: -0.025,
+    },
+  }
+  const md = formatMemoMarkdown(downMemo)
+  assert.match(md, /^- 折溢价:\s*-0\.50%$/m, '负 premium 渲染为 -0.50%')
+  assert.match(md, /^- 当日涨跌:\s*-2\.50%$/m, '负 dailyChange 渲染为 -2.50%')
+  assert.ok(!md.includes('+-'), 'markdown 不应出现 +- 连号')
+  assert.ok(!md.includes('-+'), 'markdown 不应出现 -+ 连号')
+})
+
+test('formatMemoMarkdown: replaySelection={} 时仍渲染区块且每字段独立回退占位', () => {
+  // 上游归档路径若交付 replaySelection={}（声明已归档但未填任何字段），
+  // 必须按字段独立回退到 未指定/未命中/暂无/(无)，不漏 undefined/null。
+  const archivedMemo = { ...baseMemo, replaySelection: {} }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^###\s*归档来源/m, '空 replaySelection 仍渲染区块')
+  assert.match(md, /^- 请求 as-of:\s*未指定$/m, 'requestedAsOf 缺失回退到 未指定')
+  assert.match(md, /^- 命中日期:\s*未命中$/m, 'matchedDate 缺失回退到 未命中')
+  assert.match(md, /^- 生成时间:\s*暂无$/m, 'matchedGeneratedAt 缺失回退到 暂无')
+  assert.match(md, /^- 可用日期:\s*\(无\)$/m, 'availableDates 缺失显示 (无)')
+  assert.doesNotMatch(md, /^- 回退原因:/m, 'fallbackReason 缺失不应出现回退原因行')
+  assert.doesNotMatch(md, /^- 去重日期:/m, 'dedupedDates 缺失不应出现去重日期行')
+  assert.ok(!md.includes('undefined'), '不应泄漏 undefined')
+  assert.ok(!md.includes('null'), '不应泄漏 null 字面量')
+})
+
+test('formatMemoMarkdown: replaySelection 为非对象值（字符串/数字/布尔）时不触发归档来源区块', () => {
+  // 防御式守卫：若上游意外传入 replaySelection='2026-04-30' / 42 / true 等非对象值，
+  // 必须按 live memo 处理，避免对原始值做 .availableDates 之类属性访问。
+  for (const variant of ['2026-04-30', 42, true]) {
+    const memo = { ...baseMemo, replaySelection: variant }
+    const md = formatMemoMarkdown(memo)
+    assert.doesNotMatch(
+      md,
+      /^###\s*归档来源/m,
+      `replaySelection=${JSON.stringify(variant)} 不应触发归档来源区块`,
+    )
+  }
+})
+
+test('formatMemoMarkdown: fallbackReason="" 时不渲染回退原因行避免空尾巴', () => {
+  // 上游若把 fallbackReason 显式设为 ''（命中但语义上"无回退原因"），不应出现
+  // `- 回退原因: ` 这种行尾空白；其余归档字段必须正常回显不受影响。
+  const memo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-30',
+      matchedDate: '2026-04-30',
+      matchedGeneratedAt: '2026-04-30T08:00:00.000Z',
+      fallbackReason: '',
+      availableDates: ['2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const md = formatMemoMarkdown(memo)
+  assert.doesNotMatch(md, /^- 回退原因:/m, 'fallbackReason="" 应被视作无回退')
+  assert.match(md, /^- 命中日期:\s*2026-04-30$/m, '其他归档字段不受影响')
+  assert.match(md, /^- 可用日期:\s*2026-04-30$/m, 'availableDates 仍正常渲染')
+})
+
+test('formatMemoText: 未知 tone 值不触发 [警告] 前缀且不漏 undefined', () => {
+  // TONE_PREFIX 仅识别 warning/neutral/positive；其他值（拼写错误或后续新增 tone）
+  // 应安全降级到无前缀，且不应让 undefined 漏到单行摘要里。
+  const oddMemo = { ...baseMemo, tone: 'unknown' }
+  const text = formatMemoText(oddMemo)
+  assert.equal(text.split('\n').length, 1, '单行不变')
+  assert.equal(text.startsWith('[警告]'), false, '未知 tone 不应触发 [警告] 前缀')
+  assert.ok(text.startsWith(oddMemo.headline), '应直接以 headline 开头')
+  assert.ok(!text.includes('undefined'), '不应泄漏 undefined')
+})
