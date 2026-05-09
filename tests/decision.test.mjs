@@ -132,3 +132,102 @@ test('回退分支（无优化器）+ 信号 warning：仍然显示信号动作'
   assert.equal(result.source, '信号引擎')
   assert.ok(result.exposure <= 0.12 + 1e-9)
 })
+
+test('优化器为 null 时回退到信号引擎（不解引用 best）', () => {
+  const result = composePrimaryDecision({
+    signal: baseSignal,
+    optimizer: null,
+    riskBudget: 60,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.source, '信号引擎')
+  assert.equal(result.action, '小仓跟踪')
+  assert.equal(result.rule, '上升趋势')
+})
+
+test('ok=false 时即便 best.current 残缺也走回退分支，不抛错', () => {
+  const result = composePrimaryDecision({
+    signal: baseSignal,
+    optimizer: { ok: false, best: { current: null } },
+    riskBudget: 60,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.source, '信号引擎')
+  assert.equal(result.action, '小仓跟踪')
+  assert.equal(result.overfitRisk, '暂无')
+})
+
+test('riskBudget=0 时把优化器仓位压到 0', () => {
+  const result = composePrimaryDecision({
+    signal: baseSignal,
+    optimizer: baseOptimizer,
+    riskBudget: 0,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.exposure, 0)
+  assert.equal(result.source, '自动优化')
+})
+
+test('riskBudget=200 越界不会反向放大优化器仓位', () => {
+  const result = composePrimaryDecision({
+    signal: baseSignal,
+    optimizer: baseOptimizer,
+    riskBudget: 200,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.exposure, 0.95)
+})
+
+test('优化器给出 >1 的越界仓位时仍被风险预算 clamp 到上限', () => {
+  const overOptimizer = {
+    ...baseOptimizer,
+    best: {
+      ...baseOptimizer.best,
+      current: { ...baseOptimizer.best.current, exposure: 1.2 },
+    },
+  }
+  const result = composePrimaryDecision({
+    signal: baseSignal,
+    optimizer: overOptimizer,
+    riskBudget: 100,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.exposure, 1)
+})
+
+test('信号 warning 但缺失 suggestedExposure：动作/语气/规则仍稳定透出', () => {
+  const warningSignal = {
+    ...baseSignal,
+    action: '禁止追高',
+    tone: 'warning',
+    suggestedExposure: undefined,
+  }
+  const result = composePrimaryDecision({
+    signal: warningSignal,
+    optimizer: baseOptimizer,
+    riskBudget: 80,
+    trendProfile: baseTrend,
+  })
+  assert.equal(result.action, '禁止追高')
+  assert.equal(result.tone, 'warning')
+  assert.equal(result.source, '自动优化')
+  assert.equal(result.exposure, 0.8)
+  assert.equal(result.rule, '20/60日趋势，5%/12%回撤 · 信号 禁止追高')
+})
+
+test('回退分支 + 信号 warning + 无 trendProfile：rule 形如「样本不足 · 信号 X」', () => {
+  const warningSignal = {
+    ...baseSignal,
+    action: '禁止追高',
+    tone: 'warning',
+    suggestedExposure: 0.1,
+  }
+  const result = composePrimaryDecision({
+    signal: warningSignal,
+    optimizer: { ok: false },
+    riskBudget: 60,
+    trendProfile: undefined,
+  })
+  assert.equal(result.rule, '样本不足 · 信号 禁止追高')
+  assert.equal(result.source, '信号引擎')
+})
