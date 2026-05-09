@@ -126,3 +126,97 @@ test('buildDataFreshness 标出无缓存失败源名称', () => {
   assert.equal(result.tone, 'danger')
   assert.ok(result.details.includes('失败源：实时ETF行情'))
 })
+
+test('describeMarketStatus 在缺失行情日时给出未知文案', () => {
+  assert.equal(describeMarketStatus({ now: MAY_6_SHANGHAI }), '行情日期未知')
+  assert.equal(
+    describeMarketStatus({ quoteTradeDate: '', now: MAY_6_SHANGHAI }),
+    '行情日期未知',
+  )
+})
+
+test('describeMarketStatus 区分今日待确认与上一交易日', () => {
+  assert.equal(
+    describeMarketStatus({
+      quoteTradeDate: '2026-05-06',
+      statusCode: 0,
+      now: MAY_6_SHANGHAI,
+    }),
+    '今日行情待确认',
+  )
+  assert.equal(
+    describeMarketStatus({ quoteTradeDate: '2026-05-05', now: MAY_6_SHANGHAI }),
+    '行情停留在上一交易日',
+  )
+})
+
+test('describeMarketStatus 对非法日期回退到原始字符串', () => {
+  assert.equal(
+    describeMarketStatus({ quoteTradeDate: 'invalid', now: MAY_6_SHANGHAI }),
+    '行情日 invalid',
+  )
+})
+
+test('buildDataFreshness 在数据齐备时返回 fresh 并附快照时间', () => {
+  const result = buildDataFreshness({
+    snapshotGeneratedAt: '2026-05-06T03:00:00.000Z',
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    now: MAY_6_SHANGHAI,
+  })
+  assert.equal(result.status, 'fresh')
+  assert.equal(result.tone, 'good')
+  assert.equal(result.summary, '数据已刷新')
+  assert.equal(result.failedCount, 0)
+  assert.equal(result.requiredFailedCount, 0)
+  assert.equal(result.fallbackCount, 0)
+  assert.equal(result.quoteAgeDays, 0)
+  assert.equal(result.navAgeDays, 0)
+  assert.deepEqual(result.details, ['快照 2026-05-06T03:00:00.000Z'])
+})
+
+test('buildDataFreshness 对上一交易日数据返回 previous_trade_day', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-05-05',
+    navDate: '2026-05-05',
+    now: MAY_6_SHANGHAI,
+  })
+  assert.equal(result.status, 'previous_trade_day')
+  assert.equal(result.tone, 'good')
+  assert.equal(result.summary, '上一交易日数据')
+  assert.equal(result.quoteAgeDays, 1)
+  assert.equal(result.navAgeDays, 1)
+  assert.ok(result.details.includes('行情距今天 1 天'))
+  assert.ok(result.details.includes('净值距今天 1 天'))
+})
+
+test('buildDataFreshness 标记 stale 并写出行情和净值距今天数', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-04-30',
+    navDate: '2026-04-29',
+    now: MAY_6_SHANGHAI,
+  })
+  assert.equal(result.status, 'stale')
+  assert.equal(result.tone, 'warning')
+  assert.equal(result.summary, '行情停留在 2026-04-30')
+  assert.equal(result.quoteAgeDays, 6)
+  assert.equal(result.navAgeDays, 7)
+  assert.ok(result.details.includes('行情距今天 6 天'))
+  assert.ok(result.details.includes('净值距今天 7 天'))
+})
+
+test('buildDataFreshness 在缓存源缺标签时回退到数量描述', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      { ok: false, fallback: true, required: false },
+      { ok: false, fallback: true, required: false },
+    ],
+  })
+  assert.equal(result.status, 'partial')
+  assert.equal(result.tone, 'warning')
+  assert.equal(result.fallbackCount, 2)
+  assert.ok(result.details.includes('2 个源使用缓存'))
+})
