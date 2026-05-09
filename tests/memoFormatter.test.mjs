@@ -228,3 +228,141 @@ test('formatMemoMarkdown/Text: 顶层 source/rule/tone 与整个 metrics 对象�
   assert.equal(text.startsWith('[警告]'), false, '缺失 tone 不应触发 [警告] 前缀')
   assert.ok(text.includes(partial.headline), '单行摘要仍应包含 headline')
 })
+
+test('formatMemoMarkdown: live memo（replaySelection=null）不渲染归档来源区块', () => {
+  // live memo 的 composeResearchMemo 输出 replaySelection=null；markdown 应保持原有四大区块，
+  // 不引入"归档来源"区块，避免在实时备忘里写出无意义的"未指定/未命中"占位。
+  const liveMemo = { ...baseMemo, replaySelection: null }
+  const md = formatMemoMarkdown(liveMemo)
+  assert.doesNotMatch(md, /^###\s*归档来源/m, 'live memo 不应出现归档来源区块')
+  assert.doesNotMatch(md, /命中日期|请求 as-of/, 'live memo 不应出现归档来源字段')
+})
+
+test('formatMemoMarkdown: replaySelection 字段缺失时不渲染归档来源区块', () => {
+  // baseMemo 不带 replaySelection 字段（兼容旧数据）；markdown 必须保持稳定，
+  // 不被新增的归档来源逻辑污染。
+  const md = formatMemoMarkdown(baseMemo)
+  assert.doesNotMatch(md, /^###\s*归档来源/m, 'replaySelection 缺失时不应出现归档来源区块')
+})
+
+test('formatMemoMarkdown: 命中归档时渲染归档来源区块（请求/命中/生成时间/可用日期）', () => {
+  // archived memo 必须把 replaySelection 暴露在 markdown 里，给阅读者 traceability。
+  // 仅 JSON 暴露而 markdown 缺失，会让 --as-of 导出变得无法审计。
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-29',
+      matchedDate: '2026-04-29',
+      matchedGeneratedAt: '2026-04-29T07:00:00.000Z',
+      fallbackReason: null,
+      availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^###\s*归档来源/m, 'archived memo 必须包含归档来源区块')
+  assert.match(md, /^- 请求 as-of:\s*2026-04-29$/m, '请求 as-of 必须回显')
+  assert.match(md, /^- 命中日期:\s*2026-04-29$/m, '命中日期必须回显')
+  assert.match(md, /^- 生成时间:\s*2026-04-29T07:00:00\.000Z$/m, '生成时间必须回显 ISO')
+  assert.match(
+    md,
+    /^- 可用日期:\s*2026-04-28,\s*2026-04-29,\s*2026-04-30$/m,
+    '可用日期必须按归档顺序列出',
+  )
+  assert.doesNotMatch(md, /^- 回退原因:/m, 'fallbackReason=null 时不应出现回退原因行')
+  assert.doesNotMatch(md, /^- 去重日期:/m, 'dedupedDates=[] 时不应出现去重日期行')
+})
+
+test('formatMemoMarkdown: requestedAsOf=null 时显示 未指定 而非 null/undefined', () => {
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: null,
+      matchedDate: '2026-04-30',
+      matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
+      fallbackReason: 'no-as-of',
+      availableDates: ['2026-04-28', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^- 请求 as-of:\s*未指定$/m, 'requestedAsOf=null 渲染为 未指定')
+  assert.match(md, /^- 回退原因:\s*no-as-of$/m, 'fallbackReason 非空时必须回显')
+  assert.ok(!md.includes('null'), 'markdown 不应泄漏 null 字面量')
+  assert.ok(!md.includes('undefined'), 'markdown 不应泄漏 undefined 字面量')
+})
+
+test('formatMemoMarkdown: matchedDate/matchedGeneratedAt=null 时使用占位文案不漏 null', () => {
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2099-12-31',
+      matchedDate: null,
+      matchedGeneratedAt: null,
+      fallbackReason: 'no-match',
+      availableDates: ['2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^- 命中日期:\s*未命中$/m, 'matchedDate=null 渲染为 未命中')
+  assert.match(md, /^- 生成时间:\s*暂无$/m, 'matchedGeneratedAt=null 渲染为 暂无')
+  assert.match(md, /^- 回退原因:\s*no-match$/m, 'fallbackReason=no-match 必须回显')
+  assert.ok(!md.includes('null'), 'markdown 不应泄漏 null 字面量')
+})
+
+test('formatMemoMarkdown: dedupedDates 非空时单独列出去重日期供审计', () => {
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-30',
+      matchedDate: '2026-04-30',
+      matchedGeneratedAt: '2026-04-30T08:00:00.000Z',
+      fallbackReason: null,
+      availableDates: ['2026-04-29', '2026-04-30'],
+      dedupedDates: ['2026-04-30'],
+    },
+  }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^- 去重日期:\s*2026-04-30$/m, 'dedupedDates 非空时必须暴露')
+})
+
+test('formatMemoMarkdown: availableDates 缺失或非数组时显示 (无) 占位', () => {
+  for (const variant of [undefined, null, 42, 'archive']) {
+    const archivedMemo = {
+      ...baseMemo,
+      replaySelection: {
+        requestedAsOf: '2026-04-30',
+        matchedDate: '2026-04-30',
+        matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
+        fallbackReason: null,
+        availableDates: variant,
+        dedupedDates: [],
+      },
+    }
+    const md = formatMemoMarkdown(archivedMemo)
+    assert.match(
+      md,
+      /^- 可用日期:\s*\(无\)$/m,
+      `availableDates=${JSON.stringify(variant)} 应显示 (无) 占位`,
+    )
+    assert.ok(!md.includes('undefined'), 'markdown 不应泄漏 undefined')
+    assert.ok(!md.includes('null'), 'markdown 不应泄漏 null')
+  }
+})
+
+test('formatMemoMarkdown: 空 availableDates 数组显示 (无) 占位而非空字符串', () => {
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-30',
+      matchedDate: null,
+      matchedGeneratedAt: null,
+      fallbackReason: 'no-frames',
+      availableDates: [],
+      dedupedDates: [],
+    },
+  }
+  const md = formatMemoMarkdown(archivedMemo)
+  assert.match(md, /^- 可用日期:\s*\(无\)$/m, '空数组应显示 (无)，避免行尾空白')
+})

@@ -22,6 +22,31 @@ function bulletList(items, fallback = '暂无') {
   return items.map((item) => `- ${item}`).join('\n')
 }
 
+function buildReplaySelectionLines(replaySelection) {
+  if (!replaySelection || typeof replaySelection !== 'object') return null
+  const availableDates = Array.isArray(replaySelection.availableDates)
+    ? replaySelection.availableDates
+    : []
+  const dedupedDates = Array.isArray(replaySelection.dedupedDates)
+    ? replaySelection.dedupedDates
+    : []
+  const lines = [
+    '',
+    '### 归档来源',
+    `- 请求 as-of: ${replaySelection.requestedAsOf ?? '未指定'}`,
+    `- 命中日期: ${replaySelection.matchedDate ?? '未命中'}`,
+    `- 生成时间: ${replaySelection.matchedGeneratedAt ?? '暂无'}`,
+  ]
+  if (replaySelection.fallbackReason) {
+    lines.push(`- 回退原因: ${replaySelection.fallbackReason}`)
+  }
+  lines.push(`- 可用日期: ${availableDates.length === 0 ? '(无)' : availableDates.join(', ')}`)
+  if (dedupedDates.length > 0) {
+    lines.push(`- 去重日期: ${dedupedDates.join(', ')}`)
+  }
+  return lines
+}
+
 export function formatMemoMarkdown(memo) {
   const metrics = memo.metrics ?? {}
   const lines = [
@@ -48,6 +73,8 @@ export function formatMemoMarkdown(memo) {
     `- 规则: ${memo.rule ?? '暂无'}`,
     `- 风险标签: ${memo.tone ?? '暂无'}`,
   ]
+  const replayLines = buildReplaySelectionLines(memo.replaySelection)
+  if (replayLines) lines.push(...replayLines)
   return lines.join('\n')
 }
 
