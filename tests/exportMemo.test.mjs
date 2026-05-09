@@ -374,6 +374,49 @@ test('exportMemo CLI: --format=text 输出单行摘要', () => {
   assert.ok(out.length > 0)
 })
 
+test('exportMemo CLI: --format=text live memo 不带 归档自 后缀，保持现有契约', () => {
+  const result = runExportMemo(['--format=text'])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const out = result.stdout.trim()
+  assert.ok(!out.includes('归档自'), 'live --format=text 不应出现 归档自 后缀')
+  assert.ok(!out.includes('归档'), 'live --format=text 不应出现 归档 字样')
+})
+
+test('exportMemo CLI: --format=text --as-of 暴露 归档自 matchedDate 后缀且仍是单行', () => {
+  // 归档单行摘要必须自带可审计的来源标记，否则粘贴到聊天里看不出与实时 memo 的区别。
+  // 仅暴露 matchedDate，不展开 availableDates/dedupedDates 噪音。
+  const archive = JSON.parse(readFileSync(historySnapshotsUrl, 'utf8'))
+  const archivedSnapshots = normalizeHistoryArchive(archive)
+  const archivedSnapshot = archivedSnapshots[0]
+  assert.ok(archivedSnapshot, 'fixture archive should contain at least one normalized snapshot')
+
+  const result = runExportMemo(['--format=text', `--as-of=${archivedSnapshot.date}`])
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\n${result.stderr}`)
+  const out = result.stdout.trim()
+  assert.equal(out.split('\n').length, 1, '归档单行摘要必须仍是单行')
+  assert.ok(out.endsWith(`｜归档自 ${archivedSnapshot.date}`), '必须以 归档自 matchedDate 结尾')
+
+  const otherDates = archivedSnapshots
+    .map((entry) => entry.date)
+    .filter((date) => date !== archivedSnapshot.date)
+  for (const otherDate of otherDates) {
+    assert.ok(
+      !out.includes(otherDate),
+      `归档单行摘要不应展开 availableDates 噪音 ${otherDate}`,
+    )
+  }
+  assert.ok(!out.includes('可用日期'), '归档单行摘要不应出现 可用日期 标签')
+  if (archivedSnapshot.generatedAt) {
+    assert.ok(
+      !out.includes(archivedSnapshot.generatedAt),
+      '归档单行摘要不应展开 matchedGeneratedAt ISO',
+    )
+  }
+  for (const sentinel of ['undefined', 'NaN', 'Infinity', 'null']) {
+    assert.ok(!out.includes(sentinel), `归档单行摘要不应包含 ${sentinel} 哨兵`)
+  }
+})
+
 test('exportMemo CLI: --output 写入与 stdout 一致，且不改动数据 JSON', () => {
   const outputDir = mkdtempSync(join(tmpdir(), 'etf-memo-export-'))
   const outputPath = join(outputDir, 'memo.json')
