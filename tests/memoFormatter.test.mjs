@@ -118,6 +118,40 @@ test('formatMemoMarkdown: 缺失 metrics 字段时显示 暂无 而非 NaN/undef
   assert.ok(md.includes('暂无'), 'markdown should fallback to 暂无')
 })
 
+test('formatMemoMarkdown/Text: metrics 为 ±Infinity 时回退到 暂无 不漏 Infinity 字面量', () => {
+  // 上游若发生除零或溢出（如分母为 0 的 dailyChange/premium 计算），metrics 可能变成 ±Infinity；
+  // formatScore/formatExposure/formatSignedPercent 都基于 Number.isFinite 守卫，必须把这些非有限值
+  // 统一回退到 暂无，不能让 Infinity/-Infinity 字面量漏到 markdown 或单行摘要里。
+  // 该用例守卫未来若有人把守卫改成 `if (!value)` 或 `Number.isNaN(value)` 之类更窄的检查
+  // 而让 ±Infinity 直接 String() 漏到产物中。
+  const overflowMemo = {
+    ...baseMemo,
+    metrics: {
+      score: Infinity,
+      exposure: -Infinity,
+      confidence: Infinity,
+      premium: -Infinity,
+      dailyChange: Infinity,
+    },
+  }
+
+  const md = formatMemoMarkdown(overflowMemo)
+  assert.match(md, /^- 评分:\s*暂无$/m, 'score=Infinity 必须回退到 暂无')
+  assert.match(md, /^- 仓位:\s*暂无$/m, 'exposure=-Infinity 必须回退到 暂无')
+  assert.match(md, /^- 置信度:\s*暂无$/m, 'confidence=Infinity 必须回退到 暂无')
+  assert.match(md, /^- 折溢价:\s*暂无$/m, 'premium=-Infinity 必须回退到 暂无')
+  assert.match(md, /^- 当日涨跌:\s*暂无$/m, 'dailyChange=Infinity 必须回退到 暂无')
+  assert.ok(!md.includes('Infinity'), 'markdown 不应泄漏 Infinity/-Infinity 字面量')
+  assert.ok(!md.includes('NaN'), 'markdown 不应泄漏 NaN 字面量')
+  assert.ok(!md.includes('undefined'), 'markdown 不应泄漏 undefined 字面量')
+
+  const text = formatMemoText(overflowMemo)
+  assert.equal(text.split('\n').length, 1, '指标溢出仍保持单行摘要')
+  assert.ok(!text.includes('Infinity'), 'text 不应泄漏 Infinity/-Infinity 字面量')
+  assert.ok(!text.includes('NaN'), 'text 不应泄漏 NaN 字面量')
+  assert.ok(!text.includes('undefined'), 'text 不应泄漏 undefined 字面量')
+})
+
 test('formatMemoText: 单行摘要 含动作/仓位/信号/质量/趋势', () => {
   const text = formatMemoText(baseMemo)
   assert.equal(text.split('\n').length, 1, 'text format should be a single line')
