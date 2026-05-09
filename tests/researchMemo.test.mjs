@@ -180,6 +180,7 @@ test('composeResearchMemo: 显式 replaySelection 透传给 memo 输出', () => 
   const replaySelection = {
     requestedAsOf: '2026-04-30',
     matchedDate: '2026-04-30',
+    matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
     fallbackReason: null,
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
     dedupedDates: [],
@@ -224,6 +225,7 @@ test('composeResearchMemo: replaySelection.dedupedDates 透传并深拷贝（防
   const replaySelection = {
     requestedAsOf: '2026-04-30',
     matchedDate: '2026-04-30',
+    matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
     fallbackReason: null,
     availableDates: ['2026-04-29', '2026-04-30'],
     dedupedDates: ['2026-04-30'],

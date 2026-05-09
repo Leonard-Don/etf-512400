@@ -12,6 +12,7 @@ function cloneReplaySelection(replaySelection) {
   return {
     requestedAsOf: replaySelection.requestedAsOf ?? null,
     matchedDate: replaySelection.matchedDate ?? null,
+    matchedGeneratedAt: replaySelection.matchedGeneratedAt ?? null,
     fallbackReason: replaySelection.fallbackReason ?? null,
     availableDates,
     dedupedDates,

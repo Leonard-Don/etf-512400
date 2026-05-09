@@ -152,6 +152,7 @@ test('exportMemo CLI: --as-of JSON memo 暴露 replaySelection 元数据，便�
   assert.ok(memo.replaySelection, 'archived memo 必须暴露 replaySelection 元数据')
   assert.equal(memo.replaySelection.requestedAsOf, archivedSnapshot.date)
   assert.equal(memo.replaySelection.matchedDate, archivedSnapshot.date)
+  assert.equal(memo.replaySelection.matchedGeneratedAt, archivedSnapshot.generatedAt)
   assert.equal(memo.replaySelection.fallbackReason, null)
   assert.deepEqual(
     [...memo.replaySelection.availableDates].sort(),
@@ -207,6 +208,7 @@ test('exportMemo CLI: --as-of 完整时间戳时 replaySelection 回显请求值
   assert.ok(memo.replaySelection, 'timestamp 命中也必须暴露 replaySelection')
   assert.equal(memo.replaySelection.requestedAsOf, archivedSnapshot.generatedAt)
   assert.equal(memo.replaySelection.matchedDate, archivedSnapshot.date)
+  assert.equal(memo.replaySelection.matchedGeneratedAt, archivedSnapshot.generatedAt)
   assert.equal(memo.replaySelection.fallbackReason, null)
 })
 
