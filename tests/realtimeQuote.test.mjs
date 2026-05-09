@@ -109,6 +109,21 @@ test('parseRealtimeQuote 拒绝非成功状态载荷', () => {
   assert.throws(() => parseRealtimeQuote({ rc: 102, data: null }), /rc=102/)
 })
 
+test('parseRealtimeQuote 拒绝 rc=0 但缺失 data 字段的载荷', () => {
+  assert.throws(() => parseRealtimeQuote({ rc: 0 }), /rc=0/)
+})
+
+test('parseRealtimeQuote 拒绝缺失证券代码的载荷', () => {
+  assert.throws(
+    () =>
+      parseRealtimeQuote({
+        rc: 0,
+        data: { ...EASTMONEY_SAMPLE.data, f57: '' },
+      }),
+    /missing code, price, or previous close/,
+  )
+})
+
 test('parseRealtimeKline 使用当日 K 线作为浏览器实时兜底', () => {
   const quote = parseRealtimeKline(
     {
@@ -152,6 +167,17 @@ test('parseRealtimeKline 拒绝空字符串占位的核心价格', () => {
         },
       }),
     /missing code, date, price, or previous close/,
+  )
+})
+
+test('parseRealtimeKline 拒绝 klines 为空的载荷', () => {
+  assert.throws(
+    () =>
+      parseRealtimeKline({
+        rc: 0,
+        data: { code: '512400', name: '有色金属ETF南方', preKPrice: 2.119, klines: [] },
+      }),
+    /Unexpected realtime kline payload rc=0/,
   )
 })
 
@@ -268,4 +294,23 @@ test('parseRealtimeTencent 拒绝空字符串占位的核心价格', () => {
     () => parseRealtimeTencent(buildTencentPayload({ 3: '' })),
     /missing code, price, or previous close/,
   )
+})
+
+test('parseRealtimeTencent 拒绝结构异常的腾讯响应', () => {
+  assert.throws(
+    () =>
+      parseRealtimeTencent({
+        data: { sh512400: { qt: { sh512400: null } } },
+      }),
+    /Unexpected realtime Tencent payload/,
+  )
+})
+
+test('parseRealtimeTencent 时钟字段过短时 tradeDate/tradeTime 留空', () => {
+  const quote = parseRealtimeTencent(buildTencentPayload({ 30: '202605' }))
+
+  assert.equal(quote.tradeDate, null)
+  assert.equal(quote.tradeTime, null)
+  assert.equal(quote.price, 2.199)
+  assert.equal(quote.previousClose, 2.119)
 })
