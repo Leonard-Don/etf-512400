@@ -366,3 +366,96 @@ test('formatMemoMarkdown: 空 availableDates 数组显示 (无) 占位而非空�
   const md = formatMemoMarkdown(archivedMemo)
   assert.match(md, /^- 可用日期:\s*\(无\)$/m, '空数组应显示 (无)，避免行尾空白')
 })
+
+test('formatMemoText: 命中归档时附加 归档自 matchedDate 后缀且保持单行', () => {
+  // 归档导出的单行摘要必须能让阅读者一眼看出"这是历史复盘，不是实时"。
+  // 仅暴露 matchedDate，避免在一行里堆 availableDates/dedupedDates 噪音。
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2026-04-29',
+      matchedDate: '2026-04-29',
+      matchedGeneratedAt: '2026-04-29T07:00:00.000Z',
+      fallbackReason: null,
+      availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const text = formatMemoText(archivedMemo)
+  assert.equal(text.split('\n').length, 1, 'archived 单行摘要必须保持单行')
+  assert.ok(text.includes(archivedMemo.headline), 'archived 单行仍包含 headline')
+  assert.ok(text.endsWith('｜归档自 2026-04-29'), 'archived 单行必须以 归档自 matchedDate 结尾')
+  for (const driver of archivedMemo.drivers) {
+    assert.ok(text.includes(driver), `archived 单行仍包含 driver ${driver}`)
+  }
+  for (const date of ['2026-04-28', '2026-04-30']) {
+    assert.ok(!text.includes(date), `archived 单行不应展开 availableDates 噪音 ${date}`)
+  }
+  assert.ok(!text.includes('可用日期'), 'archived 单行不应出现 可用日期 标签')
+  assert.ok(!text.includes('去重日期'), 'archived 单行不应出现 去重日期 标签')
+  assert.ok(
+    !text.includes('2026-04-29T07:00:00.000Z'),
+    'archived 单行不应展开 matchedGeneratedAt ISO，避免噪音',
+  )
+})
+
+test('formatMemoText: live memo（replaySelection=null）不附加归档后缀，保持现有契约', () => {
+  // live 单行摘要必须保持与之前完全一致，不能被新加的归档逻辑污染。
+  const liveMemo = { ...baseMemo, replaySelection: null }
+  const text = formatMemoText(liveMemo)
+  assert.equal(text.split('\n').length, 1, 'live 单行摘要保持单行')
+  assert.ok(!text.includes('归档自'), 'live memo 不应出现 归档自 后缀')
+  assert.ok(!text.includes('归档'), 'live memo 不应出现 归档 字样')
+})
+
+test('formatMemoText: replaySelection 字段缺失时不附加归档后缀（兼容旧数据）', () => {
+  // baseMemo 不带 replaySelection 字段（旧契约）；formatMemoText 必须保持稳定，
+  // 不被新增的归档后缀逻辑污染。
+  const text = formatMemoText(baseMemo)
+  assert.ok(!text.includes('归档自'), 'replaySelection 缺失时不应出现 归档自 后缀')
+  assert.equal(text.split('\n').length, 1, '单行不变')
+})
+
+test('formatMemoText: matchedDate=null 时不附加归档后缀（避免 未命中 漏出到单行摘要）', () => {
+  // CLI 在 matchedDate=null 时会非零退出，但纯函数被直接调用时仍可能收到该形态；
+  // 不应把 "未命中" 之类占位文案塞进一行摘要里造成歧义。
+  const archivedMemo = {
+    ...baseMemo,
+    replaySelection: {
+      requestedAsOf: '2099-12-31',
+      matchedDate: null,
+      matchedGeneratedAt: null,
+      fallbackReason: 'no-match',
+      availableDates: ['2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const text = formatMemoText(archivedMemo)
+  assert.equal(text.split('\n').length, 1, '即便 matchedDate 缺失也保持单行')
+  assert.ok(!text.includes('归档自'), 'matchedDate=null 时不应出现 归档自 后缀')
+  assert.ok(!text.includes('未命中'), 'matchedDate=null 时不应把 未命中 漏到单行摘要')
+  assert.ok(!text.includes('null'), '不应泄漏 null 字面量')
+  assert.ok(!text.includes('undefined'), '不应泄漏 undefined 字面量')
+})
+
+test('formatMemoText: warning tone 与归档后缀同时出现时各自独立渲染（前缀+后缀）', () => {
+  // 风险归档复盘时，[警告] 前缀与 归档自 后缀都需要保留，互不抢位。
+  const warningArchivedMemo = {
+    ...baseMemo,
+    tone: 'warning',
+    headline: '禁止追高（仓位 10%）',
+    replaySelection: {
+      requestedAsOf: '2026-04-30',
+      matchedDate: '2026-04-30',
+      matchedGeneratedAt: '2026-04-30T08:00:00.000Z',
+      fallbackReason: null,
+      availableDates: ['2026-04-29', '2026-04-30'],
+      dedupedDates: [],
+    },
+  }
+  const text = formatMemoText(warningArchivedMemo)
+  assert.equal(text.split('\n').length, 1, 'warning + 归档仍是单行')
+  assert.match(text, /^\[警告\]/, 'warning tone 前缀必须保留')
+  assert.ok(text.includes('禁止追高'), 'headline 仍包含')
+  assert.ok(text.endsWith('｜归档自 2026-04-30'), '归档自 matchedDate 后缀必须保留')
+})
