@@ -661,6 +661,22 @@ test('buildHistoryReplay selection.matchedGeneratedAt 在 generatedAt 非字符�
   }
 })
 
+test('buildHistoryReplay selection.matchedGeneratedAt 在 generatedAt 仅含空白时归一为 null', () => {
+  // 纯空白的 generatedAt 不是有效时间戳，否则 memoFormatter 会输出 "生成时间:    "
+  // 这种伪元数据，researchMemo.replaySelection 也会把空白当时间戳传下去
+  const baseSignal = { avgTrend: 70, avgRisk: 30 }
+  for (const generatedAt of ['   ', '\t', '\n', '  \t\n  ']) {
+    const replay = buildHistoryReplay([
+      { date: '2026-04-30', generatedAt, signal: baseSignal },
+    ])
+    assert.equal(
+      replay.selection.matchedGeneratedAt,
+      null,
+      `generatedAt=${JSON.stringify(generatedAt)} 应归一为 null（空白等同无效时间戳）`,
+    )
+  }
+})
+
 test('buildHistoryReplay selection.dedupedDates 是副本，不被外部突变污染', () => {
   const archive = normalizeHistoryArchive([
     snapshot({
