@@ -29,6 +29,10 @@ function roundTo(value, digits) {
   return Math.round(value * factor) / factor
 }
 
+function finiteOrNull(value) {
+  return Number.isFinite(value) ? value : null
+}
+
 function buildSignalAggregate(drivers) {
   const okDrivers = Array.isArray(drivers)
     ? drivers.filter((driver) => driver?.ok !== false && Number.isFinite(driver?.trendScore))
@@ -113,11 +117,11 @@ export function normalizeHistorySnapshot(record) {
     date: record.tradeDate,
     generatedAt: record.generatedAt ?? null,
     quote: {
-      price: record.price ?? null,
-      nav: record.nav ?? null,
-      changePercent: record.changePercent ?? null,
-      amountCny: record.amountCny ?? null,
-      turnoverRate: record.turnoverRate ?? null,
+      price: finiteOrNull(record.price),
+      nav: finiteOrNull(record.nav),
+      changePercent: finiteOrNull(record.changePercent),
+      amountCny: finiteOrNull(record.amountCny),
+      turnoverRate: finiteOrNull(record.turnoverRate),
       tradeTime: record.tradeTime ?? null,
     },
     premium,
