@@ -81,5 +81,9 @@ export function formatMemoMarkdown(memo) {
 export function formatMemoText(memo) {
   const prefix = TONE_PREFIX[memo.tone] ?? ''
   const drivers = (memo.drivers ?? []).join(' | ')
-  return `${prefix}${memo.headline}｜${drivers}`
+  const matchedDate = memo.replaySelection?.matchedDate
+  const archiveSuffix = typeof matchedDate === 'string' && matchedDate.length > 0
+    ? `｜归档自 ${matchedDate}`
+    : ''
+  return `${prefix}${memo.headline}｜${drivers}${archiveSuffix}`
 }
