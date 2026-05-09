@@ -261,6 +261,7 @@ test('buildHistoryReplay 空骨架 selection 标 no-frames 且无可用日期', 
     assert.deepEqual(replay.selection, {
       requestedAsOf: null,
       matchedDate: null,
+      matchedGeneratedAt: null,
       fallbackReason: 'no-frames',
       availableDates: [],
       dedupedDates: [],
@@ -278,6 +279,7 @@ test('buildHistoryReplay 默认 selection 为最新帧 + fallbackReason=no-as-of
   assert.deepEqual(replay.selection, {
     requestedAsOf: null,
     matchedDate: '2026-04-30',
+    matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
     fallbackReason: 'no-as-of',
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
     dedupedDates: [],
@@ -294,6 +296,7 @@ test('buildHistoryReplay 命中 asOf 时 selection.fallbackReason 为 null 且 r
   assert.deepEqual(replay.selection, {
     requestedAsOf: '2026-04-29',
     matchedDate: '2026-04-29',
+    matchedGeneratedAt: '2026-04-29T06:29:39.104Z',
     fallbackReason: null,
     availableDates: ['2026-04-28', '2026-04-29', '2026-04-30'],
     dedupedDates: [],
@@ -309,6 +312,7 @@ test('buildHistoryReplay asOf 未匹配时 selection 标 no-match 但 availableD
   assert.deepEqual(replay.selection, {
     requestedAsOf: '2025-01-01',
     matchedDate: null,
+    matchedGeneratedAt: null,
     fallbackReason: 'no-match',
     availableDates: ['2026-04-29', '2026-04-30'],
     dedupedDates: [],
@@ -328,6 +332,7 @@ test('buildHistoryReplay 非字符串/空白 asOf 时 selection 标 invalid-as-o
       {
         requestedAsOf: null,
         matchedDate: '2026-04-30',
+        matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
         fallbackReason: 'invalid-as-of',
         availableDates: ['2026-04-29', '2026-04-30'],
         dedupedDates: [],
@@ -343,6 +348,7 @@ test('buildHistoryReplay 非字符串/空白 asOf 时 selection 标 invalid-as-o
       {
         requestedAsOf: null,
         matchedDate: '2026-04-30',
+        matchedGeneratedAt: '2026-04-30T06:29:39.104Z',
         fallbackReason: 'invalid-as-of',
         availableDates: ['2026-04-29', '2026-04-30'],
         dedupedDates: [],
@@ -537,6 +543,49 @@ test('buildHistoryReplay no-match 时 selection.dedupedDates 仍揭示归档中�
     ['2026-04-30'],
     '即使未匹配，dedupedDates 也应反映归档侧的去重状态以便审计',
   )
+})
+
+test('buildHistoryReplay selection.matchedGeneratedAt 暴露被选中帧的 generatedAt（同日多帧时关键）', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T06:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 40, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-30',
+      generatedAt: '2026-04-30T08:00:00.000Z',
+      drivers: [{ key: 'gold', ok: true, trendScore: 80, riskScore: 30 }],
+    }),
+    snapshot({
+      tradeDate: '2026-04-29',
+      generatedAt: '2026-04-29T06:00:00.000Z',
+    }),
+  ])
+
+  const defaultReplay = buildHistoryReplay(archive)
+  assert.equal(
+    defaultReplay.selection.matchedGeneratedAt,
+    '2026-04-30T08:00:00.000Z',
+    '默认 selection 应回显被去重保留的最新 generatedAt 帧',
+  )
+
+  const matched = buildHistoryReplay(archive, { asOf: '2026-04-30' })
+  assert.equal(
+    matched.selection.matchedGeneratedAt,
+    '2026-04-30T08:00:00.000Z',
+    'asOf 命中去重日期时也应回显胜出的 generatedAt，便于审计',
+  )
+
+  const noMatch = buildHistoryReplay(archive, { asOf: '2099-12-31' })
+  assert.equal(
+    noMatch.selection.matchedGeneratedAt,
+    null,
+    'asOf 无匹配时 matchedGeneratedAt 必须为 null',
+  )
+
+  const empty = buildHistoryReplay([])
+  assert.equal(empty.selection.matchedGeneratedAt, null, '空骨架 matchedGeneratedAt 必须为 null')
 })
 
 test('buildHistoryReplay selection.dedupedDates 是副本，不被外部突变污染', () => {
