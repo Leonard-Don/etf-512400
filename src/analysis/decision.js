@@ -4,14 +4,19 @@
 // 但只要信号引擎触发了 warning 级别（趋势转弱、风险降档、禁止追高等），主结论必须吸收信号的动作和仓位上限，
 // 避免出现"标题主仓持有 / 副标题禁止追高"这类自相矛盾的展示。
 
+function finiteNumberOr(value, fallback) {
+  return Number.isFinite(value) ? value : fallback
+}
+
 export function composePrimaryDecision({ signal, optimizer, riskBudget, trendProfile }) {
-  const riskCap = riskBudget / 100
+  const riskCap = finiteNumberOr(riskBudget / 100, 0)
+  const signalExposure = finiteNumberOr(signal.suggestedExposure, riskCap)
   const base = optimizer?.ok
     ? {
         action: optimizer.best.current.action,
         tone: optimizer.best.current.tone,
         score: optimizer.best.stabilityScore,
-        exposure: Math.min(optimizer.best.current.exposure, riskCap),
+        exposure: Math.min(finiteNumberOr(optimizer.best.current.exposure, riskCap), riskCap),
         source: '自动优化',
         rule: optimizer.best.label,
         overfitRisk: optimizer.best.overfitRisk,
@@ -21,7 +26,7 @@ export function composePrimaryDecision({ signal, optimizer, riskBudget, trendPro
         action: signal.action,
         tone: signal.tone,
         score: signal.score,
-        exposure: Math.min(signal.suggestedExposure, riskCap),
+        exposure: Math.min(signalExposure, riskCap),
         source: '信号引擎',
         rule: trendProfile?.state ?? '样本不足',
         overfitRisk: '暂无',
@@ -35,7 +40,7 @@ export function composePrimaryDecision({ signal, optimizer, riskBudget, trendPro
     ...base,
     action: signal.action,
     tone: 'warning',
-    exposure: Math.min(base.exposure, signal.suggestedExposure),
+    exposure: Math.min(base.exposure, signalExposure),
     rule: `${base.rule} · 信号 ${signal.action}`,
   }
 }
