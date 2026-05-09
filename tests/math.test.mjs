@@ -134,3 +134,69 @@ test('scoreFromReturn 中性 50 + 标度', () => {
   assert.equal(scoreFromReturn(NaN, 100), 50)
   assert.equal(scoreFromReturn(1, 100), 100) // clamped
 })
+
+test('clamp 退化与 NaN 传播', () => {
+  // 上下界相等时强制返回该值
+  assert.equal(clamp(5, 3, 3), 3)
+  assert.equal(clamp(0, 3, 3), 3)
+  // NaN 经 Math.min/Math.max 传播；clamp 不应静默吃掉 NaN
+  assert.ok(Number.isNaN(clamp(NaN, 0, 10)))
+})
+
+test('average 单值与全部 Infinity', () => {
+  assert.equal(average([7]), 7)
+  // ±Infinity 不是有限值，应被 Number.isFinite 过滤掉 → 全部过滤 → null
+  assert.equal(average([Infinity, -Infinity]), null)
+})
+
+test('dailyReturns 空数组与单元素均返回空序列', () => {
+  assert.deepEqual(dailyReturns([]), [])
+  assert.deepEqual(dailyReturns([{ close: 10 }]), [])
+})
+
+test('cleanKlines 空数组直接返回空', () => {
+  assert.deepEqual(cleanKlines([]), [])
+})
+
+test('maxDrawdownFromCurve 空曲线与单点均返回 0', () => {
+  // 空曲线时 peak 通过 `?? 1` 兜底，forEach 不执行，回撤为 0
+  assert.equal(maxDrawdownFromCurve([]), 0)
+  // 单点曲线无回撤
+  assert.equal(maxDrawdownFromCurve([0.8]), 0)
+})
+
+test('annualizedReturn 拒绝低于 -100% 的累计收益与非正期数', () => {
+  assert.equal(annualizedReturn(-1.5, 252), 0)
+  assert.equal(annualizedReturn(0.1, -10), 0)
+})
+
+test('scoreFromReturn 下限夹紧与 ±Infinity 走中性分支', () => {
+  // 50 + (-1)*100 = -50 → 夹到 0
+  assert.equal(scoreFromReturn(-1, 100), 0)
+  // ±Infinity 不是有限值 → 走中性 50
+  assert.equal(scoreFromReturn(Infinity, 100), 50)
+  assert.equal(scoreFromReturn(-Infinity, 100), 50)
+})
+
+test('movingAverage days=1 退化为当日 close', () => {
+  const k = [{ close: 10 }, { close: 12 }, { close: 11 }]
+  assert.equal(movingAverage(k, 0, 1), 10)
+  assert.equal(movingAverage(k, 2, 1), 11)
+})
+
+test('trailingHigh 起点处部分窗口 start 被夹到 0', () => {
+  const k = [{ close: 7 }, { close: 9 }, { close: 8 }]
+  // endIndex=0, days=5：start=max(0,-4)=0，窗口仅包含第 0 项
+  assert.equal(trailingHigh(k, 0, 5), 7)
+  // endIndex=1, days=5：窗口为前两项，最大值 9
+  assert.equal(trailingHigh(k, 1, 5), 9)
+})
+
+test('buildFactorProfile 空 baskets 全部归零', () => {
+  const profile = buildFactorProfile([])
+  // totalWeight 为 0 时被 || 1 兜底，分子也为 0 → 比值为 0
+  assert.equal(profile.trendScore, 0)
+  assert.equal(profile.riskScore, 0)
+  assert.equal(profile.positiveFactors, 0)
+  assert.equal(profile.highRiskFactors, 0)
+})
