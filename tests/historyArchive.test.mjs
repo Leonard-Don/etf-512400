@@ -148,6 +148,16 @@ test('normalizeHistorySnapshot 把非有限风险分按零风险纳入均值', (
   assert.equal(entry.signal.highRiskCount, 0)
 })
 
+test('normalizeHistorySnapshot 非有限的 changePercent 与 amountCny 归一为 null', () => {
+  const entry = normalizeHistorySnapshot({
+    ...SAMPLE_RECORD,
+    changePercent: Number.NaN,
+    amountCny: Number.POSITIVE_INFINITY,
+  })
+  assert.equal(entry.quote.changePercent, null)
+  assert.equal(entry.quote.amountCny, null)
+})
+
 test('normalizeHistorySnapshot 对 null 或缺失输入返回 null', () => {
   assert.equal(normalizeHistorySnapshot(null), null)
   assert.equal(normalizeHistorySnapshot(undefined), null)
