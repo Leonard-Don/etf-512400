@@ -137,3 +137,60 @@ test('quote 缺 amountCny 时不会爆掉，liquidity 仍能给分位/分数', (
       (result.liquidity.amountPercentile >= 0 && result.liquidity.amountPercentile <= 100),
   )
 })
+
+test('样本不足（<20 日）→ tracking.status="样本不足"，分数仍在 [0,100]', () => {
+  // 只给 15 日，对齐后 returns ≈14 个，低于 minSampleForGrading=20
+  const benchmark = syntheticSeries(15, (i) => 100 * 1.0005 ** i)
+  const etf = syntheticSeries(15, (i) => 100 * 1.0005 ** i)
+  const nav = navFromKlines(etf)
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: nav,
+    price: etf.at(-1).close,
+    nav: nav.at(-1).unit,
+    quote: { amountCny: 100_000_000, turnoverRate: 0.01 },
+  })
+  assert.equal(result.tracking.status, '样本不足')
+  assert.ok(result.tracking.sampleSize < 20)
+  assert.ok(result.tracking.score >= 0 && result.tracking.score <= 100)
+  assert.ok(result.score >= 0 && result.score <= 100)
+})
+
+test('价格相对净值低 ~2% → premium.status="折价偏深"，streakLabel 含"折价"', () => {
+  // nav 单位定为 close * 1.02，使得 currentPremium ≈ -1.96%（<-0.4%）
+  const klines = syntheticSeries(140, (i) => 100 * 1.0005 ** i)
+  const nav = navFromKlines(klines, 1.02)
+  const result = buildTradingQualityProfile({
+    etfKlines: klines,
+    benchmarkKlines: klines,
+    navSeries: nav,
+    price: klines.at(-1).close,
+    nav: klines.at(-1).close * 1.02,
+    quote: { amountCny: 500_000_000, turnoverRate: 0.02 },
+  })
+  assert.equal(result.premium.status, '折价偏深')
+  assert.equal(result.premium.tone, 'opportunity')
+  assert.ok(result.premium.currentPremium < -0.004)
+  assert.match(result.premium.streakLabel, /折价/)
+  assert.ok(result.premium.streak >= 1)
+})
+
+test('完全无成交额数据 → liquidity.status="样本不足"，amountPercentile 为 null，score 仍在 [0,100]', () => {
+  // etf 仅有 close，没有 amount 字段；quote 也不带 amountCny
+  const benchmark = syntheticSeries(140, (i) => 100)
+  const etf = syntheticSeries(140, () => 100)
+  const nav = navFromKlines(etf)
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: nav,
+    price: 100,
+    nav: 100,
+    quote: { turnoverRate: 0.01 },
+  })
+  assert.equal(result.liquidity.status, '样本不足')
+  assert.equal(result.liquidity.amountPercentile, null)
+  assert.equal(result.liquidity.latestAmount, null)
+  assert.ok(result.liquidity.score >= 0 && result.liquidity.score <= 100)
+})
