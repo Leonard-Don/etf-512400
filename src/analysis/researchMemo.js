@@ -33,7 +33,8 @@ export function composeResearchMemo({
   dailyChange,
   replaySelection = null,
 }) {
-  const exposurePercent = Math.round((primaryDecision.exposure ?? 0) * 100)
+  const exposureValue = primaryDecision.exposure
+  const exposurePercent = Number.isFinite(exposureValue) ? Math.round(exposureValue * 100) : 0
   const headline = `${primaryDecision.action}（仓位 ${exposurePercent}%）`
 
   const drivers = [
