@@ -37,9 +37,10 @@ export function composeResearchMemo({
   const exposurePercent = Number.isFinite(exposureValue) ? Math.round(exposureValue * 100) : 0
   const headline = `${primaryDecision.action}（仓位 ${exposurePercent}%）`
 
+  const driverScore = (score) => (Number.isFinite(score) ? score : '暂无')
   const drivers = [
-    `信号 ${signal.action}（${signal.score}）`,
-    `交易质量 ${tradingQuality.action}（${tradingQuality.score}）`,
+    `信号 ${signal.action}（${driverScore(signal.score)}）`,
+    `交易质量 ${tradingQuality.action}（${driverScore(tradingQuality.score)}）`,
     `趋势 ${trendProfile.state}`,
   ]
 
