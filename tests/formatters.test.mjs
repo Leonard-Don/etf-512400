@@ -85,3 +85,35 @@ test('formatPercent/formatSignedPercent: 非数字非字符串（boolean/array/o
   assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
   assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号')
 })
+
+test('formatPercent/formatSignedPercent: BigInt 与 boxed Number/Date/valueOf 包装类型必须回退到 暂无（numeric-primitive-only 契约）', () => {
+  // PR #27 钉死 stringy、PR #28 钉死 boolean/array/object，最后留下的"会被 Number(value) 静默
+  // 接受、却不是 number 原始值"的一类输入仍未被显式锁住：BigInt（Number(1n)=1）、boxed Number
+  // 包装（Number(new Number(0.5))=0.5）、Date（Number(new Date(0))=0、Number(new Date(50))=50）、
+  // 以及自定义 valueOf 对象（Number({valueOf:()=>0.5})=0.5）。这些类型最容易从远端 JSON 转换层、
+  // 金融 API（用 BigInt 表大额数量）、legacy 代码 new Number(...) 测试夹具、Date/percent 字段
+  // 串位等路径漂移进 percent 入口。Number(value) 旧守卫下，1n 会渲染成 "100.00%"、boxed Number(0.5)
+  // 会渲染成 "50.00%"、Date(0) 与 valueOf-0 会渲染成 "0.00%"——把"非 number 原始值"伪装成合法
+  // percent。Number.isFinite(value) 不做隐式拆箱/转换，对 BigInt/包装对象/Date/valueOf-obj 一律
+  // 返回 false。本测试守住共享 percent 契约的"numeric primitive only"边界：若未来有人为兼容
+  // BigInt 或 boxed Number 在共享层加回 Number(value) 包裹，立刻 RED。
+  assert.equal(formatPercent(0n), '暂无', 'BigInt 0n 不得被 coerce 成 0.00%（Number(0n)=0 旧守卫会漏过）')
+  assert.equal(formatPercent(1n), '暂无', 'BigInt 1n 不得被 coerce 成 100.00%（Number(1n)=1 旧守卫会漏过）')
+  assert.equal(formatPercent(-1n), '暂无', 'BigInt -1n 不得被 coerce 成 -100.00%')
+  assert.equal(formatPercent(new Number(0.5)), '暂无', 'boxed Number(0.5) 不得被拆箱成 50.00%')
+  assert.equal(formatPercent(new Number(0)), '暂无', 'boxed Number(0) 不得被拆箱成 0.00%（与 numeric 0 同形最危险）')
+  assert.equal(formatPercent(new Date(0)), '暂无', 'Date(0) 不得被 valueOf 转成 0.00%（Number(date) 走 timestamp 路径）')
+  assert.equal(formatPercent({ valueOf: () => 0.5 }), '暂无', '自定义 valueOf 对象不得被拆箱成 50.00%')
+  assert.equal(formatPercent({ valueOf: () => 0 }), '暂无', '自定义 valueOf 返回 0 不得被拆箱成 0.00%')
+  assert.equal(formatSignedPercent(1n), '暂无', 'signed 路径同样拒绝 BigInt 1n')
+  assert.equal(formatSignedPercent(-1n), '暂无', 'signed 路径同样拒绝 BigInt -1n')
+  assert.equal(formatSignedPercent(new Number(0.012)), '暂无', 'signed 路径同样拒绝 boxed Number(0.012)')
+  assert.equal(formatSignedPercent(new Date(0)), '暂无', 'signed 路径同样拒绝 Date(0)')
+  assert.equal(formatSignedPercent({ valueOf: () => 0.012 }), '暂无', 'signed 路径同样拒绝自定义 valueOf 对象')
+
+  // 回归守卫：合法 number 原始值仍按既有契约渲染，不被 numeric-primitive-only 拒绝逻辑误伤。
+  assert.equal(formatPercent(0), '0.00%', 'numeric 0 仍渲染为 0.00%')
+  assert.equal(formatPercent(0.5), '50.00%', 'numeric 0.5 仍按 *100 渲染')
+  assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
+  assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号')
+})
