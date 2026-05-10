@@ -330,3 +330,36 @@ test('composeResearchMemo: replaySelection 缺 dedupedDates 时填 [] 保持形�
   )
   assert.deepEqual(memo.replaySelection.dedupedDates, [])
 })
+
+test('composeResearchMemo: 非有限 exposure 不让 headline 漏出 NaN/Infinity 哨兵', () => {
+  // 现有 headline 用 `Math.round((primaryDecision.exposure ?? 0) * 100)` 拼接，?? 只兜底
+  // null/undefined，NaN/±Infinity 会原样穿过 Math.round 并被字符串插值为 "NaN%"/"Infinity%"。
+  // formatMemoMarkdown 直接 `## ${memo.headline}` 透传，没有再做哨兵守卫；现有 metrics 的
+  // Number.isFinite 防护只覆盖 markdown 指标行，不覆盖 headline。
+  // 这一守卫与 memoFormatter.formatExposure 的非有限回退构成对称的 defense-in-depth：
+  // composeResearchMemo 是对外暴露的纯函数 API，未来 caller（场景模拟、优化器、UI 试算）
+  // 漏掉上游 clamp 时不应直接污染 headline。
+  for (const sentinel of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    const memo = composeResearchMemo({
+      primaryDecision: { ...basePrimary, exposure: sentinel },
+      signal: baseSignal,
+      tradingQuality: baseQuality,
+      trendProfile: baseTrend,
+      premium: 0.001,
+      dailyChange: 0.012,
+    })
+    assert.equal(typeof memo.headline, 'string', `exposure=${String(sentinel)} 仍应输出 string headline`)
+    assert.ok(
+      !memo.headline.includes('NaN'),
+      `exposure=${String(sentinel)} 不应让 headline 漏出 NaN 哨兵：${memo.headline}`,
+    )
+    assert.ok(
+      !memo.headline.includes('Infinity'),
+      `exposure=${String(sentinel)} 不应让 headline 漏出 Infinity 哨兵：${memo.headline}`,
+    )
+    assert.ok(
+      memo.headline.startsWith(basePrimary.action),
+      `exposure=${String(sentinel)} headline 仍应以 action 开头：${memo.headline}`,
+    )
+  }
+})
