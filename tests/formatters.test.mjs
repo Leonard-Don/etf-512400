@@ -58,3 +58,30 @@ test('formatPercent/formatSignedPercent: 字符串数值不得伪装成合法 pe
   assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
   assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号且不出现 +-')
 })
+
+test('formatPercent/formatSignedPercent: 非数字非字符串（boolean/array/object）必须回退到 暂无', () => {
+  // PR #27 把守卫收紧到 Number.isFinite(value) 后，stringy percent 已被显式拒绝；本测试
+  // 把 numeric-only 契约的另一侧——非 number 非 string 的"垃圾输入"——一并钉死。
+  // 这些类型来自上游 schema 漂移、agent prompt 误装配、远端 JSON 字段缺失被默认值兜底
+  // 等路径：Number(true)=1、Number([])=0、Number([0])=0 都是有限数字，若未来有人在共享层
+  // 重新引入 Number(value) 包裹，会让 boolean true 渲染成 "100.00%"、空数组渲染成 "0.00%"
+  // (与平盘日同形)、单元素数组 [0.5] 渲染成 "50.00%"——把"完全错误的类型"伪装成合法
+  // percent。Number.isFinite(value) 不做隐式转换，对非 number 一律返回 false，本测试守住
+  // 这条边界：若守卫被弱化，立刻 RED。
+  assert.equal(formatPercent(true), '暂无', 'boolean true 不得被 coerce 成 100.00%')
+  assert.equal(formatPercent(false), '暂无', 'boolean false 不得被 coerce 成 0.00%（与 numeric 0 同形最危险）')
+  assert.equal(formatPercent([]), '暂无', '空数组 Number([])=0，必须显式拒绝以防伪装成 0.00%')
+  assert.equal(formatPercent([0]), '暂无', '单元素数组 Number([0])=0，同样必须拒绝')
+  assert.equal(formatPercent({}), '暂无', '普通对象 Number({})=NaN 已天然落到 暂无，本断言钉死该契约')
+  assert.equal(formatSignedPercent(true), '暂无', 'signed 路径同样拒绝 boolean true')
+  assert.equal(formatSignedPercent(false), '暂无', 'signed 路径同样拒绝 boolean false')
+  assert.equal(formatSignedPercent([]), '暂无', 'signed 路径同样拒绝空数组')
+  assert.equal(formatSignedPercent([0]), '暂无', 'signed 路径同样拒绝单元素数组')
+  assert.equal(formatSignedPercent({}), '暂无', 'signed 路径同样拒绝普通对象')
+
+  // 回归守卫：合法 numeric 仍按既有契约渲染，不被非 number 拒绝逻辑误伤。
+  assert.equal(formatPercent(0), '0.00%', 'numeric 0 仍渲染为 0.00%')
+  assert.equal(formatPercent(0.5), '50.00%', 'numeric 0.5 仍按 *100 渲染')
+  assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
+  assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号')
+})
