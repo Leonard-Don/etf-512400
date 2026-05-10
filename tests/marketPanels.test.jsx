@@ -52,3 +52,48 @@ describe('CommodityDriverPanel return5/20/60 display', () => {
     unmount()
   })
 })
+
+describe('CommodityDriverPanel changePercent display', () => {
+  test('null/undefined/NaN changePercent render formatter fallback, not 0.0%', () => {
+    const drivers = [null, undefined, Number.NaN].map((changePercent, index) => ({
+      key: `driver-${index}`,
+      label: `商品${index}`,
+      source: 'TEST',
+      unit: 'unit',
+      price: 100 + index,
+      changePercent,
+      trendScore: 50,
+      riskScore: 30,
+      return5: 0.01,
+      return20: 0.02,
+      return60: 0.03,
+    }))
+    const { html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    const fallbackCount = (out.match(/暂无/g) || []).length
+    expect(fallbackCount).toBe(3)
+    expect(out).not.toMatch(/<span class="(?:positive|negative|neutral)">0\.0%<\/span>/)
+    unmount()
+  })
+
+  test('numeric 0 changePercent still renders as a real 0%', () => {
+    const drivers = [{
+      key: 'silver',
+      label: '白银',
+      source: 'CME',
+      unit: 'USD/oz',
+      price: 30,
+      changePercent: 0,
+      trendScore: 45,
+      riskScore: 20,
+      return5: 0.01,
+      return20: 0.02,
+      return60: 0.03,
+    }]
+    const { html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    expect(out).toContain('0.00%')
+    expect(out).not.toContain('暂无')
+    unmount()
+  })
+})
