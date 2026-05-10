@@ -152,6 +152,48 @@ test('formatMemoMarkdown/Text: metrics 为 ±Infinity 时回退到 暂无 不漏
   assert.ok(!text.includes('undefined'), 'text 不应泄漏 undefined 字面量')
 })
 
+test('formatMemoMarkdown: metrics.premium/dailyChange=null 回退到 暂无（JSON 反序列化 NaN→null 哨兵保护）', () => {
+  // JSON.stringify 把 NaN/Infinity 序列化为 null；上游若把 memo 序列化再反序列化用作展示
+  // （归档复盘 / agent prompt 重放 / 持久化粘贴），metrics.premium / metrics.dailyChange 会从
+  // NaN 变成 null。formatSignedPercent 当前只用 Number.isFinite(Number(value)) 守卫，对 null
+  // 失效（Number(null)=0 是有限），导致 markdown 把"缺失"渲染成 "0.00%" 误读为"折溢价贴近净值/
+  // 平盘日"，与 confidence/score/exposure 已有的 暂无 回退不对称。两条 percent 字段必须沿用
+  // 同样的 isFinite 强守卫回退到 暂无，避免 JSON 反序列化后失去缺失语义。
+  const memo = {
+    ...baseMemo,
+    metrics: {
+      score: 78,
+      exposure: 0.6,
+      confidence: 75,
+      premium: null,
+      dailyChange: null,
+    },
+  }
+  const md = formatMemoMarkdown(memo)
+  assert.match(md, /^- 折溢价:\s*暂无$/m, 'premium=null 必须回退到 暂无 而非 0.00%')
+  assert.match(md, /^- 当日涨跌:\s*暂无$/m, 'dailyChange=null 必须回退到 暂无 而非 0.00%')
+  assert.ok(!md.includes('0.00%'), 'markdown 不应把缺失值渲染成 0.00%（与 平盘日 同形）')
+  assert.ok(!md.includes('null'), 'markdown 不应泄漏 null 字面量')
+
+  // JSON 反序列化路径：上游 memo 含 NaN，序列化后 NaN→null，再反序列化展示时也必须稳定。
+  const roundTripped = JSON.parse(JSON.stringify({
+    ...baseMemo,
+    metrics: {
+      score: 78,
+      exposure: 0.6,
+      confidence: 75,
+      premium: Number.NaN,
+      dailyChange: Number.POSITIVE_INFINITY,
+    },
+  }))
+  assert.equal(roundTripped.metrics.premium, null, 'JSON.stringify 把 NaN 转成 null（前提）')
+  assert.equal(roundTripped.metrics.dailyChange, null, 'JSON.stringify 把 Infinity 转成 null（前提）')
+  const roundTrippedMd = formatMemoMarkdown(roundTripped)
+  assert.match(roundTrippedMd, /^- 折溢价:\s*暂无$/m, 'JSON 反序列化后 premium=null 仍回退到 暂无')
+  assert.match(roundTrippedMd, /^- 当日涨跌:\s*暂无$/m, 'JSON 反序列化后 dailyChange=null 仍回退到 暂无')
+  assert.ok(!roundTrippedMd.includes('0.00%'), 'JSON 反序列化路径也不应渲染 0.00%')
+})
+
 test('formatMemoText: 单行摘要 含动作/仓位/信号/质量/趋势', () => {
   const text = formatMemoText(baseMemo)
   assert.equal(text.split('\n').length, 1, 'text format should be a single line')
