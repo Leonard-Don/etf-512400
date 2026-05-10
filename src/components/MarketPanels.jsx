@@ -106,15 +106,15 @@ export function CommodityDriverPanel({ commodityDrivers }) {
           <dl>
             <div>
               <dt>5日</dt>
-              <dd>{formatSignedPercent(driver.return5 ?? 0, 1)}</dd>
+              <dd>{formatSignedPercent(driver.return5, 1)}</dd>
             </div>
             <div>
               <dt>20日</dt>
-              <dd>{formatSignedPercent(driver.return20 ?? 0, 1)}</dd>
+              <dd>{formatSignedPercent(driver.return20, 1)}</dd>
             </div>
             <div>
               <dt>60日</dt>
-              <dd>{formatSignedPercent(driver.return60 ?? 0, 1)}</dd>
+              <dd>{formatSignedPercent(driver.return60, 1)}</dd>
             </div>
           </dl>
         </article>
