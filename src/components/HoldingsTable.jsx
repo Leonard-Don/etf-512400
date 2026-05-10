@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { compareHoldingsNumeric } from './holdingsTableSort'
 
 const COLUMNS = [
   { key: 'code', label: '代码' },
@@ -17,7 +18,7 @@ export function HoldingsTable({ holdings }) {
     return [...holdings].sort((a, b) => {
       const av = a[sort.key]
       const bv = b[sort.key]
-      if (column?.numeric) return ((av ?? 0) - (bv ?? 0)) * factor
+      if (column?.numeric) return compareHoldingsNumeric(av, bv, factor)
       return String(av ?? '').localeCompare(String(bv ?? ''), 'zh-Hans-CN') * factor
     })
   }, [holdings, sort])
