@@ -36,3 +36,25 @@ test('formatPercent/formatSignedPercent: null (JSON NaN/Infinity 反序列化哨
   assert.equal(formatSignedPercent(0.012), '+1.20%', 'formatSignedPercent 正值仍带 + 号')
   assert.equal(formatSignedPercent(-0.025), '-2.50%', 'formatSignedPercent 负值保留原生 - 号')
 })
+
+test('formatPercent/formatSignedPercent: 字符串数值不得伪装成合法 percent（numeric-only 契约）', () => {
+  // 6d1be20 把守卫从 Number.isFinite(Number(value)) 收紧到 Number.isFinite(value)，副作用是
+  // 把"看起来像数字的字符串"（"0.5" / "0" / "" / "-0.025"）从合法 percent 输入里挤出去：
+  // JSON 字符串字段、URL 查询参数、表单回填、agent prompt 间往返再 parse 失败的退化路径里，
+  // stringy percent 不再被 silent coerce 成 "50.00%" / "0.00%" 这种与 平盘日 / 贴近净值 同形
+  // 的伪有效值。memoFormatter 内部走自己的 isFinite 守卫，但 App.jsx / DecisionDeck.jsx /
+  // signal.js / 各 *Panels.jsx 都直接消费共享 formatter——契约必须显式 numeric-only，否则
+  // 上游一处 schema 漂移就会把缺失语义伪装成合法 0%。本测试守住收紧后的边界：若未来有人
+  // 为了"兼容性"在共享层重新加回 Number(value) 包裹，会立刻 RED。
+  assert.equal(formatPercent('0.5'), '暂无', '字符串 "0.5" 不得被 coerce 成 50.00%')
+  assert.equal(formatPercent('0'), '暂无', '字符串 "0" 不得被 coerce 成 0.00%（与 numeric 0 同形最危险）')
+  assert.equal(formatPercent(''), '暂无', '空字符串 Number("")=0，必须显式拒绝以防伪装成 0.00%')
+  assert.equal(formatSignedPercent('0.012'), '暂无', '字符串 "0.012" 不得被 coerce 成 +1.20%')
+  assert.equal(formatSignedPercent('-0.025'), '暂无', '字符串 "-0.025" 不得被 coerce 成 -2.50%')
+
+  // 回归守卫：numeric 0 与 numeric signed 仍按既有契约渲染，不被 numeric-only 收紧误伤。
+  assert.equal(formatPercent(0), '0.00%', 'numeric 0 仍渲染为 0.00%（合法 0 不被误判为缺失）')
+  assert.equal(formatSignedPercent(0), '0.00%', 'numeric 0 在 signed 路径下不带 + 号（既有契约：仅正值附 +）')
+  assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
+  assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号且不出现 +-')
+})
