@@ -24,13 +24,17 @@ export function Panel({ title, icon: Icon, children, className = '' }) {
 }
 
 export function Meter({ label, value, color }) {
+  // 非有限值（null/undefined/NaN/Infinity）走 暂无 + 0% 宽度，避免 NaN/undefined
+  // 漏到 CSS width 与 <b> 文案；合法 0 仍渲染 0 + 0%。
+  const finite = Number.isFinite(value)
+  const width = finite ? value : 0
   return (
     <div className="meter">
       <span>{label}</span>
       <div>
-        <i style={{ width: `${value}%`, background: color }}></i>
+        <i style={{ width: `${width}%`, background: color }}></i>
       </div>
-      <b>{value}</b>
+      <b>{finite ? value : '暂无'}</b>
     </div>
   )
 }

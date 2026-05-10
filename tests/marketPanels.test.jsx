@@ -98,6 +98,98 @@ describe('CommodityDriverPanel changePercent display', () => {
   })
 })
 
+describe('CommodityDriverPanel driver score meters', () => {
+  // 上游 driver.trendScore/riskScore 在 schema 漂移、回测样本不足、或 JSON
+  // 反序列化（NaN/Infinity → null）时会以 null/undefined/NaN 形态到达。原实现
+  // `driver.trendScore ?? 0` 把缺失伪装成合法 0（与真实 0 同形），且 NaN 不会
+  // 被 `??` 兜底，会原样漏到 Meter，最终渲染出 `width: NaN%` 和 `<b>NaN</b>`。
+  // 守卫后：缺失/非有限值走 暂无 + 0% 宽度；真实 0 仍渲染 0 + 0%。
+  function makeDriver(overrides) {
+    return {
+      key: 'gold',
+      label: '黄金',
+      source: 'CME',
+      unit: 'USD/oz',
+      price: 2400,
+      changePercent: 0.012,
+      trendScore: 50,
+      riskScore: 30,
+      return5: 0.01,
+      return20: 0.02,
+      return60: 0.03,
+      ...overrides,
+    }
+  }
+
+  test('null/undefined/NaN trendScore renders 暂无 with safe 0% width', () => {
+    const drivers = [
+      makeDriver({ key: 'd-null', trendScore: null }),
+      makeDriver({ key: 'd-undef', trendScore: undefined }),
+      makeDriver({ key: 'd-nan', trendScore: Number.NaN }),
+    ]
+    const { container, html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    expect(out).not.toMatch(/NaN|undefined|null/)
+    const trendBars = Array.from(container.querySelectorAll('.driver-scores .meter:first-child i'))
+    expect(trendBars).toHaveLength(3)
+    for (const bar of trendBars) {
+      expect(bar.style.width).toBe('0%')
+    }
+    const trendValues = Array.from(container.querySelectorAll('.driver-scores .meter:first-child b'))
+    for (const node of trendValues) {
+      expect(node.textContent).toBe('暂无')
+    }
+    unmount()
+  })
+
+  test('null/undefined/NaN riskScore renders 暂无 with safe 0% width', () => {
+    const drivers = [
+      makeDriver({ key: 'd-null', riskScore: null }),
+      makeDriver({ key: 'd-undef', riskScore: undefined }),
+      makeDriver({ key: 'd-nan', riskScore: Number.NaN }),
+    ]
+    const { container, html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    expect(out).not.toMatch(/NaN|undefined|null/)
+    const riskBars = Array.from(container.querySelectorAll('.driver-scores .meter:last-child i'))
+    expect(riskBars).toHaveLength(3)
+    for (const bar of riskBars) {
+      expect(bar.style.width).toBe('0%')
+    }
+    const riskValues = Array.from(container.querySelectorAll('.driver-scores .meter:last-child b'))
+    for (const node of riskValues) {
+      expect(node.textContent).toBe('暂无')
+    }
+    unmount()
+  })
+
+  test('numeric 0 driver scores still render as real 0 with 0% width (regression guard)', () => {
+    const drivers = [makeDriver({ key: 'zero', trendScore: 0, riskScore: 0 })]
+    const { container, html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    expect(out).not.toContain('暂无')
+    const trendBar = container.querySelector('.driver-scores .meter:first-child i')
+    const riskBar = container.querySelector('.driver-scores .meter:last-child i')
+    expect(trendBar.style.width).toBe('0%')
+    expect(riskBar.style.width).toBe('0%')
+    expect(container.querySelector('.driver-scores .meter:first-child b').textContent).toBe('0')
+    expect(container.querySelector('.driver-scores .meter:last-child b').textContent).toBe('0')
+    unmount()
+  })
+
+  test('finite driver scores render value text and scaled bar widths (regression guard)', () => {
+    const drivers = [makeDriver({ key: 'ok', trendScore: 72, riskScore: 41 })]
+    const { container, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const trendBar = container.querySelector('.driver-scores .meter:first-child i')
+    const riskBar = container.querySelector('.driver-scores .meter:last-child i')
+    expect(trendBar.style.width).toBe('72%')
+    expect(riskBar.style.width).toBe('41%')
+    expect(container.querySelector('.driver-scores .meter:first-child b').textContent).toBe('72')
+    expect(container.querySelector('.driver-scores .meter:last-child b').textContent).toBe('41')
+    unmount()
+  })
+})
+
 describe('RiskStack risk metrics display', () => {
   test('null/undefined/NaN risk metrics render formatter fallback, not 0.00%', () => {
     // riskMetrics 字段在 JSON 反序列化（NaN/Infinity → null）、上游 schema 漂移、

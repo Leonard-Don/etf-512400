@@ -112,8 +112,8 @@ export function CommodityDriverPanel({ commodityDrivers }) {
             </span>
           </div>
           <div className="driver-scores">
-            <Meter label="趋势" value={driver.trendScore ?? 0} color="#5f7f56" />
-            <Meter label="风险" value={driver.riskScore ?? 0} color="#7c3f3b" />
+            <Meter label="趋势" value={driver.trendScore} color="#5f7f56" />
+            <Meter label="风险" value={driver.riskScore} color="#7c3f3b" />
           </div>
           <dl>
             <div>
