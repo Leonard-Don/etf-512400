@@ -62,13 +62,17 @@ export function FactorTile({ factor }) {
 export function RiskStack({ riskMetrics }) {
   // 标度：回撤 50% → 满格；单日 VaR 10% → 满格
   // 缺失指标（null/undefined/NaN）让 formatPercent 走 暂无 fallback；
-  // 条形宽度做 finite 守卫避免 NaN/undefined 漏到 CSS（合法 0 仍渲染 0%）。
+  // 条形宽度做 finite 守卫避免 NaN/undefined 漏到 CSS，且把越界但有限的值
+  // （拥挤度漂到负数或 >100、压力情景里的极端回撤/VaR）夹到 [0, 100]，
+  // 避免负宽度或撑破容器；strong 文案仍走 formatter 输出原始数字（合法 0
+  // 仍渲染 0%）。
   const { maxDrawdown, oneDayVar95, crowdingScore } = riskMetrics
+  const clampWidth = (n) => Math.max(0, Math.min(n, 100))
   const drawdownWidth = Number.isFinite(maxDrawdown)
-    ? Math.min(Math.abs(maxDrawdown) * 200, 100)
+    ? clampWidth(Math.abs(maxDrawdown) * 200)
     : 0
   const varWidth = Number.isFinite(oneDayVar95)
-    ? Math.min(Math.abs(oneDayVar95) * 1000, 100)
+    ? clampWidth(Math.abs(oneDayVar95) * 1000)
     : 0
   const crowdingFinite = Number.isFinite(crowdingScore)
   const items = [
@@ -77,7 +81,7 @@ export function RiskStack({ riskMetrics }) {
     {
       label: '拥挤度',
       value: crowdingFinite ? crowdingScore / 100 : crowdingScore,
-      width: crowdingFinite ? crowdingScore : 0,
+      width: crowdingFinite ? clampWidth(crowdingScore) : 0,
     },
   ]
 
