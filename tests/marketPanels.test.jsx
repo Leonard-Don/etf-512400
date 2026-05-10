@@ -266,4 +266,44 @@ describe('RiskStack risk metrics display', () => {
     expect(bars[2].style.width).toBe('62%')
     unmount()
   })
+
+  test('large finite risk metrics clamp bar widths to 100% but keep formatter percent text', () => {
+    // 极端回撤/VaR/拥挤度（数据异常、压力情景或 schema 漂移）不能让 CSS width
+    // 超过 100% 撑破容器；但 strong 文案仍应走 formatter 输出真实数字。
+    // 当前 drawdown/var 已被 Math.min 夹到 100，crowdingScore 漏夹则会写入
+    // width:150% 撑破 risk-row。
+    const riskMetrics = {
+      maxDrawdown: -0.6,
+      oneDayVar95: 0.5,
+      crowdingScore: 150,
+    }
+    const { container, html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    const bars = Array.from(container.querySelectorAll('.risk-row i'))
+    expect(bars[0].style.width).toBe('100%')
+    expect(bars[1].style.width).toBe('100%')
+    expect(bars[2].style.width).toBe('100%')
+    expect(out).toContain('-60.00%')
+    expect(out).toContain('50.00%')
+    expect(out).toContain('150.00%')
+    expect(out).not.toContain('暂无')
+    unmount()
+  })
+
+  test('negative finite crowdingScore clamps bar width to 0% but keeps formatter percent text', () => {
+    // 拥挤度漂到负数（归一化错误、上游输入污染）时 CSS width:-10% 是非法值，
+    // 必须夹到 0%；strong 文案仍应使用 formatter 输出真实数字。
+    const riskMetrics = {
+      maxDrawdown: -0.18,
+      oneDayVar95: 0.04,
+      crowdingScore: -10,
+    }
+    const { container, html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    const bars = Array.from(container.querySelectorAll('.risk-row i'))
+    expect(bars[2].style.width).toBe('0%')
+    expect(out).toContain('-10.00%')
+    expect(out).not.toContain('暂无')
+    unmount()
+  })
 })
