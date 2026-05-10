@@ -1,10 +1,12 @@
 export function formatPercent(value, digits = 2) {
-  if (!Number.isFinite(Number(value))) return '暂无'
-  return `${(Number(value) * 100).toFixed(digits)}%`
+  // 用 Number.isFinite(value) 直接守卫：Number(null)=0 是有限的，会让 JSON 反序列化的
+  // null 哨兵（NaN/Infinity 序列化产物）漏成 "0.00%" 误读为合法 0%。
+  if (!Number.isFinite(value)) return '暂无'
+  return `${(value * 100).toFixed(digits)}%`
 }
 
 export function formatSignedPercent(value, digits = 2) {
-  if (!Number.isFinite(Number(value))) return '暂无'
+  if (!Number.isFinite(value)) return '暂无'
   const sign = value > 0 ? '+' : ''
   return `${sign}${formatPercent(value, digits)}`
 }
