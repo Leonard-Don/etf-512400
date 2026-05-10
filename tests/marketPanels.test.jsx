@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { CommodityDriverPanel } from '../src/components/MarketPanels.jsx'
+import { CommodityDriverPanel, RiskStack } from '../src/components/MarketPanels.jsx'
 import { render } from './helpers/render.jsx'
 
 describe('CommodityDriverPanel return5/20/60 display', () => {
@@ -94,6 +94,84 @@ describe('CommodityDriverPanel changePercent display', () => {
     const out = html()
     expect(out).toContain('0.00%')
     expect(out).not.toContain('暂无')
+    unmount()
+  })
+})
+
+describe('RiskStack risk metrics display', () => {
+  test('null/undefined/NaN risk metrics render formatter fallback, not 0.00%', () => {
+    // riskMetrics 字段在 JSON 反序列化（NaN/Infinity → null）、上游 schema 漂移、
+    // 或回测样本不足时会以 null/undefined/NaN 形态到达。原实现 `?? 0` 会把缺失伪装
+    // 成合法 0.00%，而 crowdingScore/100 在 null 入参时通过 Number(null)=0 同样
+    // 漏成 0.00%。守卫后必须三行都走 暂无，且条形宽度不能漏 NaN/undefined 到 CSS。
+    const riskMetrics = {
+      maxDrawdown: null,
+      oneDayVar95: undefined,
+      crowdingScore: Number.NaN,
+    }
+    const { container, html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    const fallbackCount = (out.match(/暂无/g) || []).length
+    expect(fallbackCount).toBe(3)
+    expect(out).not.toMatch(/<strong>0\.00%<\/strong>/)
+    const bars = Array.from(container.querySelectorAll('.risk-row i'))
+    expect(bars).toHaveLength(3)
+    for (const bar of bars) {
+      expect(bar.style.width).toBe('0%')
+    }
+    expect(out).not.toMatch(/NaN|undefined|null/)
+    unmount()
+  })
+
+  test('crowdingScore null specifically does not collapse to 0.00% via Number(null)/100', () => {
+    // 回归保护：原实现里 crowdingScore=null → null/100=0 → formatPercent(0)='0.00%'，
+    // 与合法 0 拥挤度同形。守卫后 null 必须走 暂无。
+    const riskMetrics = {
+      maxDrawdown: -0.12,
+      oneDayVar95: 0.03,
+      crowdingScore: null,
+    }
+    const { html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    expect(out).toContain('暂无')
+    expect((out.match(/暂无/g) || []).length).toBe(1)
+    unmount()
+  })
+
+  test('numeric 0 risk metrics still render as real 0.00% (regression guard)', () => {
+    const riskMetrics = {
+      maxDrawdown: 0,
+      oneDayVar95: 0,
+      crowdingScore: 0,
+    }
+    const { container, html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    const zeroCellCount = (out.match(/<strong>0\.00%<\/strong>/g) || []).length
+    expect(zeroCellCount).toBe(3)
+    expect(out).not.toContain('暂无')
+    const bars = Array.from(container.querySelectorAll('.risk-row i'))
+    for (const bar of bars) {
+      expect(bar.style.width).toBe('0%')
+    }
+    unmount()
+  })
+
+  test('finite risk metrics render scaled bar widths and percent values', () => {
+    const riskMetrics = {
+      maxDrawdown: -0.18,
+      oneDayVar95: 0.04,
+      crowdingScore: 62,
+    }
+    const { container, html, unmount } = render(<RiskStack riskMetrics={riskMetrics} />)
+    const out = html()
+    expect(out).toContain('-18.00%')
+    expect(out).toContain('4.00%')
+    expect(out).toContain('62.00%')
+    expect(out).not.toContain('暂无')
+    const bars = Array.from(container.querySelectorAll('.risk-row i'))
+    expect(bars[0].style.width).toBe('36%')
+    expect(bars[1].style.width).toBe('40%')
+    expect(bars[2].style.width).toBe('62%')
     unmount()
   })
 })

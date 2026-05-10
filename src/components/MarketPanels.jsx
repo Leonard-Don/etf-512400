@@ -61,12 +61,24 @@ export function FactorTile({ factor }) {
 
 export function RiskStack({ riskMetrics }) {
   // 标度：回撤 50% → 满格；单日 VaR 10% → 满格
-  const drawdownWidth = Math.min(Math.abs(riskMetrics.maxDrawdown ?? 0) * 200, 100)
-  const varWidth = Math.min(Math.abs(riskMetrics.oneDayVar95 ?? 0) * 1000, 100)
+  // 缺失指标（null/undefined/NaN）让 formatPercent 走 暂无 fallback；
+  // 条形宽度做 finite 守卫避免 NaN/undefined 漏到 CSS（合法 0 仍渲染 0%）。
+  const { maxDrawdown, oneDayVar95, crowdingScore } = riskMetrics
+  const drawdownWidth = Number.isFinite(maxDrawdown)
+    ? Math.min(Math.abs(maxDrawdown) * 200, 100)
+    : 0
+  const varWidth = Number.isFinite(oneDayVar95)
+    ? Math.min(Math.abs(oneDayVar95) * 1000, 100)
+    : 0
+  const crowdingFinite = Number.isFinite(crowdingScore)
   const items = [
-    { label: '最大回撤', value: riskMetrics.maxDrawdown, width: drawdownWidth },
-    { label: '单日VaR', value: riskMetrics.oneDayVar95, width: varWidth },
-    { label: '拥挤度', value: riskMetrics.crowdingScore / 100, width: riskMetrics.crowdingScore },
+    { label: '最大回撤', value: maxDrawdown, width: drawdownWidth },
+    { label: '单日VaR', value: oneDayVar95, width: varWidth },
+    {
+      label: '拥挤度',
+      value: crowdingFinite ? crowdingScore / 100 : crowdingScore,
+      width: crowdingFinite ? crowdingScore : 0,
+    },
   ]
 
   return (
