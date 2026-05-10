@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import {
   formatPercent,
   formatSignedPercent,
+  formatNumber,
+  formatCnyAmount,
 } from '../src/analysis/formatters.js'
 
 test('formatPercent/formatSignedPercent: null (JSON NaN/Infinity 反序列化哨兵) 必须回退到 暂无 而非 0.00%', () => {
@@ -116,4 +118,74 @@ test('formatPercent/formatSignedPercent: BigInt 与 boxed Number/Date/valueOf �
   assert.equal(formatPercent(0.5), '50.00%', 'numeric 0.5 仍按 *100 渲染')
   assert.equal(formatSignedPercent(0.012), '+1.20%', 'numeric 正值仍带 + 号')
   assert.equal(formatSignedPercent(-0.025), '-2.50%', 'numeric 负值保留原生 - 号')
+})
+
+test('formatNumber: 非 number 原始值（null/numeric string/boolean/array/boxed Number/Date/valueOf/BigInt）必须回退到 暂无（numeric-primitive-only 契约）', () => {
+  // PR #26-#29 已经把共享 percent 入口 formatPercent/formatSignedPercent 收紧到
+  // numeric-primitive-only 契约：null/numeric string/boolean/array/boxed Number/Date/valueOf
+  // 一律回退到 暂无。formatNumber 是同一组共享 formatter 里的"display number"入口，被
+  // App.jsx（基金规模 / 份额）/ StrategyPanels.jsx（盈亏比）/ MarketPanels.jsx（驱动价格）
+  // 等多处直接消费，当前却仍用 Number.isFinite(Number(value)) 旧守卫——Number(null)=0、
+  // Number('1234.5')=1234.5、Number(true)=1、Number([1234])=1234、Number(new Number(0))=0、
+  // Number(new Date(0))=0、Number({valueOf:()=>0})=0 都是有限数字，会让"非 number 原始值"
+  // 静默渲染成 "0.00" / "1,234.50" / "1.00" 这种合法 display number，把上游 schema 漂移、
+  // JSON 反序列化哨兵、prompt 误装配伪装成合法零或合法值。Number.isFinite(value) 不做
+  // 隐式拆箱/转换，对 BigInt/包装对象/Date/valueOf-obj/numeric string/boolean/array 一律
+  // 返回 false——必须把 formatNumber 与 percent 对齐到同一条 numeric-primitive-only 边界，
+  // 这样共享 formatter 才能在缺失语义上保持一致。
+
+  // null/undefined：JSON.stringify NaN/Infinity 反序列化哨兵，未初始化字段。
+  assert.equal(formatNumber(null), '暂无', 'null 不得被 coerce 成 0.00（与 numeric 0 同形最危险）')
+  assert.equal(formatNumber(undefined), '暂无', 'undefined 仍回退到 暂无（既有契约）')
+
+  // numeric string：URL 查询参数/表单回填/JSON 字符串字段/agent prompt 往返再 parse 失败。
+  assert.equal(formatNumber('0'), '暂无', '字符串 "0" 不得被 coerce 成 0.00')
+  assert.equal(formatNumber('1234.5'), '暂无', '字符串 "1234.5" 不得被 coerce 成 1,234.50')
+  assert.equal(formatNumber(''), '暂无', '空字符串 Number("")=0，必须显式拒绝以防伪装成 0.00')
+
+  // boolean：上游 schema 漂移把开关字段串到数值字段。
+  assert.equal(formatNumber(true), '暂无', 'boolean true 不得被 coerce 成 1.00')
+  assert.equal(formatNumber(false), '暂无', 'boolean false 不得被 coerce 成 0.00')
+
+  // array：prompt 误装配 / 远端 JSON 默认值兜底成数组。
+  assert.equal(formatNumber([]), '暂无', '空数组 Number([])=0，必须显式拒绝以防伪装成 0.00')
+  assert.equal(formatNumber([0]), '暂无', '单元素数组 Number([0])=0，同样必须拒绝')
+  assert.equal(formatNumber([1234]), '暂无', '单元素数组 Number([1234])=1234，同样必须拒绝以防伪装成 1,234.00')
+
+  // 普通对象：Number({})=NaN 已天然落到 暂无，本断言钉死该契约。
+  assert.equal(formatNumber({}), '暂无', '普通对象天然 NaN，钉死回退契约')
+
+  // boxed Number：legacy fixture / new Number(...)。
+  assert.equal(formatNumber(new Number(0)), '暂无', 'boxed Number(0) 不得被拆箱成 0.00')
+  assert.equal(formatNumber(new Number(1234.5)), '暂无', 'boxed Number(1234.5) 不得被拆箱成 1,234.50')
+
+  // Date：字段串位（把日期串到数值字段），Number(date) 走 timestamp 路径。
+  assert.equal(formatNumber(new Date(0)), '暂无', 'Date(0) 不得被 valueOf 转成 0.00')
+  assert.equal(formatNumber(new Date(1234)), '暂无', 'Date(1234) 不得被 valueOf 转成 1,234.00')
+
+  // 自定义 valueOf 对象：自定义 toJSON/valueOf 的 wrapper。
+  assert.equal(formatNumber({ valueOf: () => 0 }), '暂无', 'valueOf-obj 返回 0 不得被拆箱成 0.00')
+  assert.equal(formatNumber({ valueOf: () => 1234 }), '暂无', 'valueOf-obj 返回 1234 不得被拆箱成 1,234.00')
+
+  // BigInt：金融 API 用 BigInt 表大额数量。Number.isFinite(1n)=false 天然守卫。
+  assert.equal(formatNumber(0n), '暂无', 'BigInt 0n 不得被 coerce 成 0.00')
+  assert.equal(formatNumber(1234n), '暂无', 'BigInt 1234n 不得被 coerce 成 1,234.00')
+
+  // NaN/Infinity：未守卫的非有限 number。
+  assert.equal(formatNumber(Number.NaN), '暂无', 'NaN 仍回退到 暂无')
+  assert.equal(formatNumber(Number.POSITIVE_INFINITY), '暂无', '+Infinity 仍回退到 暂无')
+  assert.equal(formatNumber(Number.NEGATIVE_INFINITY), '暂无', '-Infinity 仍回退到 暂无')
+
+  // 回归守卫：合法 number 原始值仍按既有契约渲染，不被 numeric-primitive-only 拒绝逻辑误伤。
+  assert.equal(formatNumber(0), '0.00', 'numeric 0 仍渲染为 0.00（默认 2 位小数）')
+  assert.equal(formatNumber(0, 0), '0', 'numeric 0 在 0 位小数下渲染为 "0"')
+  assert.equal(formatNumber(1234.5678, 2), '1,234.57', 'numeric 仍按 zh-CN locale 加千分位')
+  assert.equal(formatNumber(1234.5678, 0), '1,235', 'numeric 0 位小数仍走 toLocaleString 取整')
+  assert.equal(formatNumber(-1234, 0), '-1,234', '负值仍保留 - 号')
+
+  // formatCnyAmount 仍正确委托 formatNumber 处理 numeric 输入，不被本次收紧拖累。
+  assert.equal(formatCnyAmount(150000000), '1.50亿', 'formatCnyAmount 仍按亿/万分级渲染合法 numeric')
+  assert.equal(formatCnyAmount(15000), '1.50万', 'formatCnyAmount 仍按万分级渲染合法 numeric')
+  assert.equal(formatCnyAmount(1234), '1,234', 'formatCnyAmount 仍把 < 万 的 numeric 走 0 位小数')
+  assert.equal(formatCnyAmount(null), '暂无', 'formatCnyAmount 既有 numeric-primitive-only 守卫保留')
 })

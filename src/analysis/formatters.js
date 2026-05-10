@@ -12,8 +12,8 @@ export function formatSignedPercent(value, digits = 2) {
 }
 
 export function formatNumber(value, digits = 2) {
-  if (!Number.isFinite(Number(value))) return '暂无'
-  return Number(value).toLocaleString('zh-CN', {
+  if (!Number.isFinite(value)) return '暂无'
+  return value.toLocaleString('zh-CN', {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })
