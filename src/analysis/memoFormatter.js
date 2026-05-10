@@ -17,6 +17,13 @@ function formatExposure(value) {
   return `${Math.round(value * 100)}%`
 }
 
+function formatSignedPercentMetric(value) {
+  // formatSignedPercent 对 null 失效（Number(null)=0 是有限），但 JSON 反序列化把 NaN/Infinity
+  // 转成 null。此处与 formatScore/formatExposure 保持同一组 Number.isFinite 强守卫。
+  if (!Number.isFinite(value)) return '暂无'
+  return formatSignedPercent(value)
+}
+
 function bulletList(items, fallback = '暂无') {
   if (!Array.isArray(items) || items.length === 0) return fallback
   return items.map((item) => `- ${item}`).join('\n')
@@ -67,8 +74,8 @@ export function formatMemoMarkdown(memo) {
     `- 评分: ${formatScore(metrics.score)}`,
     `- 仓位: ${formatExposure(metrics.exposure)}`,
     `- 置信度: ${formatScore(metrics.confidence)}`,
-    `- 折溢价: ${formatSignedPercent(metrics.premium)}`,
-    `- 当日涨跌: ${formatSignedPercent(metrics.dailyChange)}`,
+    `- 折溢价: ${formatSignedPercentMetric(metrics.premium)}`,
+    `- 当日涨跌: ${formatSignedPercentMetric(metrics.dailyChange)}`,
     `- 来源: ${memo.source ?? '暂无'}`,
     `- 规则: ${memo.rule ?? '暂无'}`,
     `- 风险标签: ${memo.tone ?? '暂无'}`,
