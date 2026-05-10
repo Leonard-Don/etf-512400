@@ -95,8 +95,8 @@ export function CommodityDriverPanel({ commodityDrivers }) {
           </div>
           <div className="driver-price">
             <strong>{formatDriverPrice(driver)}</strong>
-            <span className={driver.changePercent >= 0 ? 'positive' : 'negative'}>
-              {formatSignedPercent(driver.changePercent ?? 0)}
+            <span className={Number.isFinite(driver.changePercent) ? (driver.changePercent >= 0 ? 'positive' : 'negative') : 'neutral'}>
+              {formatSignedPercent(driver.changePercent)}
             </span>
           </div>
           <div className="driver-scores">
