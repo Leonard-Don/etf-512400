@@ -331,6 +331,45 @@ test('composeResearchMemo: replaySelection 缺 dedupedDates 时填 [] 保持形�
   assert.deepEqual(memo.replaySelection.dedupedDates, [])
 })
 
+test('composeResearchMemo: 非有限 signal.score / tradingQuality.score 不让 drivers 漏出 NaN/Infinity 哨兵', () => {
+  // drivers 直接用 `${signal.score}` / `${tradingQuality.score}` 拼接，下游 formatMemoMarkdown
+  // 用 bulletList 透传，formatMemoText 用 ' | ' 拼接，两条导出路径都不会再做哨兵守卫；
+  // 而 memoFormatter.formatScore 的 Number.isFinite 防护只覆盖指标行，不覆盖 drivers。
+  // 这一守卫与 headline exposure 守卫构成对称的 defense-in-depth：上游 signal/optimizer
+  // 在异常输入下（成交额=0、回撤窗口数据缺失）确实会算出 NaN score，未经 clamp 时
+  // 不应让 "信号 小仓跟踪（NaN）" 这种穿帮文本流入研究备忘的 markdown/text 导出。
+  for (const sentinel of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    const memo = composeResearchMemo({
+      primaryDecision: basePrimary,
+      signal: { ...baseSignal, score: sentinel },
+      tradingQuality: { ...baseQuality, score: sentinel },
+      trendProfile: baseTrend,
+      premium: 0.001,
+      dailyChange: 0.012,
+    })
+    assert.equal(memo.drivers.length, 3, `score=${String(sentinel)} 仍应输出三条 drivers`)
+    for (const driver of memo.drivers) {
+      assert.equal(typeof driver, 'string', `score=${String(sentinel)} drivers 元素应为 string`)
+      assert.ok(
+        !driver.includes('NaN'),
+        `score=${String(sentinel)} 不应让 drivers 漏出 NaN 哨兵：${driver}`,
+      )
+      assert.ok(
+        !driver.includes('Infinity'),
+        `score=${String(sentinel)} 不应让 drivers 漏出 Infinity 哨兵：${driver}`,
+      )
+    }
+    assert.ok(
+      memo.drivers.some((d) => d.includes(baseSignal.action)),
+      `score=${String(sentinel)} drivers 仍应保留 signal.action 文本`,
+    )
+    assert.ok(
+      memo.drivers.some((d) => d.includes(baseQuality.action)),
+      `score=${String(sentinel)} drivers 仍应保留 tradingQuality.action 文本`,
+    )
+  }
+})
+
 test('composeResearchMemo: 非有限 exposure 不让 headline 漏出 NaN/Infinity 哨兵', () => {
   // 现有 headline 用 `Math.round((primaryDecision.exposure ?? 0) * 100)` 拼接，?? 只兜底
   // null/undefined，NaN/±Infinity 会原样穿过 Math.round 并被字符串插值为 "NaN%"/"Infinity%"。
