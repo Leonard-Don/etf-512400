@@ -26,8 +26,10 @@ export function Panel({ title, icon: Icon, children, className = '' }) {
 export function Meter({ label, value, color }) {
   // 非有限值（null/undefined/NaN/Infinity）走 暂无 + 0% 宽度，避免 NaN/undefined
   // 漏到 CSS width 与 <b> 文案；合法 0 仍渲染 0 + 0%。
+  // 越界但有限的值（如 -10、150）夹到 [0, 100] 写入 CSS width，避免负宽度
+  // 或撑破容器；<b> 文案仍保留原始数值。
   const finite = Number.isFinite(value)
-  const width = finite ? value : 0
+  const width = finite ? Math.max(0, Math.min(value, 100)) : 0
   return (
     <div className="meter">
       <span>{label}</span>
