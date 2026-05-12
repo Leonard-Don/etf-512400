@@ -28,6 +28,9 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Component tests
+        run: npm run test:components
+
       - name: Smoke test
         run: npm run test:smoke
 
