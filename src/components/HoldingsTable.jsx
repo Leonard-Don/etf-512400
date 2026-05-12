@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { compareHoldingsNumeric } from './holdingsTableSort'
+import { compareHoldingsNumeric, formatHoldingWeight } from './holdingsTableSort'
 
 const COLUMNS = [
   { key: 'code', label: '代码' },
@@ -58,7 +58,7 @@ export function HoldingsTable({ holdings }) {
               <td>{holding.code}</td>
               <td>{holding.name}</td>
               <td>{holding.basket}</td>
-              <td>{holding.weight.toFixed(2)}%</td>
+              <td>{formatHoldingWeight(holding.weight)}</td>
               <td>{holding.signal}</td>
             </tr>
           ))}
