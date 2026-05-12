@@ -73,7 +73,7 @@ npm run test
 npm run build
 ```
 
-CI 会在 `main` 分支推送和 pull request 上执行 lint、单元测试、smoke test 和构建。
+CI 会在 `main` 分支推送和 pull request 上执行 lint、单元测试、Vitest 组件测试、smoke test 和构建。
 
 ## 项目结构
 
@@ -91,7 +91,7 @@ scripts/
   smokeTest.mjs            核心分析链路冒烟验证
 tests/
   *.test.mjs               Node 单元测试
-  components/              Vitest 组件测试
+  *.test.jsx               Vitest 组件测试
 ```
 
 ## 使用边界
