@@ -12,3 +12,8 @@ export function compareHoldingsNumeric(av, bv, factor) {
   if (bValid) return 1
   return 0
 }
+
+export function formatHoldingWeight(value) {
+  if (!Number.isFinite(value)) return '暂无'
+  return `${value.toFixed(2)}%`
+}
