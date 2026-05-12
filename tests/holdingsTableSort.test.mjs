@@ -1,6 +1,15 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { compareHoldingsNumeric } from '../src/components/holdingsTableSort.js'
+import { compareHoldingsNumeric, formatHoldingWeight } from '../src/components/holdingsTableSort.js'
+
+test('formatHoldingWeight: missing/non-finite weights render fallback while numeric 0 stays valid', () => {
+  assert.equal(formatHoldingWeight(3.5), '3.50%')
+  assert.equal(formatHoldingWeight(0), '0.00%')
+  assert.equal(formatHoldingWeight(null), '暂无')
+  assert.equal(formatHoldingWeight(undefined), '暂无')
+  assert.equal(formatHoldingWeight(Number.NaN), '暂无')
+  assert.equal(formatHoldingWeight('1.5'), '暂无')
+})
 
 test('compareHoldingsNumeric: 有限 number 原始值正常按数值排序，0 仍是合法 number（asc/desc）', () => {
   // 升序（factor=1）：小→大
