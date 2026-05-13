@@ -76,6 +76,7 @@ export function StrategyOptimizer({ optimizer }) {
         <div className="optimizer-risk">
           <span>过拟合</span>
           <b>{best.overfitRisk}</b>
+          <p>{best.overfitExplanation}</p>
         </div>
       </div>
 
@@ -86,19 +87,23 @@ export function StrategyOptimizer({ optimizer }) {
         </div>
         <div>
           <span>稳定性</span>
-          <strong>{best.stabilityScore}</strong>
+          <strong>{best.stabilityBand}</strong>
+          <p>{best.stabilityScore}分</p>
         </div>
         <div>
           <span>年化参考</span>
           <strong>{formatPercent(best.test.annualReturn, 1)}</strong>
+          <p>样本外</p>
         </div>
         <div>
           <span>样本外回撤</span>
           <strong>{formatPercent(best.test.maxDrawdown, 1)}</strong>
+          <p>越接近0越稳</p>
         </div>
       </div>
 
       <p className="optimizer-rule">{best.rule}</p>
+      <p className="optimizer-rule">{best.explanation}</p>
       <p className="historical-caution">历史拟合结果不代表未来收益，优先看稳定性、回撤、仓位和过拟合风险。</p>
 
       {surface ? (
@@ -107,24 +112,30 @@ export function StrategyOptimizer({ optimizer }) {
             <div>
               <span>稳定参数区间</span>
               <strong>{surface.stableZone?.label ?? '暂无稳定区间'}</strong>
+              <p>{surface.stableZone?.explanation ?? surface.summary}</p>
             </div>
             <div>
               <span>稳健覆盖</span>
               <strong>{formatPercent(surface.stableCoverage, 0)}</strong>
+              <p>{surface.stabilityBand}</p>
             </div>
           </div>
+          <p className="surface-summary">{surface.summary}</p>
           <div className="surface-kpis">
             <div>
               <span>有效网格</span>
               <strong>{surface.validCount}/{surface.candidateCount}</strong>
+              <p>通过样本外交易日门槛</p>
             </div>
             <div>
               <span>表面稳定</span>
-              <strong>{surface.stabilityScore}</strong>
+              <strong>{surface.stabilityBand}</strong>
+              <p>{surface.stabilityScore}分</p>
             </div>
             <div>
               <span>分数离散</span>
-              <strong>{formatNumber(surface.scoreDispersion, 1)}</strong>
+              <strong>{surface.dispersionLabel}</strong>
+              <p>{formatNumber(surface.scoreDispersion, 1)}</p>
             </div>
           </div>
           {surface.recommended ? (
@@ -132,17 +143,18 @@ export function StrategyOptimizer({ optimizer }) {
               <span>推荐配置</span>
               <strong>{surface.recommended.label}</strong>
               <p>
-                稳定 {surface.recommended.stabilityScore} · 过拟合 {surface.recommended.overfitRisk} ·
-                样本外 {formatPercent(surface.recommended.testAnnualReturn, 1)}
+                {surface.recommended.explanation} 样本外年化参考{' '}
+                {formatPercent(surface.recommended.testAnnualReturn, 1)}，回撤{' '}
+                {formatPercent(surface.recommended.testMaxDrawdown, 1)}。
               </p>
             </div>
           ) : null}
           <div className="surface-window-list">
-            {surface.topWindows.map((window) => (
-              <div key={window.label}>
+            {surface.topWindows.map((window, index) => (
+              <div key={`${window.label}-${index}`}>
                 <span>{window.label}</span>
-                <strong>{window.stabilityScore}</strong>
-                <p>{formatPercent(window.annualReturn, 1)} · {window.count}组</p>
+                <strong>{window.stabilityBand}</strong>
+                <p>{window.explanation}</p>
               </div>
             ))}
           </div>
@@ -170,11 +182,12 @@ export function StrategyOptimizer({ optimizer }) {
       <div className="factor-overlay-note">{best.current.factorNote}</div>
 
       <div className="optimizer-list">
-        {optimizer.leaderboard.map((item) => (
-          <article key={item.label}>
+        {optimizer.leaderboard.map((item, index) => (
+          <article key={item.key ?? `${item.label}-${item.overfitRisk}-${item.testExposure}-${index}`}>
             <div>
               <strong>{item.label}</strong>
-              <span>稳健 {item.stabilityScore} · 过拟合 {item.overfitRisk}</span>
+              <span>{item.stabilityBand} · 过拟合 {item.overfitRisk}</span>
+              <p>{item.explanation}</p>
             </div>
             <dl>
               <div>

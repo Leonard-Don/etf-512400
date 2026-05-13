@@ -360,6 +360,24 @@ function rangeLabel(range, formatter = (value) => `${value}`) {
   return `${formatter(range.min)} - ${formatter(range.max)}`
 }
 
+function stabilityBand(score) {
+  if (score >= 70) return '高稳定'
+  if (score >= 55) return '中等稳定'
+  return '低稳定'
+}
+
+function overfitExplanation(label) {
+  if (label === '低') return '样本内外收益差较小，且样本外收益保持正向'
+  if (label === '中') return '样本长度或训练/测试差距仍需观察，仓位不宜继续放大'
+  return '样本外表现与训练段偏离较大，优先按风险规则降档'
+}
+
+function dispersionLabel(value) {
+  if (value > 8) return '尖峰明显'
+  if (value > 4) return '有一定分化'
+  return '头部分数接近'
+}
+
 function standardDeviation(values) {
   const valid = values.filter((value) => Number.isFinite(value))
   if (valid.length < 2) return 0
@@ -377,6 +395,9 @@ function buildParameterSurface(ranked, candidates, benchmarkTest) {
       stableCoverage: 0,
       stabilityScore: 0,
       scoreDispersion: 0,
+      stabilityBand: '低稳定',
+      dispersionLabel: '无有效样本',
+      summary: '没有足够样本外候选，暂不能解释参数表面',
       recommended: null,
       stableZone: null,
       topWindows: [],
@@ -452,6 +473,7 @@ function buildParameterSurface(ranked, candidates, benchmarkTest) {
       (value) => formatPercent(value, 0),
     )}回撤`,
   }
+  stableZone.explanation = `头部 ${zoneCohort.length} 组参数落在这个邻近区间，说明仓位建议不是单点最高分硬凑出来的。`
 
   const warnings = []
   if (stableCoverage < 0.08) warnings.push('稳健候选占比偏低，单点最优容易受样本切分影响')
@@ -470,20 +492,30 @@ function buildParameterSurface(ranked, candidates, benchmarkTest) {
     stableCoverage,
     stabilityScore,
     scoreDispersion,
+    stabilityBand: stabilityBand(stabilityScore),
+    dispersionLabel: dispersionLabel(scoreDispersion),
+    summary: `有效候选 ${ranked.length}/${candidates.length} 组；稳健覆盖 ${formatPercent(stableCoverage, 0)}，${dispersionLabel(scoreDispersion)}。`,
     recommended: recommended
       ? {
           label: paramsLabel(recommended.params),
           params: recommended.params,
           score: recommended.score,
           stabilityScore: recommended.stabilityScore,
+          stabilityBand: stabilityBand(recommended.stabilityScore),
           overfitRisk: recommended.overfitRisk,
+          overfitExplanation: overfitExplanation(recommended.overfitRisk),
           testAnnualReturn: recommended.test.annualReturn,
           testMaxDrawdown: recommended.test.maxDrawdown,
           testExposure: recommended.test.exposure,
+          explanation: `推荐它是因为稳定性 ${recommended.stabilityScore}，样本外仓位 ${formatPercent(recommended.test.exposure, 0)}，过拟合风险为${recommended.overfitRisk}。`,
         }
       : null,
     stableZone,
-    topWindows,
+    topWindows: topWindows.map((window) => ({
+      ...window,
+      stabilityBand: stabilityBand(window.stabilityScore),
+      explanation: `${window.label} 窗口共有 ${window.count} 组有效参数，平均稳定性 ${window.stabilityScore}，样本外年化参考 ${formatPercent(window.annualReturn, 1)}。`,
+    })),
     warnings,
   }
 }
@@ -571,6 +603,9 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
     best: {
       ...best,
       label: paramsLabel(best.params),
+      stabilityBand: stabilityBand(best.stabilityScore),
+      overfitExplanation: overfitExplanation(best.overfitRisk),
+      explanation: `${stabilityBand(best.stabilityScore)}，${overfitExplanation(best.overfitRisk)}；当前原始仓位 ${formatPercent(latestRawExposure, 0)}，因子覆盖后为 ${formatPercent(currentExposure, 0)}。`,
       rule: `快线${best.params.fastWindow}日、慢线${best.params.slowWindow}日过滤趋势；回撤${formatPercent(best.params.entryPullback, 0)}先建观察仓，回撤${formatPercent(best.params.deepPullback, 0)}进入主仓；若回撤超过${formatPercent(best.params.riskCut, 0)}且价格低于慢线，仓位压到18%以内。`,
       current: {
         rawExposure: latestRawExposure,
@@ -589,13 +624,17 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
       ],
     },
     leaderboard: ranked.slice(0, 5).map((candidate) => ({
+      key: `${candidate.params.fastWindow}-${candidate.params.slowWindow}-${candidate.params.entryPullback}-${candidate.params.deepPullback}-${candidate.params.riskCut}`,
       label: candidate.label,
       score: candidate.score,
       stabilityScore: candidate.stabilityScore,
+      stabilityBand: stabilityBand(candidate.stabilityScore),
       overfitRisk: candidate.overfitRisk,
+      overfitExplanation: overfitExplanation(candidate.overfitRisk),
       testAnnualReturn: candidate.test.annualReturn,
       testMaxDrawdown: candidate.test.maxDrawdown,
       testExposure: candidate.test.exposure,
+      explanation: `${stabilityBand(candidate.stabilityScore)}，样本外仓位 ${formatPercent(candidate.test.exposure, 0)}；${overfitExplanation(candidate.overfitRisk)}。`,
     })),
   }
 }
