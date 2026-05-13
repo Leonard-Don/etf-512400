@@ -54,6 +54,9 @@ test('单调上涨数据下能找到至少一组有效候选并返回稳定性�
   assert.ok(result.parameterSurface.validCount > 0)
   assert.ok(result.parameterSurface.recommended?.label)
   assert.ok(result.parameterSurface.stableZone?.label)
+  assert.ok(result.parameterSurface.summary.includes('有效候选'))
+  assert.ok(result.parameterSurface.stableZone.explanation.includes('头部'))
+  assert.ok(result.best.explanation.includes('当前原始仓位'))
 })
 
 test('过拟合标签必为 低 / 中 / 高 之一', () => {
@@ -104,6 +107,9 @@ test('leaderboard 每项都带稳定性、过拟合、年化、回撤、仓位',
     assert.ok(Number.isFinite(item.testAnnualReturn))
     assert.ok(Number.isFinite(item.testMaxDrawdown))
     assert.ok(item.testExposure >= 0 && item.testExposure <= 1)
+    assert.ok(['高稳定', '中等稳定', '低稳定'].includes(item.stabilityBand))
+    assert.match(item.overfitExplanation, /样本|训练|收益/)
+    assert.match(item.explanation, /样本外仓位/)
   })
 })
 
@@ -211,4 +217,15 @@ test('NaN 和缺失 close 会被清洗，不污染参数表面分数', () => {
   assert.equal(result.sample.total, 260)
   assert.ok(Number.isFinite(result.parameterSurface.scoreDispersion))
   assert.ok(result.parameterSurface.topWindows.every((item) => Number.isFinite(item.annualReturn)))
+})
+
+test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原因', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
+  assert.equal(result.ok, true)
+  assert.match(result.parameterSurface.summary, /稳健覆盖/)
+  assert.ok(['尖峰明显', '有一定分化', '头部分数接近'].includes(result.parameterSurface.dispersionLabel))
+  assert.ok(['高稳定', '中等稳定', '低稳定'].includes(result.parameterSurface.stabilityBand))
+  assert.ok(result.parameterSurface.recommended.explanation.includes('推荐它是因为'))
+  assert.ok(result.parameterSurface.topWindows[0].explanation.includes('平均稳定性'))
 })

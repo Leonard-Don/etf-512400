@@ -64,7 +64,7 @@ import { DecisionDeck } from './components/DecisionDeck'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { HoldingsTable } from './components/HoldingsTable'
 import { CommodityDriverPanel, FactorTile, MiniLineChart, RiskStack } from './components/MarketPanels'
-import { TradingQualityPanel } from './components/QualityPanels'
+import { DataFreshnessDrilldown, TradingQualityPanel } from './components/QualityPanels'
 import { SignalLab, StrategyOptimizer, StrategyRow } from './components/StrategyPanels'
 import { MetricCard, Panel } from './components/ui'
 import './App.css'
@@ -204,7 +204,6 @@ function App() {
     ],
   )
   const degradedSources = sourceHealth.filter((source) => source.ok === false)
-  const providerHealth = dataFreshness.providerRegistry?.providers ?? []
   const realtimeStatusLabel =
     realtimeState.status === 'success'
       ? `${realtimeState.quote?.runtimeSourceLabel ?? '实时'} ${formatSnapshotTime(realtimeState.lastUpdated)}`
@@ -559,25 +558,7 @@ function App() {
               <strong>{degradedSources.length}个</strong>
             </div>
           </div>
-          {providerHealth.length ? (
-            <div className="source-health-list" aria-label="数据源健康状态">
-              {providerHealth.map((source) => (
-                <div
-                  className={`source-health-row ${
-                    source.ok ? 'ok' : source.required ? 'danger' : 'warning'
-                  }`}
-                  key={source.id}
-                >
-                  <span>{source.label}</span>
-                  <div>
-                    <strong>{source.badge}</strong>
-                    <em>{source.coveragePercent}%覆盖</em>
-                  </div>
-                  {source.fallbackReason ? <p>{source.fallbackReason}</p> : null}
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <DataFreshnessDrilldown registry={dataFreshness.providerRegistry} />
           <div className="source-list">
             {dataSources.map((source) => (
               <span key={source}>{source}</span>

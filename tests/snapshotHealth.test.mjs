@@ -256,6 +256,12 @@ test('buildProviderFreshnessRegistry 计算 provider 覆盖、fallback reason �
   assert.equal(result.providers[0].coveragePercent, 80)
   assert.equal(result.providers[1].badge, '缓存')
   assert.equal(result.providers[1].fallbackReason, 'ECONNRESET')
+  assert.equal(result.groups.core.labels, 'ETF行情')
+  assert.equal(result.groups.auxiliary.labels, '商品驱动')
+  assert.equal(result.groups.cache.labels, 'ETF行情')
+  assert.equal(result.summary, '核心源 1 个，辅助源 1 个，缓存 1 个，失败 0 个')
+  assert.ok(result.providers[0].nextAction.includes('少量缺口'))
+  assert.ok(result.providers[1].nextAction.includes('核心源'))
 })
 
 test('buildDataFreshness 对过旧 snapshot 给出 stale_snapshot 和过旧徽章', () => {
@@ -274,4 +280,29 @@ test('buildDataFreshness 对过旧 snapshot 给出 stale_snapshot 和过旧徽�
   assert.equal(result.stalenessBadge, '过旧')
   assert.ok(result.details.includes('快照距今天 5 天'))
   assert.equal(result.providerRegistry.providers[0].badge, '过旧')
+  assert.equal(result.providerRegistry.providers[0].ageText, '滞后 5 天')
+  assert.ok(result.providerRegistry.actionItems[0].includes('重新刷新'))
+})
+
+test('buildProviderFreshnessRegistry 汇总核心/辅助/缓存/失败源 drilldown', () => {
+  const result = buildProviderFreshnessRegistry({
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-04',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      { id: 'quote', label: '实时ETF行情', required: true, ok: true, runtime: true },
+      { id: 'fundGauge', label: '估算净值', required: false, ok: false, fallback: true },
+      { id: 'macro', label: '宏观利率', required: false, ok: false, fallback: false },
+    ],
+  })
+  assert.equal(result.groups.core.count, 1)
+  assert.equal(result.groups.auxiliary.count, 2)
+  assert.equal(result.groups.cache.labels, '估算净值')
+  assert.equal(result.groups.failed.labels, '宏观利率')
+  assert.equal(result.cacheProviderCount, 1)
+  assert.equal(result.failedProviderCount, 1)
+  assert.equal(result.providers[0].roleLabel, '核心源')
+  assert.equal(result.providers[0].statusText, '运行时实时')
+  assert.equal(result.providers[1].statusText, '缓存兜底')
+  assert.ok(result.actionItems.some((item) => item.includes('缓存只作旁证')))
 })
