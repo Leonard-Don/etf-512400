@@ -63,6 +63,7 @@ export function StrategyOptimizer({ optimizer }) {
   }
 
   const best = optimizer.best
+  const surface = optimizer.parameterSurface
 
   return (
     <div className="optimizer-console">
@@ -99,6 +100,59 @@ export function StrategyOptimizer({ optimizer }) {
 
       <p className="optimizer-rule">{best.rule}</p>
       <p className="historical-caution">历史拟合结果不代表未来收益，优先看稳定性、回撤、仓位和过拟合风险。</p>
+
+      {surface ? (
+        <div className="surface-console">
+          <div className="surface-head">
+            <div>
+              <span>稳定参数区间</span>
+              <strong>{surface.stableZone?.label ?? '暂无稳定区间'}</strong>
+            </div>
+            <div>
+              <span>稳健覆盖</span>
+              <strong>{formatPercent(surface.stableCoverage, 0)}</strong>
+            </div>
+          </div>
+          <div className="surface-kpis">
+            <div>
+              <span>有效网格</span>
+              <strong>{surface.validCount}/{surface.candidateCount}</strong>
+            </div>
+            <div>
+              <span>表面稳定</span>
+              <strong>{surface.stabilityScore}</strong>
+            </div>
+            <div>
+              <span>分数离散</span>
+              <strong>{formatNumber(surface.scoreDispersion, 1)}</strong>
+            </div>
+          </div>
+          {surface.recommended ? (
+            <div className="surface-recommendation">
+              <span>推荐配置</span>
+              <strong>{surface.recommended.label}</strong>
+              <p>
+                稳定 {surface.recommended.stabilityScore} · 过拟合 {surface.recommended.overfitRisk} ·
+                样本外 {formatPercent(surface.recommended.testAnnualReturn, 1)}
+              </p>
+            </div>
+          ) : null}
+          <div className="surface-window-list">
+            {surface.topWindows.map((window) => (
+              <div key={window.label}>
+                <span>{window.label}</span>
+                <strong>{window.stabilityScore}</strong>
+                <p>{formatPercent(window.annualReturn, 1)} · {window.count}组</p>
+              </div>
+            ))}
+          </div>
+          <div className="surface-warning-list">
+            {surface.warnings.map((warning) => (
+              <span key={warning}>{warning}</span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="optimizer-split">
         <div>

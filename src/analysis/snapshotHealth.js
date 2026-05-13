@@ -1,4 +1,5 @@
 const DAY_MS = 24 * 60 * 60 * 1000
+const STALE_SNAPSHOT_DAYS = 3
 
 export function shanghaiDateString(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {
@@ -30,6 +31,114 @@ function sourceLabels(sources) {
     .join('、')
 }
 
+function sourceLabel(source) {
+  return source?.label || source?.id || '未命名源'
+}
+
+function timestampDayGap(timestamp, now) {
+  if (!timestamp) return null
+  const parsed = new Date(timestamp)
+  if (Number.isNaN(parsed.getTime())) return null
+  return calendarDayGap(shanghaiDateString(parsed), shanghaiDateString(now))
+}
+
+function coverageRatioFor(source) {
+  if (Number.isFinite(source?.okCount) && Number.isFinite(source?.total) && source.total > 0) {
+    return Math.max(0, Math.min(1, source.okCount / source.total))
+  }
+  return source?.ok === false ? 0 : 1
+}
+
+function providerStatusFor(source) {
+  if (source?.ok) return source?.runtime ? 'runtime' : 'ok'
+  if (source?.fallback) return 'fallback'
+  return 'failed'
+}
+
+function providerBadgeFor(status, ageDays) {
+  if (status === 'failed') return '失败'
+  if (status === 'fallback') return '缓存'
+  if (ageDays !== null && ageDays > STALE_SNAPSHOT_DAYS) return '过旧'
+  if (status === 'runtime') return '实时'
+  return '正常'
+}
+
+export function buildProviderFreshnessRegistry({
+  sourceHealth = [],
+  quoteTradeDate,
+  navDate,
+  snapshotGeneratedAt,
+  now = new Date(),
+} = {}) {
+  const snapshotAgeDays = timestampDayGap(snapshotGeneratedAt, now)
+  const quoteAgeDays = calendarDayGap(quoteTradeDate, shanghaiDateString(now))
+  const navAgeDays = calendarDayGap(navDate, shanghaiDateString(now))
+
+  const providers = sourceHealth.map((source) => {
+    const status = providerStatusFor(source)
+    const fetchedAgeDays = timestampDayGap(source?.fetchedAt, now)
+    const domainAgeDays =
+      source?.id === 'quote'
+        ? quoteAgeDays
+        : source?.id === 'fundTrend' || source?.id === 'fundGauge'
+          ? navAgeDays
+          : null
+    const ageDays = domainAgeDays ?? fetchedAgeDays ?? snapshotAgeDays
+    const coverageRatio = coverageRatioFor(source)
+    const fallbackReason =
+      source?.error ??
+      (source?.fallback ? '使用缓存或本地快照兜底' : status === 'failed' ? '源未返回可用数据' : '')
+
+    return {
+      id: source?.id ?? sourceLabel(source),
+      label: sourceLabel(source),
+      required: Boolean(source?.required),
+      status,
+      badge: providerBadgeFor(status, ageDays),
+      ok: source?.ok !== false,
+      fallback: Boolean(source?.fallback),
+      runtime: Boolean(source?.runtime),
+      coverageRatio,
+      coveragePercent: Math.round(coverageRatio * 100),
+      ageDays,
+      fetchedAt: source?.fetchedAt,
+      fallbackReason,
+      okCount: source?.okCount,
+      total: source?.total,
+      fallbackCount: source?.fallbackCount,
+    }
+  })
+
+  const coverageScore = providers.length
+    ? Math.round(
+        (providers.reduce((sum, provider) => sum + provider.coverageRatio, 0) / providers.length) *
+          100,
+      )
+    : 100
+  const failedRequired = providers.filter((provider) => provider.required && !provider.ok)
+  const staleProviders = providers.filter(
+    (provider) => provider.ageDays !== null && provider.ageDays > STALE_SNAPSHOT_DAYS,
+  )
+
+  return {
+    providers,
+    coverageScore,
+    failedRequiredCount: failedRequired.length,
+    staleProviderCount: staleProviders.length,
+    snapshotAgeDays,
+    quoteAgeDays,
+    navAgeDays,
+    stalenessBadge:
+      failedRequired.length > 0
+        ? '核心降级'
+        : staleProviders.length > 0 || (snapshotAgeDays ?? 0) > STALE_SNAPSHOT_DAYS
+          ? '过旧'
+          : providers.some((provider) => provider.fallback)
+            ? '缓存兜底'
+            : '新鲜',
+  }
+}
+
 export function describeMarketStatus({ quoteTradeDate, statusCode, now = new Date() }) {
   if (!quoteTradeDate) return '行情日期未知'
 
@@ -54,6 +163,14 @@ export function buildDataFreshness({
   const today = shanghaiDateString(now)
   const quoteGap = calendarDayGap(quoteTradeDate, today)
   const navGap = calendarDayGap(navDate, today)
+  const providerRegistry = buildProviderFreshnessRegistry({
+    sourceHealth,
+    quoteTradeDate,
+    navDate,
+    snapshotGeneratedAt,
+    now,
+  })
+  const snapshotAgeDays = providerRegistry.snapshotAgeDays
   const failedSources = sourceHealth.filter((source) => source?.ok === false)
   const fallbackSources = failedSources.filter((source) => source.fallback)
   const requiredFailures = failedSources.filter((source) => source.required)
@@ -74,6 +191,10 @@ export function buildDataFreshness({
     tone = 'warning'
     status = 'stale'
     summary = `行情停留在 ${quoteTradeDate ?? navDate ?? '旧快照'}`
+  } else if ((snapshotAgeDays ?? 0) > STALE_SNAPSHOT_DAYS) {
+    tone = 'warning'
+    status = 'stale_snapshot'
+    summary = `快照超过 ${snapshotAgeDays} 天`
   } else if ((quoteGap ?? 0) === 1 || (navGap ?? 0) === 1) {
     tone = 'good'
     status = 'previous_trade_day'
@@ -95,6 +216,9 @@ export function buildDataFreshness({
   if (snapshotGeneratedAt) {
     details.push(`快照 ${snapshotGeneratedAt}`)
   }
+  if ((snapshotAgeDays ?? 0) > STALE_SNAPSHOT_DAYS) {
+    details.push(`快照距今天 ${snapshotAgeDays} 天`)
+  }
 
   return {
     status,
@@ -105,6 +229,10 @@ export function buildDataFreshness({
     failedCount: failedSources.length,
     requiredFailedCount: requiredFailures.length,
     fallbackCount: fallbackSources.length,
+    coverageScore: providerRegistry.coverageScore,
+    providerRegistry,
+    snapshotAgeDays,
+    stalenessBadge: providerRegistry.stalenessBadge,
     details,
   }
 }
