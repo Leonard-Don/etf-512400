@@ -22,6 +22,7 @@ export { composePrimaryDecision } from './decision.js'
 export { composeResearchMemo } from './researchMemo.js'
 export {
   buildDataFreshness,
+  buildProviderFreshnessRegistry,
   calendarDayGap,
   describeMarketStatus,
   shanghaiDateString,

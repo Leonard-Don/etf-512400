@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   buildDataFreshness,
+  buildProviderFreshnessRegistry,
   calendarDayGap,
   describeMarketStatus,
   shanghaiDateString,
@@ -56,6 +57,8 @@ test('buildDataFreshness 标出辅助源降级和缓存使用', () => {
   assert.equal(result.tone, 'warning')
   assert.equal(result.failedCount, 1)
   assert.equal(result.fallbackCount, 1)
+  assert.equal(result.coverageScore, 50)
+  assert.equal(result.stalenessBadge, '缓存兜底')
   assert.ok(result.details.includes('缓存源：盘中估算净值'))
 })
 
@@ -172,6 +175,8 @@ test('buildDataFreshness 在数据齐备时返回 fresh 并附快照时间', () 
   assert.equal(result.fallbackCount, 0)
   assert.equal(result.quoteAgeDays, 0)
   assert.equal(result.navAgeDays, 0)
+  assert.equal(result.stalenessBadge, '新鲜')
+  assert.equal(result.coverageScore, 100)
   assert.deepEqual(result.details, ['快照 2026-05-06T03:00:00.000Z'])
 })
 
@@ -219,4 +224,54 @@ test('buildDataFreshness 在缓存源缺标签时回退到数量描述', () => {
   assert.equal(result.tone, 'warning')
   assert.equal(result.fallbackCount, 2)
   assert.ok(result.details.includes('2 个源使用缓存'))
+})
+
+test('buildProviderFreshnessRegistry 计算 provider 覆盖、fallback reason 与 staleness badge', () => {
+  const result = buildProviderFreshnessRegistry({
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    snapshotGeneratedAt: '2026-05-06T03:00:00.000Z',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      {
+        id: 'commodityDrivers',
+        label: '商品驱动',
+        ok: true,
+        okCount: 4,
+        total: 5,
+      },
+      {
+        id: 'quote',
+        label: 'ETF行情',
+        required: true,
+        ok: false,
+        fallback: true,
+        error: 'ECONNRESET',
+      },
+    ],
+  })
+  assert.equal(result.coverageScore, 40)
+  assert.equal(result.failedRequiredCount, 1)
+  assert.equal(result.stalenessBadge, '核心降级')
+  assert.equal(result.providers[0].coveragePercent, 80)
+  assert.equal(result.providers[1].badge, '缓存')
+  assert.equal(result.providers[1].fallbackReason, 'ECONNRESET')
+})
+
+test('buildDataFreshness 对过旧 snapshot 给出 stale_snapshot 和过旧徽章', () => {
+  const result = buildDataFreshness({
+    snapshotGeneratedAt: '2026-05-01T03:00:00.000Z',
+    quoteTradeDate: '2026-05-06',
+    navDate: '2026-05-06',
+    now: MAY_6_SHANGHAI,
+    sourceHealth: [
+      { id: 'etfKlines', label: '512400 日K', ok: true, fetchedAt: '2026-05-01T03:00:00.000Z' },
+    ],
+  })
+  assert.equal(result.status, 'stale_snapshot')
+  assert.equal(result.tone, 'warning')
+  assert.equal(result.snapshotAgeDays, 5)
+  assert.equal(result.stalenessBadge, '过旧')
+  assert.ok(result.details.includes('快照距今天 5 天'))
+  assert.equal(result.providerRegistry.providers[0].badge, '过旧')
 })
