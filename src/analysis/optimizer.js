@@ -73,6 +73,14 @@ const MIN_KLINE_SAMPLE = 140 // 至少需要的 K 线样本
 const MIN_PERIODS_FOR_RANKING = 35 // 测试段交易日太少不参与排名
 const STABILITY_CAP_SHORT_SAMPLE = 78 // 样本不足时稳定性的上限
 
+const DEFAULT_PARAMETER_GRID = {
+  fastWindows: [10, 15, 20, 25, 30],
+  slowWindows: [50, 60, 80, 100, 120],
+  entryPullbacks: [0.04, 0.05, 0.07, 0.08],
+  deepPullbacks: [0.1, 0.12, 0.15],
+  riskCuts: [0.16, 0.2, 0.24],
+}
+
 function optimizedExposure(params, klines, index) {
   const close = klines[index].close
   const fastMa = movingAverage(klines, index, params.fastWindow)
@@ -192,12 +200,27 @@ function evaluateOptimizedCandidate(klines, params, startIndex, endIndex) {
   }
 }
 
-function generateOptimizerCandidates() {
-  const fastWindows = [10, 15, 20, 25, 30]
-  const slowWindows = [50, 60, 80, 100, 120]
-  const entryPullbacks = [0.04, 0.05, 0.07, 0.08]
-  const deepPullbacks = [0.1, 0.12, 0.15]
-  const riskCuts = [0.16, 0.2, 0.24]
+function finiteGridValues(values, fallback) {
+  const source = Array.isArray(values) && values.length ? values : fallback
+  return [...new Set(source.filter((value) => Number.isFinite(value)))].sort((a, b) => a - b)
+}
+
+function normalizeParameterGrid(parameterGrid = {}) {
+  return {
+    fastWindows: finiteGridValues(parameterGrid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
+    slowWindows: finiteGridValues(parameterGrid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
+    entryPullbacks: finiteGridValues(
+      parameterGrid.entryPullbacks,
+      DEFAULT_PARAMETER_GRID.entryPullbacks,
+    ),
+    deepPullbacks: finiteGridValues(parameterGrid.deepPullbacks, DEFAULT_PARAMETER_GRID.deepPullbacks),
+    riskCuts: finiteGridValues(parameterGrid.riskCuts, DEFAULT_PARAMETER_GRID.riskCuts),
+  }
+}
+
+function generateOptimizerCandidates(parameterGrid) {
+  const { fastWindows, slowWindows, entryPullbacks, deepPullbacks, riskCuts } =
+    normalizeParameterGrid(parameterGrid)
   const candidates = []
 
   fastWindows.forEach((fastWindow) => {
@@ -321,7 +344,151 @@ function paramsLabel(params) {
   return `${params.fastWindow}/${params.slowWindow}日趋势，${Math.round(params.entryPullback * 100)}%/${Math.round(params.deepPullback * 100)}%回撤`
 }
 
-export function buildStrategyOptimizer({ klines, factorBaskets }) {
+function numberRange(values) {
+  const valid = values.filter((value) => Number.isFinite(value)).sort((a, b) => a - b)
+  if (!valid.length) return null
+  return {
+    min: valid[0],
+    max: valid.at(-1),
+    values: [...new Set(valid)],
+  }
+}
+
+function rangeLabel(range, formatter = (value) => `${value}`) {
+  if (!range) return '暂无'
+  if (range.min === range.max) return formatter(range.min)
+  return `${formatter(range.min)} - ${formatter(range.max)}`
+}
+
+function standardDeviation(values) {
+  const valid = values.filter((value) => Number.isFinite(value))
+  if (valid.length < 2) return 0
+  const mean = average(valid)
+  return Math.sqrt(valid.reduce((sum, value) => sum + (value - mean) ** 2, 0) / valid.length)
+}
+
+function buildParameterSurface(ranked, candidates, benchmarkTest) {
+  if (!ranked.length) {
+    return {
+      candidateCount: candidates.length,
+      validCount: 0,
+      validCoverage: 0,
+      stableCount: 0,
+      stableCoverage: 0,
+      stabilityScore: 0,
+      scoreDispersion: 0,
+      recommended: null,
+      stableZone: null,
+      topWindows: [],
+      warnings: ['没有候选通过样本外交易日门槛，无法形成参数表面'],
+    }
+  }
+
+  const topCutoffIndex = Math.max(0, Math.min(ranked.length - 1, Math.ceil(ranked.length * 0.12) - 1))
+  const cutoffScore = ranked[topCutoffIndex].score
+  const topCohort = ranked.filter((candidate) => candidate.score >= cutoffScore - 1e-9)
+  const robustCandidates = ranked.filter(
+    (candidate) =>
+      candidate.stabilityScore >= 62 &&
+      candidate.overfitRisk !== '高' &&
+      candidate.test.annualReturn >= benchmarkTest.annualReturn - 0.02,
+  )
+  const stableCohort = topCohort.filter(
+    (candidate) => candidate.stabilityScore >= 58 && candidate.overfitRisk !== '高',
+  )
+  const zoneCohort = stableCohort.length ? stableCohort : topCohort
+  const recommended = [...zoneCohort].sort(
+    (a, b) => b.stabilityScore - a.stabilityScore || b.score - a.score,
+  )[0]
+  const scoreDispersion = standardDeviation(topCohort.map((candidate) => candidate.score))
+  const stabilityScore = Math.round(average(zoneCohort.map((candidate) => candidate.stabilityScore)) ?? 0)
+  const validCoverage = candidates.length ? ranked.length / candidates.length : 0
+  const stableCoverage = ranked.length ? robustCandidates.length / ranked.length : 0
+
+  const windowBuckets = new Map()
+  ranked.forEach((candidate) => {
+    const key = `${candidate.params.fastWindow}/${candidate.params.slowWindow}`
+    const bucket = windowBuckets.get(key) ?? {
+      label: `${key}日`,
+      count: 0,
+      scores: [],
+      stabilities: [],
+      returns: [],
+    }
+    bucket.count += 1
+    bucket.scores.push(candidate.score)
+    bucket.stabilities.push(candidate.stabilityScore)
+    bucket.returns.push(candidate.test.annualReturn)
+    windowBuckets.set(key, bucket)
+  })
+
+  const topWindows = [...windowBuckets.values()]
+    .map((bucket) => ({
+      label: bucket.label,
+      count: bucket.count,
+      averageScore: average(bucket.scores) ?? 0,
+      stabilityScore: Math.round(average(bucket.stabilities) ?? 0),
+      annualReturn: average(bucket.returns) ?? 0,
+    }))
+    .sort((a, b) => b.averageScore - a.averageScore)
+    .slice(0, 4)
+
+  const stableZone = {
+    fastWindow: numberRange(zoneCohort.map((candidate) => candidate.params.fastWindow)),
+    slowWindow: numberRange(zoneCohort.map((candidate) => candidate.params.slowWindow)),
+    entryPullback: numberRange(zoneCohort.map((candidate) => candidate.params.entryPullback)),
+    deepPullback: numberRange(zoneCohort.map((candidate) => candidate.params.deepPullback)),
+    riskCut: numberRange(zoneCohort.map((candidate) => candidate.params.riskCut)),
+    candidateCount: zoneCohort.length,
+    label: `${rangeLabel(
+      numberRange(zoneCohort.map((candidate) => candidate.params.fastWindow)),
+    )}/${rangeLabel(
+      numberRange(zoneCohort.map((candidate) => candidate.params.slowWindow)),
+    )}日趋势，${rangeLabel(
+      numberRange(zoneCohort.map((candidate) => candidate.params.entryPullback)),
+      (value) => formatPercent(value, 0),
+    )}/${rangeLabel(
+      numberRange(zoneCohort.map((candidate) => candidate.params.deepPullback)),
+      (value) => formatPercent(value, 0),
+    )}回撤`,
+  }
+
+  const warnings = []
+  if (stableCoverage < 0.08) warnings.push('稳健候选占比偏低，单点最优容易受样本切分影响')
+  if (scoreDispersion > 8) warnings.push('头部候选分数离散度高，参数表面存在尖峰')
+  if (ranked[0].overfitRisk === '高') warnings.push('分数最高参数已被标记为高过拟合风险')
+  if (recommended && recommended.label !== ranked[0].label) {
+    warnings.push('推荐配置优先采用稳定性更高的邻近参数，而非单点最高分')
+  }
+  if (!warnings.length) warnings.push('头部参数形成可解释稳定区间，暂未发现明显尖峰脆弱区')
+
+  return {
+    candidateCount: candidates.length,
+    validCount: ranked.length,
+    validCoverage,
+    stableCount: robustCandidates.length,
+    stableCoverage,
+    stabilityScore,
+    scoreDispersion,
+    recommended: recommended
+      ? {
+          label: paramsLabel(recommended.params),
+          params: recommended.params,
+          score: recommended.score,
+          stabilityScore: recommended.stabilityScore,
+          overfitRisk: recommended.overfitRisk,
+          testAnnualReturn: recommended.test.annualReturn,
+          testMaxDrawdown: recommended.test.maxDrawdown,
+          testExposure: recommended.test.exposure,
+        }
+      : null,
+    stableZone,
+    topWindows,
+    warnings,
+  }
+}
+
+export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid }) {
   const cleaned = cleanKlines(klines)
   const factorProfile = buildFactorProfile(factorBaskets)
 
@@ -341,7 +508,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
   const testStart = splitIndex
   const testEnd = cleaned.length - 1
   const benchmarkTest = evaluateBuyHold(cleaned, testStart, testEnd)
-  const candidates = generateOptimizerCandidates().map((params) => {
+  const candidates = generateOptimizerCandidates(parameterGrid).map((params) => {
     const train = evaluateOptimizedCandidate(cleaned, params, trainStart, trainEnd)
     const test = evaluateOptimizedCandidate(cleaned, params, testStart, testEnd)
     const stabilityScore = Math.min(
@@ -355,6 +522,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
       stabilityScore,
       overfitRisk: overfitLabel(stabilityScore, train, test, cleaned.length),
       score: scoreCandidate({ train, test, benchmarkTest, params }),
+      label: paramsLabel(params),
     }
   })
 
@@ -373,6 +541,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
   }
 
   const best = ranked[0]
+  const parameterSurface = buildParameterSurface(ranked, candidates, benchmarkTest)
   const latestRawExposure = optimizedExposure(best.params, cleaned, cleaned.length - 1)
   const factorOverlay = factorOverlayFor(factorProfile)
   const currentExposure = clamp(latestRawExposure * factorOverlay.multiplier, 0, 1)
@@ -398,6 +567,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
       endDate: cleaned.at(-1)?.date,
     },
     benchmarkTest,
+    parameterSurface,
     best: {
       ...best,
       label: paramsLabel(best.params),
@@ -419,7 +589,7 @@ export function buildStrategyOptimizer({ klines, factorBaskets }) {
       ],
     },
     leaderboard: ranked.slice(0, 5).map((candidate) => ({
-      label: paramsLabel(candidate.params),
+      label: candidate.label,
       score: candidate.score,
       stabilityScore: candidate.stabilityScore,
       overfitRisk: candidate.overfitRisk,

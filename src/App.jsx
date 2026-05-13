@@ -204,6 +204,7 @@ function App() {
     ],
   )
   const degradedSources = sourceHealth.filter((source) => source.ok === false)
+  const providerHealth = dataFreshness.providerRegistry?.providers ?? []
   const realtimeStatusLabel =
     realtimeState.status === 'success'
       ? `${realtimeState.quote?.runtimeSourceLabel ?? '实时'} ${formatSnapshotTime(realtimeState.lastUpdated)}`
@@ -546,13 +547,21 @@ function App() {
               <strong>{dataFreshness.summary}</strong>
             </div>
             <div>
+              <span>Provider覆盖</span>
+              <strong>{dataFreshness.coverageScore}%</strong>
+            </div>
+            <div>
+              <span>新鲜度徽章</span>
+              <strong>{dataFreshness.stalenessBadge}</strong>
+            </div>
+            <div>
               <span>降级源</span>
               <strong>{degradedSources.length}个</strong>
             </div>
           </div>
-          {sourceHealth.length ? (
+          {providerHealth.length ? (
             <div className="source-health-list" aria-label="数据源健康状态">
-              {sourceHealth.map((source) => (
+              {providerHealth.map((source) => (
                 <div
                   className={`source-health-row ${
                     source.ok ? 'ok' : source.required ? 'danger' : 'warning'
@@ -560,15 +569,11 @@ function App() {
                   key={source.id}
                 >
                   <span>{source.label}</span>
-                  <strong>
-                    {source.runtime && source.ok
-                      ? '实时'
-                      : source.ok
-                        ? '正常'
-                        : source.fallback
-                          ? '缓存'
-                          : '失败'}
-                  </strong>
+                  <div>
+                    <strong>{source.badge}</strong>
+                    <em>{source.coveragePercent}%覆盖</em>
+                  </div>
+                  {source.fallbackReason ? <p>{source.fallbackReason}</p> : null}
                 </div>
               ))}
             </div>

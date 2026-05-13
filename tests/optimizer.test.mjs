@@ -51,6 +51,9 @@ test('单调上涨数据下能找到至少一组有效候选并返回稳定性�
   assert.ok(result.totalCandidates > 0)
   assert.ok(result.leaderboard.length > 0)
   assert.ok(result.leaderboard.length <= 5)
+  assert.ok(result.parameterSurface.validCount > 0)
+  assert.ok(result.parameterSurface.recommended?.label)
+  assert.ok(result.parameterSurface.stableZone?.label)
 })
 
 test('过拟合标签必为 低 / 中 / 高 之一', () => {
@@ -155,4 +158,57 @@ test('leaderboard 按 score 降序排列且长度不超过 5', () => {
       `leaderboard[${i - 1}].score=${result.leaderboard[i - 1].score} 应 ≥ leaderboard[${i}].score=${result.leaderboard[i].score}`,
     )
   }
+})
+
+test('单点参数网格也能形成稳定区间和推荐配置', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0007 ** i)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: {
+      fastWindows: [20],
+      slowWindows: [60],
+      entryPullbacks: [0.05],
+      deepPullbacks: [0.12],
+      riskCuts: [0.2],
+    },
+  })
+  assert.equal(result.ok, true)
+  assert.equal(result.totalCandidates, 1)
+  assert.equal(result.parameterSurface.validCount, 1)
+  assert.equal(result.parameterSurface.recommended.label, result.best.label)
+  assert.match(result.parameterSurface.stableZone.label, /20\/60日趋势/)
+})
+
+test('多个等分数候选会进入同一个参数表面 cohort', () => {
+  const klines = syntheticKlines(260, () => 100)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: {
+      fastWindows: [15, 20],
+      slowWindows: [60],
+      entryPullbacks: [0.05],
+      deepPullbacks: [0.12],
+      riskCuts: [0.2],
+    },
+  })
+  assert.equal(result.ok, true)
+  assert.equal(result.parameterSurface.validCount, 2)
+  assert.equal(result.parameterSurface.stableZone.candidateCount, 2)
+  assert.match(result.parameterSurface.stableZone.label, /15 - 20\/60日趋势/)
+})
+
+test('NaN 和缺失 close 会被清洗，不污染参数表面分数', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const dirty = [
+    { date: '2023-12-29', close: Number.NaN },
+    { date: '2023-12-30' },
+    ...klines,
+  ]
+  const result = buildStrategyOptimizer({ klines: dirty, factorBaskets: baseFactors })
+  assert.equal(result.ok, true)
+  assert.equal(result.sample.total, 260)
+  assert.ok(Number.isFinite(result.parameterSurface.scoreDispersion))
+  assert.ok(result.parameterSurface.topWindows.every((item) => Number.isFinite(item.annualReturn)))
 })
