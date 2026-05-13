@@ -71,6 +71,73 @@ export function TradingQualityPanel({ quality }) {
   )
 }
 
+export function DataFreshnessDrilldown({ registry }) {
+  const providers = registry?.providers ?? []
+  if (!providers.length) return null
+
+  const groups = registry.groups ?? {}
+
+  return (
+    <div className="provider-freshness-card" aria-label="数据源新鲜度明细">
+      <div className="provider-freshness-head">
+        <div>
+          <span>Provider Freshness</span>
+          <strong>{registry.summary}</strong>
+        </div>
+        <b>{registry.stalenessBadge}</b>
+      </div>
+
+      <div className="provider-group-grid">
+        <ProviderGroup label="核心源" group={groups.core} />
+        <ProviderGroup label="辅助源" group={groups.auxiliary} />
+        <ProviderGroup label="缓存源" group={groups.cache} />
+        <ProviderGroup label="失败源" group={groups.failed} />
+      </div>
+
+      <div className="provider-action-list">
+        {(registry.actionItems ?? []).map((item) => (
+          <p key={item}>{item}</p>
+        ))}
+      </div>
+
+      <div className="provider-source-list">
+        {providers.map((source) => (
+          <article
+            className={`provider-source-row ${
+              source.ok ? (source.fallback ? 'warning' : 'ok') : source.required ? 'danger' : 'warning'
+            }`}
+            key={source.id}
+          >
+            <div>
+              <span>{source.roleLabel}</span>
+              <strong>{source.label}</strong>
+              <p>{source.statusText} · {source.ageText}</p>
+            </div>
+            <div className="provider-source-badges">
+              <b>{source.badge}</b>
+              <em>{source.coveragePercent}%覆盖</em>
+            </div>
+            <p className="provider-next-action">{source.nextAction}</p>
+            {source.fallbackReason ? (
+              <p className="provider-fallback-reason">{source.fallbackReason}</p>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProviderGroup({ label, group }) {
+  return (
+    <div>
+      <span>{label}</span>
+      <strong>{group?.count ?? 0}个</strong>
+      <p>{group?.labels ?? '无'}</p>
+    </div>
+  )
+}
+
 function formatZScore(value) {
   if (!Number.isFinite(value)) return '暂无'
   const sign = value > 0 ? '+' : ''

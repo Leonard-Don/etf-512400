@@ -63,6 +63,45 @@ function providerBadgeFor(status, ageDays) {
   return '正常'
 }
 
+function providerRoleFor(source) {
+  return source?.required ? 'core' : 'auxiliary'
+}
+
+function providerRoleLabel(role) {
+  return role === 'core' ? '核心源' : '辅助源'
+}
+
+function ageTextFor(ageDays) {
+  if (ageDays === null) return '新鲜度未知'
+  if (ageDays <= 0) return '今日数据'
+  if (ageDays === 1) return '上一交易日'
+  return `滞后 ${ageDays} 天`
+}
+
+function providerStatusTextFor(status, ageDays) {
+  if (status === 'failed') return '失败无缓存'
+  if (status === 'fallback') return '缓存兜底'
+  if (ageDays !== null && ageDays > STALE_SNAPSHOT_DAYS) return '源数据过旧'
+  if (status === 'runtime') return '运行时实时'
+  return '快照可用'
+}
+
+function providerNextActionFor({ status, ageDays, required, coverageRatio, fallback }) {
+  if (status === 'failed' && required) return '先恢复核心源，仓位建议按降级口径执行'
+  if (status === 'failed') return '补采辅助源；当前信号暂不依赖该源放大仓位'
+  if (fallback && required) return '核心源仍在用缓存，刷新成功前不要上调仓位'
+  if (fallback) return '缓存只作旁证，等待下一轮刷新复核'
+  if (ageDays !== null && ageDays > STALE_SNAPSHOT_DAYS) return '重新刷新该源后再确认仓位'
+  if (coverageRatio < 0.8) return '样本覆盖不足，先补齐缺口再提高权重'
+  if (coverageRatio < 1) return '存在少量缺口，继续观察下一轮刷新'
+  return '可纳入当前信号解释'
+}
+
+function providerSummaryLabel(providers, predicate) {
+  const labels = providers.filter(predicate).map((provider) => provider.label)
+  return labels.length ? labels.join('、') : '无'
+}
+
 export function buildProviderFreshnessRegistry({
   sourceHealth = [],
   quoteTradeDate,
@@ -76,6 +115,7 @@ export function buildProviderFreshnessRegistry({
 
   const providers = sourceHealth.map((source) => {
     const status = providerStatusFor(source)
+    const role = providerRoleFor(source)
     const fetchedAgeDays = timestampDayGap(source?.fetchedAt, now)
     const domainAgeDays =
       source?.id === 'quote'
@@ -95,14 +135,25 @@ export function buildProviderFreshnessRegistry({
       required: Boolean(source?.required),
       status,
       badge: providerBadgeFor(status, ageDays),
+      statusText: providerStatusTextFor(status, ageDays),
+      role,
+      roleLabel: providerRoleLabel(role),
       ok: source?.ok !== false,
       fallback: Boolean(source?.fallback),
       runtime: Boolean(source?.runtime),
       coverageRatio,
       coveragePercent: Math.round(coverageRatio * 100),
       ageDays,
+      ageText: ageTextFor(ageDays),
       fetchedAt: source?.fetchedAt,
       fallbackReason,
+      nextAction: providerNextActionFor({
+        status,
+        ageDays,
+        required: Boolean(source?.required),
+        coverageRatio,
+        fallback: Boolean(source?.fallback),
+      }),
       okCount: source?.okCount,
       total: source?.total,
       fallbackCount: source?.fallbackCount,
@@ -119,15 +170,61 @@ export function buildProviderFreshnessRegistry({
   const staleProviders = providers.filter(
     (provider) => provider.ageDays !== null && provider.ageDays > STALE_SNAPSHOT_DAYS,
   )
+  const cacheProviders = providers.filter((provider) => provider.fallback)
+  const failedProviders = providers.filter((provider) => !provider.ok && !provider.fallback)
+  const coreProviders = providers.filter((provider) => provider.role === 'core')
+  const auxiliaryProviders = providers.filter((provider) => provider.role === 'auxiliary')
+  const actionItems = [
+    ...new Set(
+      providers
+        .filter(
+          (provider) =>
+            !provider.ok ||
+            provider.fallback ||
+            (provider.ageDays !== null && provider.ageDays > STALE_SNAPSHOT_DAYS) ||
+            provider.coverageRatio < 1,
+        )
+        .map((provider) => provider.nextAction),
+    ),
+  ].slice(0, 3)
 
   return {
     providers,
     coverageScore,
     failedRequiredCount: failedRequired.length,
     staleProviderCount: staleProviders.length,
+    cacheProviderCount: cacheProviders.length,
+    failedProviderCount: failedProviders.length,
     snapshotAgeDays,
     quoteAgeDays,
     navAgeDays,
+    groups: {
+      core: {
+        count: coreProviders.length,
+        labels: providerSummaryLabel(providers, (provider) => provider.role === 'core'),
+      },
+      auxiliary: {
+        count: auxiliaryProviders.length,
+        labels: providerSummaryLabel(providers, (provider) => provider.role === 'auxiliary'),
+      },
+      cache: {
+        count: cacheProviders.length,
+        labels: providerSummaryLabel(providers, (provider) => provider.fallback),
+      },
+      failed: {
+        count: failedProviders.length,
+        labels: providerSummaryLabel(providers, (provider) => !provider.ok && !provider.fallback),
+      },
+      stale: {
+        count: staleProviders.length,
+        labels: providerSummaryLabel(
+          providers,
+          (provider) => provider.ageDays !== null && provider.ageDays > STALE_SNAPSHOT_DAYS,
+        ),
+      },
+    },
+    actionItems: actionItems.length ? actionItems : ['数据源可用于当前信号，继续按计划刷新'],
+    summary: `核心源 ${coreProviders.length} 个，辅助源 ${auxiliaryProviders.length} 个，缓存 ${cacheProviders.length} 个，失败 ${failedProviders.length} 个`,
     stalenessBadge:
       failedRequired.length > 0
         ? '核心降级'
