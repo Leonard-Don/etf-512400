@@ -1,10 +1,10 @@
 export function calculatePremium(price, nav) {
-  if (!nav) return 0
+  if (!Number.isFinite(price) || !Number.isFinite(nav) || nav === 0) return 0
   return price / nav - 1
 }
 
 export function calculateDailyChange(price, previousClose) {
-  if (!previousClose) return 0
+  if (!Number.isFinite(price) || !Number.isFinite(previousClose) || previousClose === 0) return 0
   return price / previousClose - 1
 }
 
