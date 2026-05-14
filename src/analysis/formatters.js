@@ -28,8 +28,10 @@ export function formatCnyAmount(value) {
 
 export function formatSnapshotTime(value) {
   if (!value) return '未刷新'
+  if (typeof value !== 'string' && !(value instanceof Date)) return '未刷新'
+
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
+  if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : '未刷新'
 
   return new Intl.DateTimeFormat('zh-CN', {
     timeZone: 'Asia/Shanghai',
