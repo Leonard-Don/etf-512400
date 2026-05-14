@@ -5,6 +5,7 @@ import {
   formatSignedPercent,
   formatNumber,
   formatCnyAmount,
+  formatSnapshotTime,
 } from '../src/analysis/formatters.js'
 
 test('formatPercent/formatSignedPercent: null (JSON NaN/Infinity 反序列化哨兵) 必须回退到 暂无 而非 0.00%', () => {
@@ -188,4 +189,50 @@ test('formatNumber: 非 number 原始值（null/numeric string/boolean/array/box
   assert.equal(formatCnyAmount(15000), '1.50万', 'formatCnyAmount 仍按万分级渲染合法 numeric')
   assert.equal(formatCnyAmount(1234), '1,234', 'formatCnyAmount 仍把 < 万 的 numeric 走 0 位小数')
   assert.equal(formatCnyAmount(null), '暂无', 'formatCnyAmount 既有 numeric-primitive-only 守卫保留')
+})
+
+test('formatSnapshotTime: 非 string 非 Date 原始值（boolean/array/object/number/BigInt/boxed Number）必须回退到 未刷新（string-or-Date-only 契约）', () => {
+  // formatSnapshotTime 是 App.jsx 顶部 chips（快照徽章 / 实时状态 / refresh-note）和"数据管线"
+  // 面板里"刷新时间"等数据新鲜度文案的主要入口；其他共享 formatter（formatPercent / formatNumber /
+  // formatCnyAmount）在 PR #25-#30 里都已收紧到 numeric-primitive-only 契约，但 formatSnapshotTime
+  // 仅用 `if (!value) return '未刷新'` 的 falsy 守卫，下游靠 `new Date(value)` + `Number.isNaN(getTime())`
+  // 做最后兜底。问题在于：
+  //   * `new Date(true)` = epoch+1ms（不是 NaN），会把 boolean true 渲染成 "1970-01-01 08:00"；
+  //   * `new Date([])` / `new Date({})` 是 Invalid Date，但兜底 `return value` 会把数组/对象原样
+  //     交给 React 渲染，触发 "[object Object]" 或 children-must-be-react-node 警告；
+  //   * `new Date(<number-epoch>)` 会把"上游 schema 漂移塞进数值字段"的 epoch 时间戳静默渲染
+  //     成合法时间，掩盖类型契约违规；
+  //   * boxed `new Number(0)` / `new Date('invalid')` 一类拆箱对象同样会绕过 falsy 守卫。
+  // 本测试钉死共享 snapshot-time 入口的 string-or-Date-primitive-only 边界：非 string 非 Date
+  // 一律回退到 '未刷新'，与其他 formatter 的 numeric-primitive-only 收紧保持同一风格。
+  assert.equal(formatSnapshotTime(true), '未刷新', 'boolean true 不得被 new Date(true) 渲染成 1970-01-01')
+  assert.equal(formatSnapshotTime(false), '未刷新', 'boolean false（falsy）保留既有 未刷新 回退')
+  assert.equal(formatSnapshotTime([]), '未刷新', '空数组不得被 new Date 解析后原样返回到 React 渲染层')
+  assert.equal(formatSnapshotTime([0]), '未刷新', '单元素数组同样必须拒绝')
+  assert.equal(formatSnapshotTime({}), '未刷新', '普通对象不得原样返回到 React 渲染层')
+  assert.equal(formatSnapshotTime(0), '未刷新', 'numeric 0（falsy）保留既有 未刷新 回退')
+  assert.equal(formatSnapshotTime(1700000000000), '未刷新', '数值 epoch 不得被 new Date 静默渲染成合法时间')
+  assert.equal(formatSnapshotTime(0n), '未刷新', 'BigInt 0n 不得被 new Date 解析')
+  assert.equal(formatSnapshotTime(1700000000000n), '未刷新', 'BigInt epoch 同样必须拒绝')
+  assert.equal(formatSnapshotTime(new Number(1700000000000)), '未刷新', 'boxed Number 不得被拆箱后当作 epoch 渲染')
+  assert.equal(formatSnapshotTime(new Date(Number.NaN)), '未刷新', 'Invalid Date 实例必须回退到 未刷新 而非原对象')
+
+  // 回归守卫：合法 ISO 字符串与有效 Date 实例仍按既有契约渲染上海时区时间，不被本次收紧误伤。
+  // 用 Intl 引擎本地化输出可能因 ICU 数据版本差异在分隔符上微浮动，因此用模式匹配 + 已知锚点。
+  const fromIso = formatSnapshotTime('2026-05-06T03:30:00.000Z')
+  assert.match(fromIso, /^\d{2}-\d{2} \d{2}:\d{2}$/, '合法 ISO 字符串仍渲染成 MM-DD HH:MM 模式')
+  assert.ok(fromIso.startsWith('05-06'), '上海时区 UTC+8 下 03:30Z 仍落在 05-06')
+  assert.ok(fromIso.endsWith('11:30'), '上海时区 UTC+8 下 03:30Z 仍渲染为 11:30')
+
+  const fromDate = formatSnapshotTime(new Date('2026-05-06T00:00:00.000Z'))
+  assert.match(fromDate, /^\d{2}-\d{2} \d{2}:\d{2}$/, 'Date 实例仍渲染成 MM-DD HH:MM 模式')
+
+  // 回归守卫：null/undefined/空串仍走既有 未刷新 回退（既有契约，不被新增类型守卫误改文案）。
+  assert.equal(formatSnapshotTime(null), '未刷新', 'null 仍回退到 未刷新（既有契约）')
+  assert.equal(formatSnapshotTime(undefined), '未刷新', 'undefined 仍回退到 未刷新（既有契约）')
+  assert.equal(formatSnapshotTime(''), '未刷新', '空字符串仍回退到 未刷新（既有契约）')
+
+  // 回归守卫：不可解析字符串仍把原始 string 透出（既有契约，便于人工排查 schema 漂移；与
+  // 非 string 类型回退到 未刷新 区分——string 一定是上游有意写入的字面量，原样回显反而最诚实）。
+  assert.equal(formatSnapshotTime('not-a-date'), 'not-a-date', '不可解析字符串仍原样回显（既有契约）')
 })
