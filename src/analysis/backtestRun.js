@@ -15,16 +15,24 @@ function asReturnSeries(rows) {
   const returns = []
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index]
-    if (Number.isFinite(row?.return)) {
-      returns.push(row.return)
+    const rawReturn = row?.return
+    if (typeof rawReturn === 'number') {
+      if (!Number.isFinite(rawReturn)) {
+        throw new RangeError('BacktestRun.rows return 必须是有限数字，禁止 NaN/Infinity')
+      }
+      returns.push(rawReturn)
       continue
     }
-    if (index === 0 && Number.isFinite(row?.close)) continue
-    if (Number.isFinite(row?.close) && Number.isFinite(rows[index - 1]?.close)) {
-      if (row.close <= 0 || rows[index - 1].close <= 0) {
+    const rawClose = row?.close
+    if (typeof rawClose === 'number' && !Number.isFinite(rawClose)) {
+      throw new RangeError('BacktestRun.rows close 必须是有限数字，禁止 NaN/Infinity')
+    }
+    if (index === 0 && Number.isFinite(rawClose)) continue
+    if (Number.isFinite(rawClose) && Number.isFinite(rows[index - 1]?.close)) {
+      if (rawClose <= 0 || rows[index - 1].close <= 0) {
         throw new RangeError('BacktestRun close 序列必须为正数，避免 Infinity/NaN 收益')
       }
-      returns.push(row.close / rows[index - 1].close - 1)
+      returns.push(rawClose / rows[index - 1].close - 1)
       continue
     }
     returns.push(0)

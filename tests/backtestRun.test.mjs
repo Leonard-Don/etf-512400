@@ -63,6 +63,42 @@ test('BacktestRun rejects negative fees and non-positive close-derived returns',
   assert.throws(() => run.evaluate(), /close/)
 })
 
+test('BacktestRun preserves explicit zero return but rejects non-finite return/close rows', () => {
+  const zeroRun = new BacktestRun({
+    runId: 'bt-zero',
+    strategySpecId: 'spec',
+    rows: [{ return: 0 }, { return: 0.05 }, { return: 0 }],
+    exposureFn: () => 1,
+  })
+  const zeroResult = zeroRun.evaluate()
+  assert.equal(zeroResult.metrics.sampleSize, 3)
+  assert.ok(Math.abs(zeroResult.metrics.totalReturn - 0.05) < 1e-12)
+
+  const nanReturnRun = new BacktestRun({
+    runId: 'bt-nan-return',
+    strategySpecId: 'spec',
+    rows: [{ return: 0.01 }, { return: Number.NaN }],
+    exposureFn: () => 1,
+  })
+  assert.throws(() => nanReturnRun.evaluate(), /return/)
+
+  const infReturnRun = new BacktestRun({
+    runId: 'bt-inf-return',
+    strategySpecId: 'spec',
+    rows: [{ return: 0.01 }, { return: Number.POSITIVE_INFINITY }],
+    exposureFn: () => 1,
+  })
+  assert.throws(() => infReturnRun.evaluate(), /return/)
+
+  const nanCloseRun = new BacktestRun({
+    runId: 'bt-nan-close',
+    strategySpecId: 'spec',
+    rows: [{ close: 10 }, { close: Number.NaN }],
+    exposureFn: () => 1,
+  })
+  assert.throws(() => nanCloseRun.evaluate(), /close/)
+})
+
 test('StabilityScore downgrades dispersed parameter cohorts', () => {
   const stable = new StabilityScore({
     cohort: [
