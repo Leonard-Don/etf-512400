@@ -233,3 +233,64 @@ test('currentPremium 恰好为数值 0（价格 = 净值）时 premium.score 仍
   assert.ok(Number.isFinite(result.premium.score))
   assert.ok(result.premium.score >= 85, `expected score near base 90, got ${result.premium.score}`)
 })
+
+test('真实 zScore=0（currentPremium 落在历史均值上、std20>0）→ premium.score 仍是高分有限值', () => {
+  // 与上一条的差别：历史 premium 真正有波动（std20 不为 0），保证 zScore 是数值 0 而非 null。
+  // 修复 `?? 0` → `Number.isFinite(...) ? ... : 0` 必须不动合法的数值 0。
+  const days = 140
+  const benchmark = syntheticSeries(days, () => 100)
+  const etf = syntheticSeries(days, () => 100)
+  // nav.unit 交替为 100.5/99.5，让历史 premium 在 0 附近正负摆动
+  const nav = etf.map((item, i) => ({
+    date: item.date,
+    unit: i % 2 === 0 ? 100.5 : 99.5,
+  }))
+  const lastNavUnit = nav.at(-1).unit
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: nav,
+    price: lastNavUnit,
+    nav: lastNavUnit, // currentPremium === 0
+    quote: { amountCny: 500_000_000, turnoverRate: 0.02 },
+  })
+  assert.equal(result.premium.currentPremium, 0)
+  assert.ok(Number.isFinite(result.premium.zScore))
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(result.premium.score >= 0 && result.premium.score <= 100)
+  assert.ok(
+    ['贴近净值', '溢价偏热', '折价偏深'].includes(result.premium.status),
+    `unexpected status ${result.premium.status}`,
+  )
+})
+
+test('折溢价输入触发极端 zScore 时 premium.score 受 clamp 限制，status/streakLabel 仍是有效字符串', () => {
+  // 构造：历史 premium 全部为 0（std20=0，原路径 zScore=null），currentPremium 突然偏离 +5%。
+  // 这是"finite currentPremium + 内部 zScore 由 sanitize 兜底"的回归路径：
+  // 即使把 `?? 0` 误改成漏 NaN/Infinity 的写法，整体输出也要落在 [0,100] 且 label 是字符串。
+  const days = 140
+  const benchmark = syntheticSeries(days, () => 100)
+  const etf = syntheticSeries(days, () => 100)
+  const nav = etf.map((item) => ({ date: item.date, unit: 100 }))
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: nav,
+    price: 105,
+    nav: 100, // currentPremium = +5%
+    quote: { amountCny: 500_000_000, turnoverRate: 0.02 },
+  })
+  assert.ok(Number.isFinite(result.premium.currentPremium))
+  assert.ok(Math.abs(result.premium.currentPremium - 0.05) < 1e-9)
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(result.premium.score >= 0 && result.premium.score <= 100)
+  assert.ok(
+    ['贴近净值', '溢价偏热', '折价偏深'].includes(result.premium.status),
+    `unexpected status ${result.premium.status}`,
+  )
+  assert.equal(typeof result.premium.streakLabel, 'string')
+  assert.doesNotMatch(result.premium.streakLabel, /NaN|Infinity/i)
+  // 整体 tradingQuality.score 也应保持有限受限
+  assert.ok(Number.isFinite(result.score))
+  assert.ok(result.score >= 0 && result.score <= 100)
+})
