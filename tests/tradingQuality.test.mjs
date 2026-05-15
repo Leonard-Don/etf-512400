@@ -194,3 +194,42 @@ test('完全无成交额数据 → liquidity.status="样本不足"，amountPerce
   assert.equal(result.liquidity.latestAmount, null)
   assert.ok(result.liquidity.score >= 0 && result.liquidity.score <= 100)
 })
+
+test('折溢价完全缺数据时 premium.score 应为 null，而不是被当作"零偏离=满分"', () => {
+  // navSeries 为空 + nav 入参 undefined → currentPremium 既无法从入参算出，也无法从历史回退
+  // 之前 `?? 0` fallback 会让 score = base(90)，把"没数据"伪装成"完美贴近净值"，
+  // 拉高整体 tradingQuality.score。
+  const benchmark = syntheticSeries(140, (i) => 100 * 1.0003 ** i)
+  const etf = syntheticSeries(140, (i) => 100 * 1.0003 ** i)
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: [],
+    price: etf.at(-1).close,
+    nav: undefined,
+    quote: { amountCny: 600_000_000, turnoverRate: 0.025 },
+  })
+  assert.equal(result.premium.status, '样本不足')
+  assert.equal(result.premium.currentPremium, null)
+  assert.equal(result.premium.score, null)
+  // 整体分数仍可用：finiteAverage 会把 null 过滤掉
+  assert.ok(Number.isFinite(result.score))
+  assert.ok(result.score >= 0 && result.score <= 100)
+})
+
+test('currentPremium 恰好为数值 0（价格 = 净值）时 premium.score 仍接近基准 90', () => {
+  // 真实的"贴近净值"必须保留高分，避免修复 null fallback 时误伤合法 0
+  const klines = syntheticSeries(140, (i) => 100 * 1.0005 ** i)
+  const nav = navFromKlines(klines)
+  const result = buildTradingQualityProfile({
+    etfKlines: klines,
+    benchmarkKlines: klines,
+    navSeries: nav,
+    price: klines.at(-1).close,
+    nav: klines.at(-1).close, // price === nav → currentPremium === 0
+    quote: { amountCny: 500_000_000, turnoverRate: 0.02 },
+  })
+  assert.equal(result.premium.currentPremium, 0)
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(result.premium.score >= 85, `expected score near base 90, got ${result.premium.score}`)
+})
