@@ -219,12 +219,15 @@ function buildPremiumTemperature({ etfKlines, navSeries, price, nav }) {
     streak += 1
   }
 
+  // zScore 非有限（null/undefined/NaN/±Infinity）时按中性 0 处理：`?? 0` 只兜 nullish，
+  // 会让 NaN/Infinity 漏到阈值比较和 score 惩罚里污染输出；合法数值 0 仍代表"恰好处于均值"。
+  const safeZScore = Number.isFinite(zScore) ? zScore : 0
   const status =
     !Number.isFinite(currentPremium)
       ? '样本不足'
-      : currentPremium > PREMIUM_TEMP.hotPremium || (zScore ?? 0) > PREMIUM_TEMP.hotZ
+      : currentPremium > PREMIUM_TEMP.hotPremium || safeZScore > PREMIUM_TEMP.hotZ
         ? '溢价偏热'
-        : currentPremium < -PREMIUM_TEMP.hotPremium || (zScore ?? 0) < -PREMIUM_TEMP.hotZ
+        : currentPremium < -PREMIUM_TEMP.hotPremium || safeZScore < -PREMIUM_TEMP.hotZ
           ? '折价偏深'
           : '贴近净值'
   // currentPremium 缺失（null/NaN/Infinity）时 score=null，避免 `?? 0` 把"无数据"伪装成"零偏离=满分"，
@@ -234,7 +237,7 @@ function buildPremiumTemperature({ etfKlines, navSeries, price, nav }) {
         clamp(
           PREMIUM_TEMP.scoreBase -
             Math.abs(currentPremium) * PREMIUM_TEMP.premiumPenalty -
-            Math.abs(zScore ?? 0) * PREMIUM_TEMP.zPenalty,
+            Math.abs(safeZScore) * PREMIUM_TEMP.zPenalty,
           0,
           100,
         ),
