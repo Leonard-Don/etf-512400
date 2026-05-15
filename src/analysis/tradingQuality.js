@@ -227,15 +227,19 @@ function buildPremiumTemperature({ etfKlines, navSeries, price, nav }) {
         : currentPremium < -PREMIUM_TEMP.hotPremium || (zScore ?? 0) < -PREMIUM_TEMP.hotZ
           ? '折价偏深'
           : '贴近净值'
-  const score = Math.round(
-    clamp(
-      PREMIUM_TEMP.scoreBase -
-        Math.abs(currentPremium ?? 0) * PREMIUM_TEMP.premiumPenalty -
-        Math.abs(zScore ?? 0) * PREMIUM_TEMP.zPenalty,
-      0,
-      100,
-    ),
-  )
+  // currentPremium 缺失（null/NaN/Infinity）时 score=null，避免 `?? 0` 把"无数据"伪装成"零偏离=满分"，
+  // 进而拉高 finiteAverage 计算的整体 tradingQuality.score；合法数值 0 仍按"贴近净值"打高分。
+  const score = Number.isFinite(currentPremium)
+    ? Math.round(
+        clamp(
+          PREMIUM_TEMP.scoreBase -
+            Math.abs(currentPremium) * PREMIUM_TEMP.premiumPenalty -
+            Math.abs(zScore ?? 0) * PREMIUM_TEMP.zPenalty,
+          0,
+          100,
+        ),
+      )
+    : null
 
   return {
     status,
