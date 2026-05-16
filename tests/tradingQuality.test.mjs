@@ -161,13 +161,10 @@ test('series ≤ 60 但 trackingDiffs ≥ 20（deviation60 缺失）→ tracking
   // 期望：score 为 null（与 sample<20 的修复对称）
   assert.equal(result.tracking.status, '样本不足')
   assert.equal(result.tracking.score, null)
-  // 整体仍可用：premium + liquidity 的均值，不掺入 tracking 假分
+  // 整体仍可用：当前 fixture 没有成交额历史，tracking/liquidity 都应被过滤，只保留 premium
   assert.ok(Number.isFinite(result.premium.score))
-  assert.ok(Number.isFinite(result.liquidity.score))
-  assert.equal(
-    result.score,
-    Math.round((result.premium.score + result.liquidity.score) / 2),
-  )
+  assert.equal(result.liquidity.score, null)
+  assert.equal(result.score, result.premium.score)
 })
 
 test('样本不足（<20 日）→ tracking.status="样本不足"，tracking.score=null 不污染整体均值', () => {
@@ -192,13 +189,10 @@ test('样本不足（<20 日）→ tracking.status="样本不足"，tracking.sco
   assert.equal(result.tracking.score, null)
   // 其它跟踪字段仍按真实数据返回（basis/deviations 等不受影响）
   assert.ok(['净值', '价格'].includes(result.tracking.basis))
-  // 整体 tradingQuality.score 应当只反映可用维度（premium + liquidity），不掺入 tracking 假分
+  // 整体 tradingQuality.score 应当只反映可用维度；当前 fixture 无成交额历史，liquidity 也应被过滤
   assert.ok(Number.isFinite(result.premium.score))
-  assert.ok(Number.isFinite(result.liquidity.score))
-  assert.equal(
-    result.score,
-    Math.round((result.premium.score + result.liquidity.score) / 2),
-  )
+  assert.equal(result.liquidity.score, null)
+  assert.equal(result.score, result.premium.score)
   assert.ok(result.score >= 0 && result.score <= 100)
 })
 
@@ -221,8 +215,12 @@ test('价格相对净值低 ~2% → premium.status="折价偏深"，streakLabel 
   assert.ok(result.premium.streak >= 1)
 })
 
-test('完全无成交额数据 → liquidity.status="样本不足"，amountPercentile 为 null，score 仍在 [0,100]', () => {
-  // etf 仅有 close，没有 amount 字段；quote 也不带 amountCny
+test('完全无成交额数据 → liquidity.status="样本不足"，amountPercentile 为 null，score=null 不掺入整体均值', () => {
+  // 与 PR #47/#49/#50 对称：etf 仅有 close、quote 也不带 amountCny 时
+  // amountPercentile/amountRatio20/latestAmount 全为 null。旧路径 `(amountPercentile ?? 50) * 0.48`
+  // 与 `(amountRatio20 ?? 1) * 16` 兜底让 rawScore ≈ base+24+16 = 74 的"假在范围内"分数，
+  // 再被 finiteAverage 当作有效信号拉进整体 tradingQuality.score。
+  // 修复后 liquidity.score 应像 premium.score / tracking.score 一样在样本不足时返回 null。
   const benchmark = syntheticSeries(140, (i) => 100)
   const etf = syntheticSeries(140, () => 100)
   const nav = navFromKlines(etf)
@@ -237,7 +235,16 @@ test('完全无成交额数据 → liquidity.status="样本不足"，amountPerce
   assert.equal(result.liquidity.status, '样本不足')
   assert.equal(result.liquidity.amountPercentile, null)
   assert.equal(result.liquidity.latestAmount, null)
-  assert.ok(result.liquidity.score >= 0 && result.liquidity.score <= 100)
+  assert.equal(result.liquidity.amountRatio20, null)
+  assert.equal(result.liquidity.score, null)
+  // 整体 tradingQuality.score 应当只反映可用维度（tracking + premium），不掺入 liquidity 假分
+  assert.ok(Number.isFinite(result.tracking.score))
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(Number.isFinite(result.score))
+  assert.equal(
+    result.score,
+    Math.round((result.tracking.score + result.premium.score) / 2),
+  )
 })
 
 test('折溢价完全缺数据时 premium.score 应为 null，而不是被当作"零偏离=满分"', () => {
