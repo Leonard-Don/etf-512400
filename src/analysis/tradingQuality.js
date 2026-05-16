@@ -287,18 +287,21 @@ function buildLiquidityTemperature({ etfKlines, quote }) {
     Number.isFinite(latestAmount) && Number.isFinite(average20) && average20 > 0
       ? latestAmount / average20
       : null
-  const score = Math.round(
-    clamp(
-      LIQUIDITY_TEMP.scoreBase +
-        (amountPercentile ?? 50) * LIQUIDITY_TEMP.percentileWeight +
-        Math.min(amountRatio20 ?? 1, LIQUIDITY_TEMP.ratio20Cap) * LIQUIDITY_TEMP.ratio20Weight +
-        Math.min(quote?.turnoverRate ?? 0, LIQUIDITY_TEMP.turnoverCap) * LIQUIDITY_TEMP.turnoverWeight,
-      0,
-      100,
-    ),
-  )
+  const insufficientSample = amountPercentile === null || !Number.isFinite(amountRatio20)
+  const score = insufficientSample
+    ? null
+    : Math.round(
+        clamp(
+          LIQUIDITY_TEMP.scoreBase +
+            amountPercentile * LIQUIDITY_TEMP.percentileWeight +
+            Math.min(amountRatio20, LIQUIDITY_TEMP.ratio20Cap) * LIQUIDITY_TEMP.ratio20Weight +
+            Math.min(quote?.turnoverRate ?? 0, LIQUIDITY_TEMP.turnoverCap) * LIQUIDITY_TEMP.turnoverWeight,
+          0,
+          100,
+        ),
+      )
   const status =
-    amountPercentile === null
+    insufficientSample
       ? '样本不足'
       : amountPercentile >= LIQUIDITY_TEMP.activePercentile &&
           (amountRatio20 ?? 1) >= LIQUIDITY_TEMP.activeRatio20
