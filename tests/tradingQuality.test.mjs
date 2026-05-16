@@ -138,8 +138,12 @@ test('quote 缺 amountCny 时不会爆掉，liquidity 仍能给分位/分数', (
   )
 })
 
-test('样本不足（<20 日）→ tracking.status="样本不足"，分数仍在 [0,100]', () => {
-  // 只给 15 日，对齐后 returns ≈14 个，低于 minSampleForGrading=20
+test('样本不足（<20 日）→ tracking.status="样本不足"，tracking.score=null 不污染整体均值', () => {
+  // 只给 15 日，对齐后 returns ≈14 个，低于 minSampleForGrading=20。
+  // 与 PR #47/#48 对 premium.score 的修复对称：缺数据时 deviation20/60 与 trackingError60
+  // 全部 null，旧路径 `Math.abs(null ?? 0)` 与 `null ?? defaultTrackingError` 让 rawScore
+  // 退化成 ~73 的"假在范围内"分数，再被 finiteAverage 当作有效信号拉进整体 tradingQuality.score。
+  // 修复后 tracking.score 应当像 premium.score 一样在样本不足时返回 null。
   const benchmark = syntheticSeries(15, (i) => 100 * 1.0005 ** i)
   const etf = syntheticSeries(15, (i) => 100 * 1.0005 ** i)
   const nav = navFromKlines(etf)
@@ -153,7 +157,16 @@ test('样本不足（<20 日）→ tracking.status="样本不足"，分数仍在
   })
   assert.equal(result.tracking.status, '样本不足')
   assert.ok(result.tracking.sampleSize < 20)
-  assert.ok(result.tracking.score >= 0 && result.tracking.score <= 100)
+  assert.equal(result.tracking.score, null)
+  // 其它跟踪字段仍按真实数据返回（basis/deviations 等不受影响）
+  assert.ok(['净值', '价格'].includes(result.tracking.basis))
+  // 整体 tradingQuality.score 应当只反映可用维度（premium + liquidity），不掺入 tracking 假分
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(Number.isFinite(result.liquidity.score))
+  assert.equal(
+    result.score,
+    Math.round((result.premium.score + result.liquidity.score) / 2),
+  )
   assert.ok(result.score >= 0 && result.score <= 100)
 })
 
