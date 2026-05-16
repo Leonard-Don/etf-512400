@@ -97,3 +97,9 @@ tests/
 ## 使用边界
 
 这是个人研究工具，不是交易系统，也不构成投资建议。所有实时行情和研究快照都依赖公开网页接口、本地代理和本地缓存；遇到接口限流、节假日、盘后或源站结构变化时，页面会显示降级状态，研究结论需要人工复核。
+
+## 📬 合作与交流 · Collaboration & Contact
+
+如果你也在做单标的研究台、ETF 本地工具、多源数据 fallback 架构，或者你是有色金属产业链相关从业者想看价格信号研究方法，欢迎通过 [Issues](https://github.com/Leonard-Don/etf-512400/issues) 交流。⭐ 觉得对你的工具栈有帮助也欢迎 star。
+
+If you're building single-ticker research consoles, ETF local-first tools, quant data fallback architectures, or you're working in the nonferrous metals industry and want to discuss price signal methodology, feel free to open an [Issue](https://github.com/Leonard-Don/etf-512400/issues). ⭐ Stars are welcome if this gave you ideas for your own stack.
