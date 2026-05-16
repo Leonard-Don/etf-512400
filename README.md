@@ -65,6 +65,42 @@ npm run dev
 开发服务器默认由 Vite 启动。实时行情代理只在本地开发服务器中启用，用于规避浏览器跨域限制。
 `npm run memo:export` 会基于本地 `src/data/liveSnapshot.json` 导出研究备忘，支持 `--format=markdown`、`--format=json` 和 `--format=text`。
 
+### `npm run health`
+
+将 `src/analysis/snapshotHealth.js` 暴露的新鲜度契约包装成可在终端运行的诊断 CLI，方便研究脚本、CI 或定时任务在没有浏览器的情况下轮询数据源健康。
+
+```bash
+npm run health                          # 默认彩色表格输出
+npm run health -- --format=json         # 机器可读 JSON（无 ANSI 颜色）
+npm run health -- --format=markdown     # 可粘贴进 commit/issue 的 markdown 表
+npm run health -- --snapshot=/tmp/x.json # 指定其它快照路径
+npm run health -- --quiet               # 仅在 stale/missing 时输出，便于 cron grep
+```
+
+退出码语义：
+
+- `0`：全部数据源 fresh（或 recent 缓存兜底），可继续按计划执行。
+- `1`：至少一个源 stale（滞后超过 3 天），先 `npm run refresh:data` 再决策。
+- `2`：至少一个核心源 missing 且无缓存兜底，或快照文件不存在/不是合法 JSON。
+
+`--format=markdown` 输出示例（其中“滞后 9 天”等数值由当日 `liveSnapshot.json` 计算）：
+
+```markdown
+# ETF 512400 数据源健康
+
+- 总览：行情停留在 2026-05-07
+- 覆盖率：100%
+- 行情：行情停留在 2026-05-07
+- 标签：过旧
+
+| 数据源 | 角色 | 状态 | 新鲜度 | 建议 |
+| --- | --- | --- | --- | --- |
+| ETF行情 | 核心源 | 源数据过旧 | 滞后 9 天 | 重新刷新该源后再确认仓位 |
+| 512400 日K | 核心源 | 源数据过旧 | 滞后 9 天 | 重新刷新该源后再确认仓位 |
+| 基金净值趋势 | 核心源 | 源数据过旧 | 滞后 10 天 | 重新刷新该源后再确认仓位 |
+| 商品驱动 | 辅助源 | 源数据过旧 | 滞后 9 天 | 重新刷新该源后再确认仓位 |
+```
+
 ## 验证
 
 ```bash
@@ -88,6 +124,8 @@ src/
   App.css                  页面样式
 scripts/
   refreshData.mjs          拉取并写入研究快照
+  exportMemo.mjs           基于快照导出研究备忘 memo
+  health.mjs               将快照新鲜度契约渲染为终端诊断（npm run health）
   smokeTest.mjs            核心分析链路冒烟验证
 tests/
   *.test.mjs               Node 单元测试
