@@ -148,15 +148,20 @@ function buildTrackingQuality({ etfKlines, benchmarkKlines, navSeries }) {
     trackingWindow.length >= 20 ? realizedVolatilityFromReturns(trackingWindow) : null
   const deviation20 = difference(primaryReturn20, indexReturn20)
   const deviation60 = difference(primaryReturn60, indexReturn60)
-  const insufficientSample = trackingDiffs.length < TRACKING_SCORE.minSampleForGrading
+  // sampleSize ≥ 20 仍不充分：series ≤ 60 时 deviation60 = null（trailingReturn(60) 返回 null），
+  // series ≤ 20 时 deviation20 也 null。继续走老路径 `Math.abs(null ?? 0) * penalty = 0` 会让缺失
+  // 维度悄悄变成"零偏离"，rawScore 接近 base(88) 的伪满分。与 PR #49 对称：任一关键输入缺失就判
+  // 为样本不足、score=null，由 finiteAverage 过滤。
+  const insufficientSample =
+    trackingDiffs.length < TRACKING_SCORE.minSampleForGrading ||
+    !Number.isFinite(deviation20) ||
+    !Number.isFinite(deviation60) ||
+    !Number.isFinite(trackingError60)
   const rawScore =
     TRACKING_SCORE.base -
     Math.abs(deviation20 ?? 0) * TRACKING_SCORE.deviation20Penalty -
     Math.abs(deviation60 ?? 0) * TRACKING_SCORE.deviation60Penalty -
     (trackingError60 ?? TRACKING_SCORE.defaultTrackingError) * TRACKING_SCORE.trackingErrorPenalty
-  // 样本不足时 deviation20/60 与 trackingError60 都缺，`?? 0` / 默认 0.04 会让 rawScore 退化成
-  // ~73 的"假在范围内"分数，再被 finiteAverage 拉进整体 tradingQuality.score。与 PR #47/#48 修复
-  // premium.score 对称：返回 null，由 finiteAverage 过滤；保留状态与 deviations 字段供解释。
   const score = insufficientSample ? null : Math.round(clamp(rawScore, 0, 100))
   const status = insufficientSample
     ? '样本不足'
