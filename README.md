@@ -132,6 +132,25 @@ tests/
   *.test.jsx               Vitest 组件测试
 ```
 
+## 项目状态
+
+**v1.0 self-use stable** (2026-05-16) — feature development frozen.
+
+这是个人对 512400 ETF 的研究控制台，定位是单一研究工具，不追求泛化到其他 ETF。当前版本是有意收口的稳定状态：
+
+- 数据 fallback 契约（运行时实时 + 手动快照双层）已稳定
+- 28 种策略 / 因子 / 优化器 / 回测 / 健康度评分全套覆盖；测试比源码大 14%
+- 51 PR hardening 历程（zero/falsy/non-finite/NaN sanitization 大扫除）已收尾
+- `npm run health` CLI 让 freshness contract 可被 cron / CI 直接消费
+
+后续维护策略：
+
+- 不规划新功能开发
+- 仅接受 blocking bug、数据源结构变化（东方财富/腾讯/天天基金接口失效）、安全问题修复
+- 保留向 fresh worktree 进行实验的能力，但 primary checkout 视为稳定基线
+- 受保护的 dirty cache 文件 (`src/data/history/512400-snapshots.json` + `liveSnapshot.json`) 是预期 dirty，禁止 `git reset` / 强拉覆盖
+- 测试与构建回归是收口验证基线
+
 ## 使用边界
 
 这是个人研究工具，不是交易系统，也不构成投资建议。所有实时行情和研究快照都依赖公开网页接口、本地代理和本地缓存；遇到接口限流、节假日、盘后或源站结构变化时，页面会显示降级状态，研究结论需要人工复核。
