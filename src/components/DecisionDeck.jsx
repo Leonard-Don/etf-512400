@@ -1,4 +1,4 @@
-import { formatPercent, formatSignedPercent } from '../analysis/metrics'
+import { formatPercent, formatSignedPercent } from '../analysis/formatters.js'
 
 export function DecisionDeck({
   dailyChange,

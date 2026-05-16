@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generatedAt": "2026-05-06T06:29:39.104Z",
-    "mode": "degraded",
+    "generatedAt": "2026-05-07T13:09:59.568Z",
+    "mode": "refreshed",
     "sources": [
       "push2.eastmoney.com quote api",
       "push2his.eastmoney.com 512400 adjusted kline api",
@@ -16,17 +16,16 @@
         "id": "quote",
         "label": "ETF行情",
         "required": true,
-        "ok": false,
-        "fetchedAt": "2026-05-06T06:29:38.886Z",
-        "fallback": true,
-        "error": "ECONNRESET: fetch failed"
+        "ok": true,
+        "fetchedAt": "2026-05-07T13:09:56.879Z",
+        "fallback": false
       },
       {
         "id": "etfKlines",
         "label": "512400 日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-06T06:29:33.931Z",
+        "fetchedAt": "2026-05-07T13:09:56.779Z",
         "fallback": false
       },
       {
@@ -34,7 +33,7 @@
         "label": "000819 基准日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-06T06:29:33.932Z",
+        "fetchedAt": "2026-05-07T13:09:56.781Z",
         "fallback": false
       },
       {
@@ -42,17 +41,16 @@
         "label": "盘中估算净值",
         "required": false,
         "ok": true,
-        "fetchedAt": "2026-05-06T06:29:34.088Z",
+        "fetchedAt": "2026-05-07T13:09:56.982Z",
         "fallback": false
       },
       {
         "id": "fundTrend",
         "label": "基金净值趋势",
         "required": true,
-        "ok": false,
-        "fetchedAt": "2026-05-06T06:29:38.968Z",
-        "fallback": true,
-        "error": "ECONNRESET: fetch failed"
+        "ok": true,
+        "fetchedAt": "2026-05-07T13:09:59.353Z",
+        "fallback": false
       },
       {
         "id": "commodityDrivers",
@@ -60,7 +58,7 @@
         "required": false,
         "ok": true,
         "fallback": false,
-        "fetchedAt": "2026-05-06T06:29:39.104Z",
+        "fetchedAt": "2026-05-07T13:09:59.568Z",
         "okCount": 5,
         "total": 5,
         "fallbackCount": 0
@@ -70,36 +68,30 @@
   "quote": {
     "code": "512400",
     "name": "有色金属ETF南方",
-    "tradeDate": "2026-04-30",
-    "tradeTime": "2026-04-30 16:11:58",
-    "price": 2.119,
-    "previousClose": 2.14,
-    "open": 2.128,
-    "high": 2.154,
-    "low": 2.101,
-    "averagePrice": 2.123,
-    "change": -0.021,
-    "changePercent": -0.0098,
-    "amountCny": 807395293,
-    "volumeLots": 3802627,
-    "turnoverRate": 0.0287,
-    "statusCode": 13,
-    "totalMarketValueCny": 28047166454.528004
+    "tradeDate": "2026-05-07",
+    "tradeTime": "2026-05-07 16:11:45",
+    "price": 2.207,
+    "previousClose": 2.199,
+    "open": 2.231,
+    "high": 2.235,
+    "low": 2.178,
+    "averagePrice": 2.205,
+    "change": 0.008,
+    "changePercent": 0.0036,
+    "amountCny": 1658626372,
+    "volumeLots": 7521276,
+    "turnoverRate": 0.057,
+    "statusCode": 5,
+    "totalMarketValueCny": 29146831590.656
   },
   "nav": {
-    "date": "2026-04-30",
-    "unit": 2.117,
-    "dailyReturn": -0.009300000000000001,
-    "accumulated": 2.142,
+    "date": "2026-05-06",
+    "unit": 2.1985,
+    "dailyReturn": 0.0385,
+    "accumulated": 2.2235,
     "source": "fund.eastmoney.com/pingzhongdata"
   },
   "navTrend": [
-    {
-      "date": "2025-03-07",
-      "unit": 1.0676,
-      "dailyReturn": 0.013300000000000001,
-      "accumulated": 1.0776
-    },
     {
       "date": "2025-03-10",
       "unit": 1.0802,
@@ -1773,36 +1765,30 @@
       "unit": 2.117,
       "dailyReturn": -0.009300000000000001,
       "accumulated": 2.142
+    },
+    {
+      "date": "2026-05-06",
+      "unit": 2.1985,
+      "dailyReturn": 0.0385,
+      "accumulated": 2.2235
     }
   ],
   "estimate": {
-    "date": "2026-05-06",
-    "value": 2.1953,
-    "changePercent": 0.037000000000000005,
-    "time": "2026-05-06 14:24",
-    "previousNavDate": "2026-04-30",
-    "previousUnitNav": 2.117,
+    "date": "2026-05-07",
+    "value": 2.2064,
+    "changePercent": 0.0036,
+    "time": "2026-05-07 15:00",
+    "previousNavDate": "2026-05-06",
+    "previousUnitNav": 2.1985,
     "source": "fundgz.1234567.com.cn"
   },
   "performance": {
-    "oneMonth": 0.0704,
-    "threeMonth": -0.10779999999999999,
-    "sixMonth": 0.21489999999999998,
-    "oneYear": 1.071
+    "oneMonth": 0.1148,
+    "threeMonth": 0.0208,
+    "sixMonth": 0.2738,
+    "oneYear": 1.102
   },
   "etfKlines": [
-    {
-      "date": "2025-03-10",
-      "open": 1.062,
-      "close": 1.065,
-      "high": 1.067,
-      "low": 1.05,
-      "volume": 2855488,
-      "amount": 307150873,
-      "amplitude": 0.0161,
-      "changePercent": 0.011399999999999999,
-      "change": 0.012
-    },
     {
       "date": "2025-03-11",
       "open": 1.05,
@@ -5142,29 +5128,29 @@
     {
       "date": "2026-05-06",
       "open": 2.134,
-      "close": 2.197,
-      "high": 2.199,
+      "close": 2.199,
+      "high": 2.2,
       "low": 2.114,
-      "volume": 5878570,
-      "amount": 1269624748,
-      "amplitude": 0.0401,
-      "changePercent": 0.0368,
-      "change": 0.078
+      "volume": 7010343,
+      "amount": 1518315837,
+      "amplitude": 0.0406,
+      "changePercent": 0.0378,
+      "change": 0.08
+    },
+    {
+      "date": "2026-05-07",
+      "open": 2.231,
+      "close": 2.207,
+      "high": 2.235,
+      "low": 2.178,
+      "volume": 7521276,
+      "amount": 1658626372,
+      "amplitude": 0.0259,
+      "changePercent": 0.0036,
+      "change": 0.008
     }
   ],
   "benchmarkKlines": [
-    {
-      "date": "2025-03-10",
-      "open": 5240.12,
-      "close": 5262.55,
-      "high": 5269.98,
-      "low": 5190.19,
-      "volume": 34168144,
-      "amount": 40666165523.6,
-      "amplitude": 0.015300000000000001,
-      "changePercent": 0.0118,
-      "change": 61.6
-    },
     {
       "date": "2025-03-11",
       "open": 5184.56,
@@ -8504,14 +8490,26 @@
     {
       "date": "2026-05-06",
       "open": 10369.41,
-      "close": 10680.62,
-      "high": 10681.83,
+      "close": 10685.06,
+      "high": 10692.22,
       "low": 10278.72,
-      "volume": 44583159,
-      "amount": 128602524453.9,
-      "amplitude": 0.0392,
-      "changePercent": 0.0382,
-      "change": 392.67
+      "volume": 49845498,
+      "amount": 144815999364.6,
+      "amplitude": 0.04019999999999999,
+      "changePercent": 0.038599999999999995,
+      "change": 397.11
+    },
+    {
+      "date": "2026-05-07",
+      "open": 10773.85,
+      "close": 10723.53,
+      "high": 10861.49,
+      "low": 10584.94,
+      "volume": 49623090,
+      "amount": 140993460656.6,
+      "amplitude": 0.0259,
+      "changePercent": 0.0036,
+      "change": 38.47
     }
   ],
   "commodityDrivers": [
@@ -8530,54 +8528,30 @@
         "label": "沪金主连",
         "unit": "元/克",
         "source": "SHFE",
-        "tradeDate": "2026-05-06",
-        "tradeTime": "2026-05-06 14:29:39",
-        "price": 1027.92,
-        "previousClose": 1016.12,
-        "open": 1018.64,
-        "high": 1028.08,
-        "low": 1015.88,
-        "averagePrice": 1022.08,
-        "change": 11.8,
-        "changePercent": 0.0222,
-        "amountCny": 80083992940,
-        "volumeLots": 78354,
-        "amplitude": 0.0121,
-        "statusCode": 20
+        "tradeDate": "2026-05-07",
+        "tradeTime": "2026-05-07 21:10:00",
+        "price": 1041.54,
+        "previousClose": 1040.98,
+        "open": 1043.28,
+        "high": 1043.28,
+        "low": 1040.76,
+        "averagePrice": 1041.64,
+        "change": 0.56,
+        "changePercent": 0.0059,
+        "amountCny": 9712279180,
+        "volumeLots": 9324,
+        "amplitude": 0.0024,
+        "statusCode": 24
       },
       "metrics": {
-        "return5": -0.004069294268108203,
-        "return20": 0.0040438375432223506,
-        "return60": -0.1334344967121902,
-        "volatility": 2.4127459259906785
+        "return5": 0.019019665394775398,
+        "return20": 0.007019375797656435,
+        "return60": -0.10321847393707706,
+        "volatility": 2.4156577846655733
       },
-      "trendScore": 32,
+      "trendScore": 37,
       "riskScore": 95,
       "klines": [
-        {
-          "date": "2026-01-15",
-          "open": 1041,
-          "close": 1035.2,
-          "high": 1042.94,
-          "low": 1028.7,
-          "volume": 190102,
-          "amount": 196860325888,
-          "amplitude": 0.0138,
-          "changePercent": 0.0002,
-          "change": 0.2
-        },
-        {
-          "date": "2026-01-16",
-          "open": 1035.22,
-          "close": 1032.32,
-          "high": 1037,
-          "low": 1027,
-          "volume": 123247,
-          "amount": 127316443136,
-          "amplitude": 0.0097,
-          "changePercent": -0.0031,
-          "change": -3.22
-        },
         {
           "date": "2026-01-19",
           "open": 1032.64,
@@ -9385,14 +9359,38 @@
         {
           "date": "2026-05-06",
           "open": 1018.64,
-          "close": 1027.92,
-          "high": 1028.08,
+          "close": 1028.48,
+          "high": 1028.68,
           "low": 1015.88,
-          "volume": 78354,
-          "amount": 80083992940,
-          "amplitude": 0.0121,
-          "changePercent": 0.0222,
-          "change": 22.3
+          "volume": 90326,
+          "amount": 92389928960,
+          "amplitude": 0.0127,
+          "changePercent": 0.0227,
+          "change": 22.86
+        },
+        {
+          "date": "2026-05-07",
+          "open": 1031.1,
+          "close": 1040.98,
+          "high": 1043.74,
+          "low": 1028.72,
+          "volume": 191181,
+          "amount": 197945618432,
+          "amplitude": 0.0147,
+          "changePercent": 0.0177,
+          "change": 18.14
+        },
+        {
+          "date": "2026-05-08",
+          "open": 1043.28,
+          "close": 1041.54,
+          "high": 1043.28,
+          "low": 1040.76,
+          "volume": 9324,
+          "amount": 9712279180,
+          "amplitude": 0.0024,
+          "changePercent": 0.0059,
+          "change": 6.16
         }
       ]
     },
@@ -9411,54 +9409,30 @@
         "label": "沪铜主连",
         "unit": "元/吨",
         "source": "SHFE",
-        "tradeDate": "2026-05-06",
-        "tradeTime": "2026-05-06 14:29:39",
-        "price": 102850,
-        "previousClose": 101030,
-        "open": 101780,
-        "high": 102950,
-        "low": 101730,
-        "averagePrice": 102433,
-        "change": 1820,
-        "changePercent": 0.0175,
-        "amountCny": 27810073900,
-        "volumeLots": 54299,
-        "amplitude": 0.0121,
-        "statusCode": 20
+        "tradeDate": "2026-05-07",
+        "tradeTime": "2026-05-07 21:09:59",
+        "price": 103200,
+        "previousClose": 103000,
+        "open": 103300,
+        "high": 103400,
+        "low": 103150,
+        "averagePrice": 103263,
+        "change": 200,
+        "changePercent": 0.0018,
+        "amountCny": 3125259000,
+        "volumeLots": 6053,
+        "amplitude": 0.0024,
+        "statusCode": 24
       },
       "metrics": {
-        "return5": 0.003806363458910722,
-        "return20": 0.07269503546099298,
-        "return60": -0.002037647972055079,
-        "volatility": 0.19090482425302124
+        "return5": 0.009192255036182262,
+        "return20": 0.06876553438276711,
+        "return60": -0.00462962962962965,
+        "volatility": 0.18941434922494044
       },
-      "trendScore": 69,
+      "trendScore": 67,
       "riskScore": 34,
       "klines": [
-        {
-          "date": "2026-01-15",
-          "open": 104350,
-          "close": 102810,
-          "high": 104660,
-          "low": 101080,
-          "volume": 333840,
-          "amount": 172095234048,
-          "amplitude": 0.0344,
-          "changePercent": -0.0131,
-          "change": -1360
-        },
-        {
-          "date": "2026-01-16",
-          "open": 103030,
-          "close": 100770,
-          "high": 103500,
-          "low": 100060,
-          "volume": 322422,
-          "amount": 164237377536,
-          "amplitude": 0.0334,
-          "changePercent": -0.0226,
-          "change": -2330
-        },
         {
           "date": "2026-01-19",
           "open": 101030,
@@ -10266,14 +10240,38 @@
         {
           "date": "2026-05-06",
           "open": 101780,
-          "close": 102850,
+          "close": 102660,
           "high": 102950,
           "low": 101730,
-          "volume": 54299,
-          "amount": 27810073900,
+          "volume": 60022,
+          "amount": 30749932032,
           "amplitude": 0.0121,
-          "changePercent": 0.0175,
-          "change": 1770
+          "changePercent": 0.015600000000000001,
+          "change": 1580
+        },
+        {
+          "date": "2026-05-07",
+          "open": 103350,
+          "close": 103000,
+          "high": 103400,
+          "low": 102630,
+          "volume": 83627,
+          "amount": 43074721792,
+          "amplitude": 0.0075,
+          "changePercent": 0.0053,
+          "change": 540
+        },
+        {
+          "date": "2026-05-08",
+          "open": 103300,
+          "close": 103200,
+          "high": 103400,
+          "low": 103150,
+          "volume": 6053,
+          "amount": 3125259000,
+          "amplitude": 0.0024,
+          "changePercent": 0.0018,
+          "change": 190
         }
       ]
     },
@@ -10292,54 +10290,30 @@
         "label": "沪铝主连",
         "unit": "元/吨",
         "source": "SHFE",
-        "tradeDate": "2026-05-06",
-        "tradeTime": "2026-05-06 14:29:39",
-        "price": 24755,
-        "previousClose": 24430,
-        "open": 24705,
-        "high": 24790,
-        "low": 24590,
-        "averagePrice": 24690,
-        "change": 325,
-        "changePercent": 0.0129,
-        "amountCny": 15359021775,
-        "volumeLots": 124416,
-        "amplitude": 0.0082,
-        "statusCode": 20
+        "tradeDate": "2026-05-07",
+        "tradeTime": "2026-05-07 21:10:00",
+        "price": 24350,
+        "previousClose": 24380,
+        "open": 24340,
+        "high": 24370,
+        "low": 24315,
+        "averagePrice": 24343,
+        "change": -30,
+        "changePercent": -0.0012,
+        "amountCny": 1618797100,
+        "volumeLots": 13300,
+        "amplitude": 0.0023,
+        "statusCode": 24
       },
       "metrics": {
-        "return5": -0.004423889000603309,
-        "return20": 0.0014158576051779281,
-        "return60": -0.03451638065522622,
-        "volatility": 1.1360316160280859
+        "return5": -0.010564811052417689,
+        "return20": -0.01136825010150222,
+        "return60": -0.008550488599348482,
+        "volatility": 1.1355373510775892
       },
       "trendScore": 46,
       "riskScore": 95,
       "klines": [
-        {
-          "date": "2026-01-15",
-          "open": 24610,
-          "close": 24375,
-          "high": 24780,
-          "low": 24065,
-          "volume": 766880,
-          "amount": 93815517184,
-          "amplitude": 0.028900000000000002,
-          "changePercent": -0.015,
-          "change": -370
-        },
-        {
-          "date": "2026-01-16",
-          "open": 24470,
-          "close": 23925,
-          "high": 24525,
-          "low": 23805,
-          "volume": 660823,
-          "amount": 79915634688,
-          "amplitude": 0.0294,
-          "changePercent": -0.022099999999999998,
-          "change": -540
-        },
         {
           "date": "2026-01-19",
           "open": 23950,
@@ -11147,14 +11121,38 @@
         {
           "date": "2026-05-06",
           "open": 24705,
-          "close": 24755,
+          "close": 24730,
           "high": 24790,
           "low": 24590,
-          "volume": 124416,
-          "amount": 15359021775,
+          "volume": 136581,
+          "amount": 16863851264,
           "amplitude": 0.008199999999999999,
-          "changePercent": 0.0129,
-          "change": 315
+          "changePercent": 0.011899999999999999,
+          "change": 290
+        },
+        {
+          "date": "2026-05-07",
+          "open": 24625,
+          "close": 24380,
+          "high": 24660,
+          "low": 24160,
+          "volume": 272604,
+          "amount": 33234915584,
+          "amplitude": 0.0203,
+          "changePercent": -0.0126,
+          "change": -310
+        },
+        {
+          "date": "2026-05-08",
+          "open": 24340,
+          "close": 24350,
+          "high": 24370,
+          "low": 24315,
+          "volume": 13300,
+          "amount": 1618797100,
+          "amplitude": 0.0023,
+          "changePercent": -0.0012,
+          "change": -30
         }
       ]
     },
@@ -11173,42 +11171,30 @@
         "label": "碳酸锂主连",
         "unit": "元/吨",
         "source": "GFEX",
-        "tradeDate": "2026-05-06",
-        "tradeTime": "2026-05-06 14:29:38",
-        "price": 198120,
-        "previousClose": 189080,
-        "open": 191500,
-        "high": 198800,
-        "low": 191040,
-        "averagePrice": 195685,
-        "change": 9040,
-        "changePercent": 0.0662,
-        "amountCny": 37995173860,
-        "volumeLots": 194165,
-        "amplitude": 0.0418,
-        "statusCode": 20
+        "tradeDate": "2026-05-07",
+        "tradeTime": "2026-05-07 15:01:35",
+        "price": 199060,
+        "previousClose": 199400,
+        "open": 199000,
+        "high": 200440,
+        "low": 193400,
+        "averagePrice": 197197,
+        "change": -340,
+        "changePercent": 0.0152,
+        "amountCny": 54106241620,
+        "volumeLots": 274376,
+        "amplitude": 0.0359,
+        "statusCode": 21
       },
       "metrics": {
-        "return5": 0.11365935919055659,
-        "return20": 0.24494156088978247,
-        "return60": 0.19148424344479187,
-        "volatility": 0.5647798685532948
+        "return5": 0.10245901639344268,
+        "return20": 0.26822120285423035,
+        "return60": 0.2077417789103264,
+        "volatility": 0.5698995603815439
       },
       "trendScore": 100,
       "riskScore": 95,
       "klines": [
-        {
-          "date": "2026-01-15",
-          "open": 163840,
-          "close": 163220,
-          "high": 165000,
-          "low": 155600,
-          "volume": 431256,
-          "amount": 69278089216,
-          "amplitude": 0.056799999999999996,
-          "changePercent": -0.0131,
-          "change": -2160
-        },
         {
           "date": "2026-01-16",
           "open": 163220,
@@ -12028,14 +12014,26 @@
         {
           "date": "2026-05-06",
           "open": 191500,
-          "close": 198120,
-          "high": 198800,
+          "close": 199400,
+          "high": 199560,
           "low": 191040,
-          "volume": 194165,
-          "amount": 37995173860,
-          "amplitude": 0.0418,
-          "changePercent": 0.0662,
-          "change": 12300
+          "volume": 222232,
+          "amount": 43576236800,
+          "amplitude": 0.045899999999999996,
+          "changePercent": 0.0731,
+          "change": 13580
+        },
+        {
+          "date": "2026-05-07",
+          "open": 199000,
+          "close": 199060,
+          "high": 200440,
+          "low": 193400,
+          "volume": 274376,
+          "amount": 54106241620,
+          "amplitude": 0.0359,
+          "changePercent": 0.0152,
+          "change": 2980
         }
       ]
     },
@@ -12054,42 +12052,30 @@
         "label": "稀土产业",
         "unit": "点",
         "source": "CSI",
-        "tradeDate": "2026-05-06",
-        "tradeTime": "2026-05-06 14:29:31",
-        "price": 3235.62,
-        "previousClose": 3141.52,
-        "open": 3158.23,
-        "high": 3237.12,
-        "low": 3137.87,
-        "averagePrice": 18.62,
-        "change": 94.1,
-        "changePercent": 0.03,
-        "amountCny": 62478241456,
-        "volumeLots": 33546125,
-        "amplitude": 0.0316,
-        "statusCode": 2
+        "tradeDate": "2026-05-07",
+        "tradeTime": "2026-05-07 16:29:58",
+        "price": 3242.11,
+        "previousClose": 3238.13,
+        "open": 3240.21,
+        "high": 3259.92,
+        "low": 3208.68,
+        "averagePrice": 19.41,
+        "change": 3.98,
+        "changePercent": 0.0012,
+        "amountCny": 57347159280,
+        "volumeLots": 29540385,
+        "amplitude": 0.0158,
+        "statusCode": 5
       },
       "metrics": {
-        "return5": 0.07340554348366979,
-        "return20": 0.151703910415673,
-        "return60": -0.014197707649091118,
-        "volatility": 0.3463184815921722
+        "return5": 0.07773954957201035,
+        "return20": 0.16568570699207918,
+        "return60": -0.0206466775010119,
+        "volatility": 0.3460821863261785
       },
-      "trendScore": 87,
+      "trendScore": 90,
       "riskScore": 62,
       "klines": [
-        {
-          "date": "2026-01-15",
-          "open": 3090.73,
-          "close": 3117.28,
-          "high": 3149.52,
-          "low": 3090.73,
-          "volume": 34096593,
-          "amount": 56029120125,
-          "amplitude": 0.018799999999999997,
-          "changePercent": -0.0029,
-          "change": -9.15
-        },
         {
           "date": "2026-01-16",
           "open": 3102.52,
@@ -12909,22 +12895,34 @@
         {
           "date": "2026-05-06",
           "open": 3158.23,
-          "close": 3235.62,
-          "high": 3237.12,
+          "close": 3238.13,
+          "high": 3238.8,
           "low": 3137.87,
-          "volume": 33546125,
-          "amount": 62478241456,
-          "amplitude": 0.0316,
-          "changePercent": 0.03,
-          "change": 94.1
+          "volume": 38443303,
+          "amount": 70330432654,
+          "amplitude": 0.0321,
+          "changePercent": 0.0308,
+          "change": 96.61
+        },
+        {
+          "date": "2026-05-07",
+          "open": 3240.21,
+          "close": 3242.11,
+          "high": 3259.92,
+          "low": 3208.68,
+          "volume": 29540385,
+          "amount": 57347159280,
+          "amplitude": 0.0158,
+          "changePercent": 0.0012,
+          "change": 3.98
         }
       ]
     }
   ],
   "history": {
     "path": "src/data/history/512400-snapshots.json",
-    "count": 1,
-    "latestGeneratedAt": "2026-05-06T06:29:39.104Z",
-    "latestTradeDate": "2026-04-30"
+    "count": 2,
+    "latestGeneratedAt": "2026-05-07T13:09:59.568Z",
+    "latestTradeDate": "2026-05-07"
   }
 }

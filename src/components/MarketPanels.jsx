@@ -1,4 +1,5 @@
-import { formatNumber, formatPercent, formatSignedPercent, mapSeriesToPolyline } from '../analysis/metrics'
+import { formatNumber, formatPercent, formatSignedPercent } from '../analysis/formatters.js'
+import { mapSeriesToPolyline } from '../analysis/charting.js'
 import { Meter } from './ui'
 
 export function MiniLineChart({ trendSeries }) {

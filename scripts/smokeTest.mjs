@@ -1,16 +1,13 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import {
-  buildBacktestStrategies,
-  buildSignalEngine,
-  buildStrategyOptimizer,
-  buildTradingQualityProfile,
-  buildTrendProfile,
-  calculateDailyChange,
-  calculatePremium,
-  composePrimaryDecision,
-  composeResearchMemo,
-} from '../src/analysis/metrics.js'
+import { buildBacktestStrategies } from '../src/analysis/backtest.js'
+import { buildSignalEngine } from '../src/analysis/signal.js'
+import { buildStrategyOptimizer } from '../src/analysis/optimizer.js'
+import { buildTradingQualityProfile } from '../src/analysis/tradingQuality.js'
+import { buildTrendProfile } from '../src/analysis/trend.js'
+import { calculateDailyChange, calculatePremium } from '../src/analysis/fundamentals.js'
+import { composePrimaryDecision } from '../src/analysis/decision.js'
+import { composeResearchMemo } from '../src/analysis/researchMemo.js'
 
 const snapshot = JSON.parse(await readFile(new URL('../src/data/liveSnapshot.json', import.meta.url), 'utf8'))
 

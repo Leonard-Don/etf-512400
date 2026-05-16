@@ -2,16 +2,13 @@
 import { open, readFile, realpath, stat } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import {
-  buildSignalEngine,
-  buildStrategyOptimizer,
-  buildTradingQualityProfile,
-  buildTrendProfile,
-  calculateDailyChange,
-  calculatePremium,
-  composePrimaryDecision,
-  composeResearchMemo,
-} from '../src/analysis/metrics.js'
+import { buildSignalEngine } from '../src/analysis/signal.js'
+import { buildStrategyOptimizer } from '../src/analysis/optimizer.js'
+import { buildTradingQualityProfile } from '../src/analysis/tradingQuality.js'
+import { buildTrendProfile } from '../src/analysis/trend.js'
+import { calculateDailyChange, calculatePremium } from '../src/analysis/fundamentals.js'
+import { composePrimaryDecision } from '../src/analysis/decision.js'
+import { composeResearchMemo } from '../src/analysis/researchMemo.js'
 import { normalizeHistoryArchive } from '../src/analysis/historyArchive.js'
 import { buildHistoryReplay } from '../src/analysis/historyReplay.js'
 import { formatMemoMarkdown, formatMemoText } from '../src/analysis/memoFormatter.js'

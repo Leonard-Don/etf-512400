@@ -31,24 +31,28 @@ import {
   snapshotHistory,
   trendSeries,
 } from './data/etf512400'
+import { buildBacktestStrategies } from './analysis/backtest.js'
+import { buildSignalEngine } from './analysis/signal.js'
+import { buildStrategyOptimizer } from './analysis/optimizer.js'
+import { buildTradingQualityProfile } from './analysis/tradingQuality.js'
+import { buildTrendProfile } from './analysis/trend.js'
 import {
-  buildBacktestStrategies,
-  buildSignalEngine,
-  buildStrategyOptimizer,
-  buildTradingQualityProfile,
-  buildTrendProfile,
   calculateDailyChange,
   calculatePremium,
-  composePrimaryDecision,
-  buildDataFreshness,
-  describeMarketStatus,
+  groupHoldingsByBasket,
+  sumWeights,
+} from './analysis/fundamentals.js'
+import { composePrimaryDecision } from './analysis/decision.js'
+import { buildDataFreshness, describeMarketStatus } from './analysis/snapshotHealth.js'
+import {
   formatCnyAmount,
   formatNumber,
   formatPercent,
   formatSnapshotTime,
   formatSignedPercent,
-  getScenarioAdjustment,
-  groupHoldingsByBasket,
+} from './analysis/formatters.js'
+import { getScenarioAdjustment } from './analysis/scenario.js'
+import {
   LOCAL_REALTIME_KLINE_URL,
   LOCAL_REALTIME_QUOTE_URL,
   LOCAL_REALTIME_TENCENT_URL,
@@ -58,8 +62,7 @@ import {
   REALTIME_KLINE_URL,
   REALTIME_QUOTE_URL,
   REALTIME_TENCENT_URL,
-  sumWeights,
-} from './analysis/metrics'
+} from './analysis/realtimeQuote.js'
 import { DecisionDeck } from './components/DecisionDeck'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { HoldingsTable } from './components/HoldingsTable'

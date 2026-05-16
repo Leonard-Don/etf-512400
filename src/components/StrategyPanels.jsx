@@ -1,5 +1,5 @@
 import { Gauge, History } from 'lucide-react'
-import { formatNumber, formatPercent, formatSignedPercent } from '../analysis/metrics'
+import { formatNumber, formatPercent, formatSignedPercent } from '../analysis/formatters.js'
 import { Meter } from './ui'
 
 export function SignalLab({ signal, trendProfile, riskBudget }) {
