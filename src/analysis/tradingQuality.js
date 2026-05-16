@@ -148,20 +148,23 @@ function buildTrackingQuality({ etfKlines, benchmarkKlines, navSeries }) {
     trackingWindow.length >= 20 ? realizedVolatilityFromReturns(trackingWindow) : null
   const deviation20 = difference(primaryReturn20, indexReturn20)
   const deviation60 = difference(primaryReturn60, indexReturn60)
+  const insufficientSample = trackingDiffs.length < TRACKING_SCORE.minSampleForGrading
   const rawScore =
     TRACKING_SCORE.base -
     Math.abs(deviation20 ?? 0) * TRACKING_SCORE.deviation20Penalty -
     Math.abs(deviation60 ?? 0) * TRACKING_SCORE.deviation60Penalty -
     (trackingError60 ?? TRACKING_SCORE.defaultTrackingError) * TRACKING_SCORE.trackingErrorPenalty
-  const score = Math.round(clamp(rawScore, 0, 100))
-  const status =
-    trackingDiffs.length < TRACKING_SCORE.minSampleForGrading
-      ? '样本不足'
-      : score >= TRACKING_SCORE.scoreStable
-        ? '跟踪稳'
-        : score >= TRACKING_SCORE.scoreAcceptable
-          ? '可接受'
-          : '偏离放大'
+  // 样本不足时 deviation20/60 与 trackingError60 都缺，`?? 0` / 默认 0.04 会让 rawScore 退化成
+  // ~73 的"假在范围内"分数，再被 finiteAverage 拉进整体 tradingQuality.score。与 PR #47/#48 修复
+  // premium.score 对称：返回 null，由 finiteAverage 过滤；保留状态与 deviations 字段供解释。
+  const score = insufficientSample ? null : Math.round(clamp(rawScore, 0, 100))
+  const status = insufficientSample
+    ? '样本不足'
+    : score >= TRACKING_SCORE.scoreStable
+      ? '跟踪稳'
+      : score >= TRACKING_SCORE.scoreAcceptable
+        ? '可接受'
+        : '偏离放大'
   const tone = status === '偏离放大' ? 'warning' : status === '跟踪稳' ? 'positive' : 'neutral'
 
   return {
