@@ -138,6 +138,38 @@ test('quote 缺 amountCny 时不会爆掉，liquidity 仍能给分位/分数', (
   )
 })
 
+test('series ≤ 60 但 trackingDiffs ≥ 20（deviation60 缺失）→ tracking.score=null，不被当作 60 日"零偏离"', () => {
+  // 与 PR #49 对称的下一个边角：series 只有 25 日时 trackingDiffs.length≈24（≥minSampleForGrading=20），
+  // 但 trailingReturn(60) 全部为 null → deviation60=null。原路径 `Math.abs(null ?? 0) * 950 = 0`
+  // 让 deviation60 这一项不扣分，rawScore 退化成接近 base(88) 的"跟踪稳"伪满分，
+  // 再被 finiteAverage 当作有效信号拉进整体 tradingQuality.score。
+  // 修复后：只要 deviation60 / deviation20 / trackingError60 任一关键输入缺失，tracking.score=null。
+  const benchmark = syntheticSeries(25, (i) => 100 * 1.0005 ** i)
+  const etf = syntheticSeries(25, (i) => 100 * 1.0005 ** i)
+  const nav = navFromKlines(etf)
+  const result = buildTradingQualityProfile({
+    etfKlines: etf,
+    benchmarkKlines: benchmark,
+    navSeries: nav,
+    price: etf.at(-1).close,
+    nav: nav.at(-1).unit,
+    quote: { amountCny: 500_000_000, turnoverRate: 0.02 },
+  })
+  // 前置：场景确实落在用户描述的边角（sample ≥ 20 但 deviation60 缺失）
+  assert.ok(result.tracking.sampleSize >= 20, `sampleSize=${result.tracking.sampleSize}`)
+  assert.equal(result.tracking.deviation60, null)
+  // 期望：score 为 null（与 sample<20 的修复对称）
+  assert.equal(result.tracking.status, '样本不足')
+  assert.equal(result.tracking.score, null)
+  // 整体仍可用：premium + liquidity 的均值，不掺入 tracking 假分
+  assert.ok(Number.isFinite(result.premium.score))
+  assert.ok(Number.isFinite(result.liquidity.score))
+  assert.equal(
+    result.score,
+    Math.round((result.premium.score + result.liquidity.score) / 2),
+  )
+})
+
 test('样本不足（<20 日）→ tracking.status="样本不足"，tracking.score=null 不污染整体均值', () => {
   // 只给 15 日，对齐后 returns ≈14 个，低于 minSampleForGrading=20。
   // 与 PR #47/#48 对 premium.score 的修复对称：缺数据时 deviation20/60 与 trackingError60
