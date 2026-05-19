@@ -1,13 +1,18 @@
 {
   "meta": {
-    "generatedAt": "2026-05-07T13:09:59.568Z",
-    "mode": "refreshed",
+    "generatedAt": "2026-05-19T09:16:56.438Z",
+    "mode": "partial",
     "sources": [
       "push2.eastmoney.com quote api",
+      "push2his.eastmoney.com 512400 quote fallback",
+      "web.ifzq.gtimg.cn Tencent quote fallback",
       "push2his.eastmoney.com 512400 adjusted kline api",
+      "web.ifzq.gtimg.cn Tencent 512400 kline fallback",
       "push2his.eastmoney.com 000819 benchmark kline api",
+      "web.ifzq.gtimg.cn Tencent 000819 kline fallback",
       "push2.eastmoney.com futures/index quote api",
       "push2his.eastmoney.com futures/index kline api",
+      "push2.eastmoney.com COMEX/LME quote api",
       "fund.eastmoney.com pingzhongdata",
       "fundgz.1234567.com.cn estimated net value"
     ],
@@ -17,129 +22,90 @@
         "label": "ETF行情",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-07T13:09:56.879Z",
-        "fallback": false
+        "fetchedAt": "2026-05-19T09:16:55.985Z",
+        "fallback": false,
+        "route": "eastmoney-kline-runtime"
       },
       {
         "id": "etfKlines",
         "label": "512400 日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-07T13:09:56.779Z",
-        "fallback": false
+        "fetchedAt": "2026-05-19T09:16:55.595Z",
+        "fallback": false,
+        "route": "eastmoney-etf-kline"
       },
       {
         "id": "benchmarkKlines",
         "label": "000819 基准日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-07T13:09:56.781Z",
-        "fallback": false
+        "fetchedAt": "2026-05-19T09:16:55.600Z",
+        "fallback": false,
+        "route": "eastmoney-benchmark-kline"
       },
       {
         "id": "fundGauge",
         "label": "盘中估算净值",
         "required": false,
         "ok": true,
-        "fetchedAt": "2026-05-07T13:09:56.982Z",
-        "fallback": false
+        "fetchedAt": "2026-05-19T09:16:55.780Z",
+        "fallback": false,
+        "route": "fundgz.1234567.com.cn"
       },
       {
         "id": "fundTrend",
         "label": "基金净值趋势",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-07T13:09:59.353Z",
+        "fetchedAt": "2026-05-19T09:16:56.173Z",
         "fallback": false
       },
       {
         "id": "commodityDrivers",
         "label": "商品驱动",
         "required": false,
-        "ok": true,
-        "fallback": false,
-        "fetchedAt": "2026-05-07T13:09:59.568Z",
+        "ok": false,
+        "fallback": true,
+        "fetchedAt": "2026-05-19T09:16:56.438Z",
         "okCount": 5,
         "total": 5,
-        "fallbackCount": 0
+        "fallbackCount": 5,
+        "internationalOkCount": 2,
+        "internationalTotal": 3,
+        "error": "使用 5 个缓存商品驱动"
       }
     ]
   },
   "quote": {
     "code": "512400",
     "name": "有色金属ETF南方",
-    "tradeDate": "2026-05-07",
-    "tradeTime": "2026-05-07 16:11:45",
-    "price": 2.207,
-    "previousClose": 2.199,
-    "open": 2.231,
-    "high": 2.235,
-    "low": 2.178,
-    "averagePrice": 2.205,
-    "change": 0.008,
-    "changePercent": 0.0036,
-    "amountCny": 1658626372,
-    "volumeLots": 7521276,
-    "turnoverRate": 0.057,
+    "tradeDate": "2026-05-19",
+    "tradeTime": "2026-05-19 17:16:55",
+    "price": 1.981,
+    "previousClose": 2.009,
+    "open": 2.006,
+    "high": 2.006,
+    "low": 1.942,
+    "averagePrice": null,
+    "change": -0.028,
+    "changePercent": -0.0139,
+    "amountCny": 812731964,
+    "volumeLots": 4130930,
+    "amplitude": 0.0319,
+    "turnoverRate": 0.0321,
     "statusCode": 5,
-    "totalMarketValueCny": 29146831590.656
+    "totalMarketValueCny": null,
+    "source": "eastmoney-kline-runtime"
   },
   "nav": {
-    "date": "2026-05-06",
-    "unit": 2.1985,
-    "dailyReturn": 0.0385,
-    "accumulated": 2.2235,
+    "date": "2026-05-18",
+    "unit": 2.0081,
+    "dailyReturn": -0.0155,
+    "accumulated": 2.0331,
     "source": "fund.eastmoney.com/pingzhongdata"
   },
   "navTrend": [
-    {
-      "date": "2025-03-10",
-      "unit": 1.0802,
-      "dailyReturn": 0.0118,
-      "accumulated": 1.0902
-    },
-    {
-      "date": "2025-03-11",
-      "unit": 1.0861,
-      "dailyReturn": 0.0055000000000000005,
-      "accumulated": 1.0961
-    },
-    {
-      "date": "2025-03-12",
-      "unit": 1.0869,
-      "dailyReturn": 0.0007000000000000001,
-      "accumulated": 1.0969
-    },
-    {
-      "date": "2025-03-13",
-      "unit": 1.0927,
-      "dailyReturn": 0.0053,
-      "accumulated": 1.1027
-    },
-    {
-      "date": "2025-03-14",
-      "unit": 1.1064,
-      "dailyReturn": 0.0125,
-      "accumulated": 1.1164
-    },
-    {
-      "date": "2025-03-17",
-      "unit": 1.0956,
-      "dailyReturn": -0.0098,
-      "accumulated": 1.1056
-    },
-    {
-      "date": "2025-03-18",
-      "unit": 1.1108,
-      "dailyReturn": 0.0139,
-      "accumulated": 1.1208
-    },
-    {
-      "date": "2025-03-19",
-      "unit": 1.1117,
-      "dailyReturn": 0.0008,
-      "accumulated": 1.1217
-    },
     {
       "date": "2025-03-20",
       "unit": 1.1084,
@@ -1771,120 +1737,72 @@
       "unit": 2.1985,
       "dailyReturn": 0.0385,
       "accumulated": 2.2235
+    },
+    {
+      "date": "2026-05-07",
+      "unit": 2.2064,
+      "dailyReturn": 0.0036,
+      "accumulated": 2.2314
+    },
+    {
+      "date": "2026-05-08",
+      "unit": 2.2072,
+      "dailyReturn": 0.0004,
+      "accumulated": 2.2322
+    },
+    {
+      "date": "2026-05-11",
+      "unit": 2.2069,
+      "dailyReturn": -0.0001,
+      "accumulated": 2.2319
+    },
+    {
+      "date": "2026-05-12",
+      "unit": 2.1903,
+      "dailyReturn": -0.0075,
+      "accumulated": 2.2153
+    },
+    {
+      "date": "2026-05-13",
+      "unit": 2.2091,
+      "dailyReturn": 0.0086,
+      "accumulated": 2.2341
+    },
+    {
+      "date": "2026-05-14",
+      "unit": 2.1305,
+      "dailyReturn": -0.0356,
+      "accumulated": 2.1555
+    },
+    {
+      "date": "2026-05-15",
+      "unit": 2.0397,
+      "dailyReturn": -0.0426,
+      "accumulated": 2.0647
+    },
+    {
+      "date": "2026-05-18",
+      "unit": 2.0081,
+      "dailyReturn": -0.0155,
+      "accumulated": 2.0331
     }
   ],
   "estimate": {
-    "date": "2026-05-07",
-    "value": 2.2064,
-    "changePercent": 0.0036,
-    "time": "2026-05-07 15:00",
-    "previousNavDate": "2026-05-06",
-    "previousUnitNav": 2.1985,
+    "date": "2026-05-19",
+    "value": 1.981,
+    "changePercent": -0.013500000000000002,
+    "time": "2026-05-19 15:00",
+    "previousNavDate": "2026-05-18",
+    "previousUnitNav": 2.0081,
     "source": "fundgz.1234567.com.cn"
   },
   "performance": {
-    "oneMonth": 0.1148,
-    "threeMonth": 0.0208,
-    "sixMonth": 0.2738,
-    "oneYear": 1.102
+    "oneMonth": -0.0737,
+    "threeMonth": -0.08289999999999999,
+    "sixMonth": 0.1802,
+    "oneYear": 0.9209
   },
   "etfKlines": [
-    {
-      "date": "2025-03-11",
-      "open": 1.05,
-      "close": 1.071,
-      "high": 1.073,
-      "low": 1.046,
-      "volume": 2455239,
-      "amount": 263102039,
-      "amplitude": 0.0254,
-      "changePercent": 0.005600000000000001,
-      "change": 0.006
-    },
-    {
-      "date": "2025-03-12",
-      "open": 1.075,
-      "close": 1.071,
-      "high": 1.08,
-      "low": 1.065,
-      "volume": 2978521,
-      "amount": 323773863,
-      "amplitude": 0.013999999999999999,
-      "changePercent": 0,
-      "change": 0
-    },
-    {
-      "date": "2025-03-13",
-      "open": 1.075,
-      "close": 1.078,
-      "high": 1.085,
-      "low": 1.067,
-      "volume": 2843582,
-      "amount": 309969951,
-      "amplitude": 0.0168,
-      "changePercent": 0.006500000000000001,
-      "change": 0.007
-    },
-    {
-      "date": "2025-03-14",
-      "open": 1.1,
-      "close": 1.091,
-      "high": 1.11,
-      "low": 1.084,
-      "volume": 4139964,
-      "amount": 458243895,
-      "amplitude": 0.0241,
-      "changePercent": 0.0121,
-      "change": 0.013
-    },
-    {
-      "date": "2025-03-17",
-      "open": 1.092,
-      "close": 1.081,
-      "high": 1.094,
-      "low": 1.079,
-      "volume": 1813748,
-      "amount": 199571742,
-      "amplitude": 0.0137,
-      "changePercent": -0.0092,
-      "change": -0.01
-    },
-    {
-      "date": "2025-03-18",
-      "open": 1.081,
-      "close": 1.096,
-      "high": 1.106,
-      "low": 1.081,
-      "volume": 1760585,
-      "amount": 195703655,
-      "amplitude": 0.0231,
-      "changePercent": 0.0139,
-      "change": 0.015
-    },
-    {
-      "date": "2025-03-19",
-      "open": 1.095,
-      "close": 1.095,
-      "high": 1.097,
-      "low": 1.084,
-      "volume": 4014323,
-      "amount": 443885713,
-      "amplitude": 0.011899999999999999,
-      "changePercent": -0.0009,
-      "change": -0.001
-    },
-    {
-      "date": "2025-03-20",
-      "open": 1.103,
-      "close": 1.092,
-      "high": 1.107,
-      "low": 1.091,
-      "volume": 2349251,
-      "amount": 261910282,
-      "amplitude": 0.0146,
-      "changePercent": -0.0027,
-      "change": -0.003
-    },
     {
       "date": "2025-03-21",
       "open": 1.089,
@@ -5148,105 +5066,105 @@
       "amplitude": 0.0259,
       "changePercent": 0.0036,
       "change": 0.008
+    },
+    {
+      "date": "2026-05-08",
+      "open": 2.188,
+      "close": 2.206,
+      "high": 2.215,
+      "low": 2.165,
+      "volume": 5402754,
+      "amount": 1185767596,
+      "amplitude": 0.0227,
+      "changePercent": -0.0005,
+      "change": -0.001
+    },
+    {
+      "date": "2026-05-11",
+      "open": 2.199,
+      "close": 2.208,
+      "high": 2.225,
+      "low": 2.186,
+      "volume": 6728432,
+      "amount": 1483180160,
+      "amplitude": 0.0177,
+      "changePercent": 0.0009,
+      "change": 0.002
+    },
+    {
+      "date": "2026-05-12",
+      "open": 2.236,
+      "close": 2.188,
+      "high": 2.249,
+      "low": 2.18,
+      "volume": 7461637,
+      "amount": 1646195190,
+      "amplitude": 0.0313,
+      "changePercent": -0.0091,
+      "change": -0.02
+    },
+    {
+      "date": "2026-05-13",
+      "open": 2.196,
+      "close": 2.209,
+      "high": 2.226,
+      "low": 2.188,
+      "volume": 6090579,
+      "amount": 1343985039,
+      "amplitude": 0.0174,
+      "changePercent": 0.0096,
+      "change": 0.021
+    },
+    {
+      "date": "2026-05-14",
+      "open": 2.199,
+      "close": 2.13,
+      "high": 2.209,
+      "low": 2.128,
+      "volume": 6221129,
+      "amount": 1345276196,
+      "amplitude": 0.036699999999999997,
+      "changePercent": -0.0358,
+      "change": -0.079
+    },
+    {
+      "date": "2026-05-15",
+      "open": 2.105,
+      "close": 2.039,
+      "high": 2.11,
+      "low": 2.025,
+      "volume": 7084865,
+      "amount": 1459357359,
+      "amplitude": 0.039900000000000005,
+      "changePercent": -0.042699999999999995,
+      "change": -0.091
+    },
+    {
+      "date": "2026-05-18",
+      "open": 1.99,
+      "close": 2.009,
+      "high": 2.017,
+      "low": 1.973,
+      "volume": 5219627,
+      "amount": 1043510007,
+      "amplitude": 0.0216,
+      "changePercent": -0.0147,
+      "change": -0.03
+    },
+    {
+      "date": "2026-05-19",
+      "open": 2.006,
+      "close": 1.981,
+      "high": 2.006,
+      "low": 1.942,
+      "volume": 4130930,
+      "amount": 812731964,
+      "amplitude": 0.0319,
+      "changePercent": -0.0139,
+      "change": -0.028
     }
   ],
   "benchmarkKlines": [
-    {
-      "date": "2025-03-11",
-      "open": 5184.56,
-      "close": 5291.65,
-      "high": 5291.65,
-      "low": 5171.49,
-      "volume": 31469517,
-      "amount": 41199596817.4,
-      "amplitude": 0.022799999999999997,
-      "changePercent": 0.0055000000000000005,
-      "change": 29.1
-    },
-    {
-      "date": "2025-03-12",
-      "open": 5307.28,
-      "close": 5295.61,
-      "high": 5319.64,
-      "low": 5268.42,
-      "volume": 28167970,
-      "amount": 36246984702.5,
-      "amplitude": 0.0097,
-      "changePercent": 0.0007000000000000001,
-      "change": 3.96
-    },
-    {
-      "date": "2025-03-13",
-      "open": 5316.94,
-      "close": 5323.93,
-      "high": 5353.11,
-      "low": 5278.42,
-      "volume": 25991226,
-      "amount": 35442566519.3,
-      "amplitude": 0.0141,
-      "changePercent": 0.0053,
-      "change": 28.32
-    },
-    {
-      "date": "2025-03-14",
-      "open": 5432.57,
-      "close": 5390.54,
-      "high": 5451.86,
-      "low": 5353.7,
-      "volume": 36542927,
-      "amount": 51006940465.7,
-      "amplitude": 0.0184,
-      "changePercent": 0.0125,
-      "change": 66.61
-    },
-    {
-      "date": "2025-03-17",
-      "open": 5381.29,
-      "close": 5338.23,
-      "high": 5402.91,
-      "low": 5329.93,
-      "volume": 25841093,
-      "amount": 36955193917,
-      "amplitude": 0.013500000000000002,
-      "changePercent": -0.0097,
-      "change": -52.31
-    },
-    {
-      "date": "2025-03-18",
-      "open": 5360.08,
-      "close": 5412.39,
-      "high": 5459.37,
-      "low": 5355.67,
-      "volume": 27835886,
-      "amount": 39036334443.2,
-      "amplitude": 0.0194,
-      "changePercent": 0.0139,
-      "change": 74.16
-    },
-    {
-      "date": "2025-03-19",
-      "open": 5404.89,
-      "close": 5416.81,
-      "high": 5417.75,
-      "low": 5359.18,
-      "volume": 21322238,
-      "amount": 30966569324.7,
-      "amplitude": 0.0108,
-      "changePercent": 0.0008,
-      "change": 4.42
-    },
-    {
-      "date": "2025-03-20",
-      "open": 5448,
-      "close": 5401.03,
-      "high": 5465.81,
-      "low": 5396.01,
-      "volume": 22997446,
-      "amount": 32286351247.2,
-      "amplitude": 0.0129,
-      "changePercent": -0.0029,
-      "change": -15.78
-    },
     {
       "date": "2025-03-21",
       "open": 5383.21,
@@ -8510,6 +8428,102 @@
       "amplitude": 0.0259,
       "changePercent": 0.0036,
       "change": 38.47
+    },
+    {
+      "date": "2026-05-08",
+      "open": 10624.51,
+      "close": 10727.48,
+      "high": 10767.44,
+      "low": 10525.85,
+      "volume": 44996230,
+      "amount": 127849125028.7,
+      "amplitude": 0.0225,
+      "changePercent": 0.0004,
+      "change": 3.95
+    },
+    {
+      "date": "2026-05-11",
+      "open": 10730.32,
+      "close": 10726.79,
+      "high": 10818.29,
+      "low": 10626.87,
+      "volume": 50901162,
+      "amount": 139431925649.1,
+      "amplitude": 0.0178,
+      "changePercent": -0.0001,
+      "change": -0.69
+    },
+    {
+      "date": "2026-05-12",
+      "open": 10889.15,
+      "close": 10645.77,
+      "high": 10900.25,
+      "low": 10592.23,
+      "volume": 50116355,
+      "amount": 133825553389.8,
+      "amplitude": 0.0287,
+      "changePercent": -0.0076,
+      "change": -81.02
+    },
+    {
+      "date": "2026-05-13",
+      "open": 10701.24,
+      "close": 10737,
+      "high": 10823.51,
+      "low": 10638.34,
+      "volume": 44375778,
+      "amount": 122967622771.5,
+      "amplitude": 0.0174,
+      "changePercent": 0.0086,
+      "change": 91.23
+    },
+    {
+      "date": "2026-05-14",
+      "open": 10694.64,
+      "close": 10355.27,
+      "high": 10738.61,
+      "low": 10355.27,
+      "volume": 43199119,
+      "amount": 115082397855.7,
+      "amplitude": 0.035699999999999996,
+      "changePercent": -0.0356,
+      "change": -381.73
+    },
+    {
+      "date": "2026-05-15",
+      "open": 10245.89,
+      "close": 9911.02,
+      "high": 10246.47,
+      "low": 9841.91,
+      "volume": 50070616,
+      "amount": 126105408511.5,
+      "amplitude": 0.0391,
+      "changePercent": -0.0429,
+      "change": -444.25
+    },
+    {
+      "date": "2026-05-18",
+      "open": 9698.84,
+      "close": 9757.99,
+      "high": 9801.45,
+      "low": 9598.67,
+      "volume": 35748523,
+      "amount": 91015255839.5,
+      "amplitude": 0.020499999999999997,
+      "changePercent": -0.0154,
+      "change": -153.03
+    },
+    {
+      "date": "2026-05-19",
+      "open": 9738.87,
+      "close": 9625.98,
+      "high": 9740.59,
+      "low": 9442.61,
+      "volume": 30820108,
+      "amount": 80047623676.9,
+      "amplitude": 0.0305,
+      "changePercent": -0.013500000000000002,
+      "change": -132.01
     }
   ],
   "commodityDrivers": [
@@ -9392,7 +9406,10 @@
           "changePercent": 0.0059,
           "change": 6.16
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "UND_ERR_SOCKET: fetch failed",
+      "international": null
     },
     {
       "key": "copper",
@@ -10273,7 +10290,44 @@
           "changePercent": 0.0018,
           "change": 190
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "UND_ERR_SOCKET: fetch failed",
+      "international": {
+        "key": "copper",
+        "secid": "109.LCPT",
+        "label": "LME铜03",
+        "unit": "美元/吨",
+        "source": "LME",
+        "method": "ulist",
+        "priceDecimals": 2,
+        "sourceUrl": "https://quote.eastmoney.com/unify/r/109.LCPT",
+        "ok": true,
+        "quote": {
+          "key": "copper",
+          "secid": "109.LCPT",
+          "code": "LCPT",
+          "name": "综合铜03",
+          "label": "LME铜03",
+          "unit": "美元/吨",
+          "source": "LME",
+          "tradeDate": "2026-05-19",
+          "tradeTime": "2026-05-19 17:16:56",
+          "price": 13485,
+          "previousClose": 13590,
+          "open": 13618,
+          "high": null,
+          "low": null,
+          "averagePrice": null,
+          "change": -105,
+          "changePercent": -0.0077,
+          "amountCny": null,
+          "volumeLots": null,
+          "amplitude": null,
+          "statusCode": null,
+          "sourceUrl": "https://quote.eastmoney.com/unify/r/109.LCPT"
+        }
+      }
     },
     {
       "key": "aluminum",
@@ -11154,7 +11208,44 @@
           "changePercent": -0.0012,
           "change": -30
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "UND_ERR_SOCKET: fetch failed",
+      "international": {
+        "key": "aluminum",
+        "secid": "109.LALT",
+        "label": "LME铝03",
+        "unit": "美元/吨",
+        "source": "LME",
+        "method": "ulist",
+        "priceDecimals": 2,
+        "sourceUrl": "https://quote.eastmoney.com/unify/r/109.LALT",
+        "ok": true,
+        "quote": {
+          "key": "aluminum",
+          "secid": "109.LALT",
+          "code": "LALT",
+          "name": "综合铝03",
+          "label": "LME铝03",
+          "unit": "美元/吨",
+          "source": "LME",
+          "tradeDate": "2026-05-19",
+          "tradeTime": "2026-05-19 17:16:56",
+          "price": 3599,
+          "previousClose": 3557.5,
+          "open": 3560,
+          "high": null,
+          "low": null,
+          "averagePrice": null,
+          "change": 41.5,
+          "changePercent": 0.0117,
+          "amountCny": null,
+          "volumeLots": null,
+          "amplitude": null,
+          "statusCode": null,
+          "sourceUrl": "https://quote.eastmoney.com/unify/r/109.LALT"
+        }
+      }
     },
     {
       "key": "battery",
@@ -12035,7 +12126,10 @@
           "changePercent": 0.0152,
           "change": 2980
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "UND_ERR_SOCKET: fetch failed",
+      "international": null
     },
     {
       "key": "rareEarth",
@@ -12916,13 +13010,16 @@
           "changePercent": 0.0012,
           "change": 3.98
         }
-      ]
+      ],
+      "fallback": true,
+      "error": "UND_ERR_SOCKET: fetch failed",
+      "international": null
     }
   ],
   "history": {
     "path": "src/data/history/512400-snapshots.json",
-    "count": 2,
-    "latestGeneratedAt": "2026-05-07T13:09:59.568Z",
-    "latestTradeDate": "2026-05-07"
+    "count": 3,
+    "latestGeneratedAt": "2026-05-19T09:16:56.438Z",
+    "latestTradeDate": "2026-05-19"
   }
 }

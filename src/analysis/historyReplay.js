@@ -88,11 +88,23 @@ function normalizeAsOf(asOf) {
   return asOf.trim()
 }
 
+function isDateOnly(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value)
+}
+
 function matchesAsOf(frame, asOf) {
   if (frame.date === asOf) return true
   if (frame.generatedAt === asOf) return true
   if (typeof frame.generatedAt === 'string' && frame.generatedAt.slice(0, 10) === asOf) return true
   return false
+}
+
+function findAsOfMatchIndex(frames, asOf) {
+  if (isDateOnly(asOf)) {
+    const tradeDateIndex = frames.findIndex((frame) => frame.date === asOf)
+    if (tradeDateIndex !== -1) return tradeDateIndex
+  }
+  return frames.findIndex((frame) => matchesAsOf(frame, asOf))
 }
 
 function roundTo(value, digits) {
@@ -154,7 +166,7 @@ export function buildHistoryReplay(snapshots, options = {}) {
   let fallbackReason
   let requestedAsOf
   if (asOfQuery) {
-    const matchIndex = frames.findIndex((frame) => matchesAsOf(frame, asOfQuery))
+    const matchIndex = findAsOfMatchIndex(frames, asOfQuery)
     currentIndex = matchIndex === -1 ? null : matchIndex
     currentFrame = matchIndex === -1 ? null : frames[matchIndex]
     fallbackReason = matchIndex === -1 ? 'no-match' : null

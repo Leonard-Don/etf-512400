@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  parseRealtimeKline,
+  parseRealtimeTencent,
   percentFromEastmoney,
   priceFromQuote,
   shanghaiDateTimeFromDate,
@@ -15,6 +17,14 @@ const historyPath = resolve(projectRoot, 'src/data/history/512400-snapshots.json
 
 const quoteUrl =
   'https://push2.eastmoney.com/api/qt/stock/get?secid=1.512400&fields=f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f116,f117,f168,f169,f170,f171,f292'
+const quoteKlineFallbackUrl =
+  `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=1&end=20500101&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61`
+const quoteTencentFallbackUrl =
+  'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh512400,day,,,1,qfq'
+const etfTencentKlineFallbackUrl =
+  'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh512400,day,,,280,qfq'
+const benchmarkTencentKlineFallbackUrl =
+  'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh000819,day,,,280,qfq'
 const fundGaugeUrl = `https://fundgz.1234567.com.cn/js/512400.js?rt=${Date.now()}`
 const fundTrendUrl = `https://fund.eastmoney.com/pingzhongdata/512400.js?v=${Date.now()}`
 const quoteFields =
@@ -193,18 +203,24 @@ function sourceHealth(source, ok, extra = {}) {
 
 async function fetchParsedSource(source) {
   try {
-    const text = await fetchText(source.url, {
-      attempts: source.attempts ?? 3,
-      timeoutMs: source.timeoutMs ?? 8000,
-    })
-    const value = source.parse(text)
+    const value = source.fetch
+      ? await source.fetch()
+      : source.parse(
+          await fetchText(source.url, {
+            attempts: source.attempts ?? 3,
+            timeoutMs: source.timeoutMs ?? 8000,
+          }),
+        )
     if (!hasUsableValue(value)) {
       throw new Error(`${source.label} 解析结果为空`)
     }
     return {
       id: source.id,
       value,
-      health: sourceHealth(source, true, { fallback: false }),
+      health: sourceHealth(source, true, {
+        fallback: false,
+        route: value.source ?? source.route,
+      }),
     }
   } catch (error) {
     if (hasUsableValue(source.fallback)) {
@@ -372,7 +388,130 @@ function parseQuote(text) {
     turnoverRate: percentFromEastmoney(data.f168),
     statusCode: data.f292,
     totalMarketValueCny: data.f116,
+    source: 'eastmoney-stock-get',
   }
+}
+
+async function fetchQuoteWithFallback() {
+  const candidates = [
+    {
+      label: 'eastmoney-stock-get',
+      url: quoteUrl,
+      parse: parseQuote,
+      attempts: 2,
+      timeoutMs: 10000,
+    },
+    {
+      label: 'eastmoney-kline',
+      url: quoteKlineFallbackUrl,
+      parse: (text) => parseRealtimeKline(text),
+      attempts: 2,
+      timeoutMs: 10000,
+    },
+    {
+      label: 'tencent-fqkline',
+      url: quoteTencentFallbackUrl,
+      parse: parseRealtimeTencent,
+      attempts: 2,
+      timeoutMs: 10000,
+    },
+  ]
+  const errors = []
+  for (const candidate of candidates) {
+    try {
+      const text = await fetchText(candidate.url, {
+        attempts: candidate.attempts,
+        timeoutMs: candidate.timeoutMs,
+      })
+      const quote = candidate.parse(text)
+      if (!hasUsableValue(quote)) {
+        throw new Error(`${candidate.label} parsed empty quote`)
+      }
+      return {
+        ...quote,
+        source: quote.source ?? candidate.label,
+      }
+    } catch (error) {
+      errors.push(`${candidate.label}: ${summarizeError(error)}`)
+    }
+  }
+  throw new Error(`ETF quote all routes failed: ${errors.join(' | ')}`)
+}
+
+function parseNumber(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value !== 'string') return null
+  const number = Number(value.trim())
+  return Number.isFinite(number) ? number : null
+}
+
+function parseTencentKlines(text, { symbol, seriesKeys }) {
+  const payload = JSON.parse(text)
+  if (payload?.code !== 0 || !payload.data?.[symbol]) {
+    throw new Error(`parseTencentKlines: 接口返回异常 (code=${payload?.code ?? 'null'})`)
+  }
+
+  const data = payload.data[symbol]
+  const rows = seriesKeys.map((key) => data[key]).find((series) => Array.isArray(series))
+  if (!rows?.length) {
+    throw new Error('parseTencentKlines: K 线数组为空')
+  }
+
+  const quoteTuple =
+    typeof data.qt?.[symbol]?.[35] === 'string' ? data.qt[symbol][35].split('/') : []
+  const latestAmount = parseNumber(quoteTuple[2])
+
+  return rows.map(([date, open, close, high, low, volume], index) => {
+    const openValue = parseNumber(open)
+    const closeValue = parseNumber(close)
+    const highValue = parseNumber(high)
+    const lowValue = parseNumber(low)
+    const previousClose = index > 0 ? parseNumber(rows[index - 1][2]) : null
+    const amplitude =
+      previousClose && highValue !== null && lowValue !== null
+        ? (highValue - lowValue) / previousClose
+        : null
+    const change =
+      previousClose && closeValue !== null ? Number((closeValue - previousClose).toFixed(4)) : null
+    const changePercent = previousClose && closeValue !== null ? closeValue / previousClose - 1 : null
+
+    return {
+      date,
+      open: openValue,
+      close: closeValue,
+      high: highValue,
+      low: lowValue,
+      volume: parseNumber(volume),
+      amount: index === rows.length - 1 ? latestAmount : null,
+      amplitude,
+      changePercent,
+      change,
+    }
+  })
+}
+
+async function fetchKlinesWithFallback(candidates) {
+  const errors = []
+  for (const candidate of candidates) {
+    try {
+      const text = await fetchText(candidate.url, {
+        attempts: candidate.attempts,
+        timeoutMs: candidate.timeoutMs,
+      })
+      const klines = candidate.parse(text)
+      if (!hasUsableValue(klines)) {
+        throw new Error(`${candidate.label} parsed empty klines`)
+      }
+      Object.defineProperty(klines, 'source', {
+        value: candidate.label,
+        enumerable: false,
+      })
+      return klines
+    } catch (error) {
+      errors.push(`${candidate.label}: ${summarizeError(error)}`)
+    }
+  }
+  throw new Error(`ETF kline all routes failed: ${errors.join(' | ')}`)
 }
 
 function parseSecurityQuote(text, contract) {
@@ -541,13 +680,37 @@ function buildHistoryPoint(snapshot) {
   }
 }
 
+function summarizeHistory(history) {
+  const sortedHistory = [...history]
+    .sort((a, b) => new Date(a.generatedAt) - new Date(b.generatedAt))
+    .slice(-260)
+
+  return {
+    path: 'src/data/history/512400-snapshots.json',
+    count: sortedHistory.length,
+    latestGeneratedAt: sortedHistory.at(-1)?.generatedAt ?? null,
+    latestTradeDate: sortedHistory.at(-1)?.tradeDate ?? null,
+  }
+}
+
+function hasRequiredSourceDegradation(snapshot) {
+  return (snapshot.meta?.sourceHealth ?? []).some((source) => source.required && !source.ok)
+}
+
 async function writeSnapshotHistory(snapshot) {
   const existing = await readJsonFile(historyPath, [])
   const history = Array.isArray(existing) ? existing : []
+  if (hasRequiredSourceDegradation(snapshot)) {
+    return {
+      ...summarizeHistory(history),
+      skipped: true,
+      reason: 'required_source_degraded',
+    }
+  }
   const nextPoint = buildHistoryPoint(snapshot)
-  const sameSessionKey = nextPoint.tradeTime ?? nextPoint.tradeDate ?? nextPoint.generatedAt
+  const sameSessionKey = nextPoint.tradeDate ?? nextPoint.tradeTime ?? nextPoint.generatedAt
   const compacted = history.filter((point) => {
-    const pointKey = point.tradeTime ?? point.tradeDate ?? point.generatedAt
+    const pointKey = point.tradeDate ?? point.tradeTime ?? point.generatedAt
     return pointKey !== sameSessionKey
   })
   const nextHistory = [...compacted, nextPoint]
@@ -557,12 +720,7 @@ async function writeSnapshotHistory(snapshot) {
   await mkdir(dirname(historyPath), { recursive: true })
   await writeFile(historyPath, `${JSON.stringify(nextHistory, null, 2)}\n`, 'utf8')
 
-  return {
-    path: 'src/data/history/512400-snapshots.json',
-    count: nextHistory.length,
-    latestGeneratedAt: nextHistory.at(-1)?.generatedAt ?? null,
-    latestTradeDate: nextHistory.at(-1)?.tradeDate ?? null,
-  }
+  return summarizeHistory(nextHistory)
 }
 
 async function fetchCommodityDriver(contract, fallbackDriver) {
@@ -678,6 +836,7 @@ async function main() {
       label: sourceLabels.quote,
       required: true,
       url: quoteUrl,
+      fetch: fetchQuoteWithFallback,
       parse: parseQuote,
       fallback: previousSnapshot?.quote,
       attempts: 1,
@@ -688,9 +847,27 @@ async function main() {
       label: sourceLabels.etfKlines,
       required: true,
       url: etfKlineUrl,
+      fetch: () =>
+        fetchKlinesWithFallback([
+          {
+            label: 'eastmoney-etf-kline',
+            url: etfKlineUrl,
+            parse: parseKlines,
+            attempts: 3,
+            timeoutMs: 10000,
+          },
+          {
+            label: 'tencent-etf-kline',
+            url: etfTencentKlineFallbackUrl,
+            parse: (text) =>
+              parseTencentKlines(text, { symbol: 'sh512400', seriesKeys: ['qfqday', 'day'] }),
+            attempts: 2,
+            timeoutMs: 10000,
+          },
+        ]),
       parse: parseKlines,
       fallback: previousSnapshot?.etfKlines,
-      attempts: 1,
+      attempts: 3,
       timeoutMs: 10000,
     },
     {
@@ -698,9 +875,27 @@ async function main() {
       label: sourceLabels.benchmarkKlines,
       required: true,
       url: benchmarkKlineUrl,
+      fetch: () =>
+        fetchKlinesWithFallback([
+          {
+            label: 'eastmoney-benchmark-kline',
+            url: benchmarkKlineUrl,
+            parse: parseKlines,
+            attempts: 3,
+            timeoutMs: 10000,
+          },
+          {
+            label: 'tencent-benchmark-kline',
+            url: benchmarkTencentKlineFallbackUrl,
+            parse: (text) =>
+              parseTencentKlines(text, { symbol: 'sh000819', seriesKeys: ['day', 'qfqday'] }),
+            attempts: 2,
+            timeoutMs: 10000,
+          },
+        ]),
       parse: parseKlines,
       fallback: previousSnapshot?.benchmarkKlines,
-      attempts: 1,
+      attempts: 3,
       timeoutMs: 10000,
     },
     {
@@ -726,7 +921,7 @@ async function main() {
   ]
 
   // 限制并发，避免一次性向东方财富/天天基金抛过多请求触发风控
-  const sourceResults = await runLimited(coreSources, 5, fetchParsedSource)
+  const sourceResults = await runLimited(coreSources, 3, fetchParsedSource)
   const sourceById = new Map(sourceResults.map((result) => [result.id, result]))
   const missingRequired = sourceResults.filter(
     (result) =>
@@ -801,8 +996,12 @@ async function main() {
       mode: hasRequiredDegradation ? 'degraded' : hasSourceDegradation ? 'partial' : 'refreshed',
       sources: [
         'push2.eastmoney.com quote api',
+        'push2his.eastmoney.com 512400 quote fallback',
+        'web.ifzq.gtimg.cn Tencent quote fallback',
         'push2his.eastmoney.com 512400 adjusted kline api',
+        'web.ifzq.gtimg.cn Tencent 512400 kline fallback',
         'push2his.eastmoney.com 000819 benchmark kline api',
+        'web.ifzq.gtimg.cn Tencent 000819 kline fallback',
         'push2.eastmoney.com futures/index quote api',
         'push2his.eastmoney.com futures/index kline api',
         'push2.eastmoney.com COMEX/LME quote api',

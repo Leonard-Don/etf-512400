@@ -96,6 +96,24 @@ test('buildHistoryReplay 用 asOf 日期把当前帧定位到对应历史帧', (
   assert.equal(replay.currentFrame.date, '2026-04-29')
 })
 
+test('buildHistoryReplay 日期 asOf 优先匹配交易日，避免被同日生成的旧交易帧抢走', () => {
+  const archive = normalizeHistoryArchive([
+    snapshot({
+      tradeDate: '2026-05-07',
+      generatedAt: '2026-05-19T08:54:01.799Z',
+    }),
+    snapshot({
+      tradeDate: '2026-05-19',
+      generatedAt: '2026-05-19T09:07:08.643Z',
+    }),
+  ])
+
+  const replay = buildHistoryReplay(archive, { asOf: '2026-05-19' })
+  assert.equal(replay.currentFrame.date, '2026-05-19')
+  assert.equal(replay.selection.matchedDate, '2026-05-19')
+  assert.equal(replay.selection.matchedGeneratedAt, '2026-05-19T09:07:08.643Z')
+})
+
 test('buildHistoryReplay 接受 generatedAt 完整时间戳作为 asOf', () => {
   const archive = normalizeHistoryArchive([
     snapshot({ tradeDate: '2026-04-29', generatedAt: '2026-04-29T07:00:00.000Z' }),
