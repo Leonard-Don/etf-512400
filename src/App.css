@@ -276,30 +276,68 @@
 }
 
 .scenario-tabs {
-  background: #eef3f1;
-  border: 1px solid #dce4e0;
-  border-radius: 8px;
-  display: inline-flex;
-  gap: 3px;
-  padding: 3px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .scenario-tabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
+  align-items: stretch;
+  background: #f7faf8;
+  border: 1px solid #dde7e2;
+  border-radius: 8px;
   color: #53615d;
   cursor: pointer;
+  display: grid;
   font-size: 13px;
   font-weight: 700;
-  min-height: 32px;
-  padding: 0 12px;
+  gap: 8px;
+  min-height: 94px;
+  padding: 10px 12px;
+  text-align: left;
 }
 
 .scenario-tabs button.selected {
   background: #ffffff;
-  box-shadow: 0 1px 4px rgba(37, 48, 45, 0.1);
+  border-color: #9fb8ad;
+  box-shadow: 0 1px 5px rgba(37, 48, 45, 0.12);
   color: #141c1a;
+}
+
+.scenario-tab-title {
+  color: #17221f;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.scenario-impact-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.scenario-impact-row small {
+  color: #7b8883;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.scenario-impact-row b {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.impact-benefit {
+  color: #2f7a4f;
+}
+
+.impact-risk {
+  color: #a34f3e;
+}
+
+.impact-flat {
+  color: #687570;
 }
 
 .command-insights {
@@ -883,14 +921,8 @@
 }
 
 .scenario-tabs {
-  display: flex;
   margin-bottom: 14px;
   width: 100%;
-}
-
-.scenario-tabs button {
-  flex: 1 1 0;
-  padding: 0 8px;
 }
 
 .stress-readout {
@@ -2214,6 +2246,10 @@ td:nth-child(4) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .scenario-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .line-chart svg {
     height: 190px;
   }
@@ -2278,6 +2314,10 @@ td:nth-child(4) {
 
   .risk-slider input {
     grid-column: auto;
+  }
+
+  .scenario-tabs {
+    grid-template-columns: 1fr;
   }
 
   .event-row {

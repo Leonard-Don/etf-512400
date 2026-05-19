@@ -50,7 +50,7 @@ import {
   formatSnapshotTime,
   formatSignedPercent,
 } from './analysis/formatters.js'
-import { getScenarioAdjustment } from './analysis/scenario.js'
+import { getScenarioAdjustment, scenarioDefinitions } from './analysis/scenario.js'
 import {
   LOCAL_REALTIME_KLINE_URL,
   LOCAL_REALTIME_QUOTE_URL,
@@ -72,12 +72,6 @@ import { SignalLab, StrategyOptimizer, StrategyRow } from './components/Strategy
 import { MetricCard, Panel } from './components/ui'
 import './App.css'
 
-const scenarios = [
-  { id: 'base', label: '基准' },
-  { id: 'goldRisk', label: '黄金避险' },
-  { id: 'dollarUp', label: '美元利率' },
-  { id: 'demandSoft', label: '需求走弱' },
-]
 const realtimeEndpoints = [
   {
     id: 'local-quote',
@@ -116,6 +110,24 @@ const realtimeEndpoints = [
     parse: parseRealtimeTencent,
   },
 ]
+
+function formatSignedPointChange(value, digits = 1) {
+  if (!Number.isFinite(value)) return '暂无'
+  const sign = value > 0 ? '+' : value < 0 ? '-' : ''
+  return `${sign}${Math.abs(value * 100).toFixed(digits)}个百分点`
+}
+
+function getPriceImpactTone(value) {
+  if (value > 0) return 'impact-benefit'
+  if (value < 0) return 'impact-risk'
+  return 'impact-flat'
+}
+
+function getVolImpactTone(value) {
+  if (value > 0) return 'impact-risk'
+  if (value < 0) return 'impact-benefit'
+  return 'impact-flat'
+}
 
 function App() {
   const [scenario, setScenario] = useState('base')
@@ -407,19 +419,40 @@ function App() {
         </Panel>
 
         <Panel title="情景压力（What-If）" icon={ShieldAlert}>
-          <div className="scenario-tabs">
-            {scenarios.map((item) => (
+          <div className="scenario-tabs" aria-label="情景影响选择">
+            {scenarioDefinitions.map((item) => (
               <button
                 className={item.id === scenario ? 'selected' : ''}
                 key={item.id}
                 type="button"
+                aria-pressed={item.id === scenario}
                 onClick={() => setScenario(item.id)}
               >
-                {item.label}
+                <span className="scenario-tab-title">{item.tabLabel}</span>
+                <span className="scenario-impact-row">
+                  <small>价格</small>
+                  <b className={getPriceImpactTone(item.priceShock)}>{formatSignedPercent(item.priceShock, 1)}</b>
+                </span>
+                <span className="scenario-impact-row">
+                  <small>波动</small>
+                  <b className={getVolImpactTone(item.volShock)}>{formatSignedPointChange(item.volShock)}</b>
+                </span>
               </button>
             ))}
           </div>
           <div className="stress-readout">
+            <div>
+              <span>价格影响</span>
+              <strong className={getPriceImpactTone(scenarioState.priceShock)}>
+                {formatSignedPercent(scenarioState.priceShock, 1)}
+              </strong>
+            </div>
+            <div>
+              <span>波动变化</span>
+              <strong className={getVolImpactTone(scenarioState.volShock)}>
+                {formatSignedPointChange(scenarioState.volShock)}
+              </strong>
+            </div>
             <div>
               <span>情景价格</span>
               <strong>{stressedPrice.toFixed(3)}</strong>
