@@ -642,33 +642,106 @@
 }
 
 .line-chart svg {
-  background: #f8faf9;
+  background: linear-gradient(180deg, #fbfcfb 0%, #f4f8f5 100%);
   border: 1px solid #e5ece8;
   border-radius: 8px;
   display: block;
-  height: 230px;
+  height: 260px;
   width: 100%;
 }
 
-.chart-grid line {
-  stroke: #dfe6e2;
+.indexed-chart {
+  overflow: visible;
+  touch-action: none;
+}
+
+.chart-surface {
+  fill: url("#indexedChartSurface");
+  stroke: #dfe8e3;
   stroke-width: 1;
+}
+
+.chart-grid line {
+  stroke: #d9e2dd;
+  stroke-width: 1;
+}
+
+.chart-grid text,
+.chart-x-axis text {
+  fill: #7a8581;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.chart-baseline {
+  stroke: #aab9b1 !important;
+  stroke-dasharray: 5 5;
+}
+
+.chart-baseline-label {
+  fill: #71817a;
+  font-size: 10px;
+  font-weight: 760;
+}
+
+.chart-end-labels text {
+  font-size: 11px;
+  font-weight: 780;
+  paint-order: stroke;
+  stroke: #f9fbfa;
+  stroke-linejoin: round;
+  stroke-width: 3px;
+}
+
+.chart-end-labels .chart-end-change {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.86;
+}
+
+.chart-tooltip line {
+  stroke: #80908a;
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.chart-tooltip rect {
+  fill: rgba(255, 255, 255, 0.94);
+  stroke: #d8e0dc;
+  stroke-width: 1;
+}
+
+.chart-tooltip text {
+  fill: #384642;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.chart-tooltip .chart-tooltip-date {
+  fill: #111827;
+  font-size: 11px;
+  font-weight: 780;
 }
 
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .chart-legend span {
   align-items: center;
-  color: #54615e;
+  background: #f7faf8;
+  border: 1px solid #e2ebe6;
+  border-radius: 999px;
+  color: #40504b;
   display: inline-flex;
   font-size: 12px;
   font-weight: 700;
   gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
 }
 
 .chart-legend i {
@@ -676,6 +749,12 @@
   display: inline-flex;
   height: 8px;
   width: 8px;
+}
+
+.chart-legend b {
+  color: #6e7b77;
+  font-size: 11px;
+  font-weight: 760;
 }
 
 .factor-grid {

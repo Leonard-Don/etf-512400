@@ -420,8 +420,8 @@ function App() {
         <Panel className="market-panel" title="趋势与因子" icon={BarChart3}>
           <div className="chart-header">
             <div>
-              <strong>{timeframe}窗口</strong>
-              <span>ETF、黄金、铜、稀土归一化走势</span>
+              <strong>共同样本归一化</strong>
+              <span>ETF、黄金、铜、稀土 · 同一时间轴 · 起点=100</span>
             </div>
             <ChevronsUpDown size={18} />
           </div>

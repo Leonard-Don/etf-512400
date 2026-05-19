@@ -1,6 +1,29 @@
 import { describe, expect, test } from 'vitest'
-import { CommodityDriverPanel, RiskStack } from '../src/components/MarketPanels.jsx'
+import { CommodityDriverPanel, MiniLineChart, RiskStack } from '../src/components/MarketPanels.jsx'
 import { render } from './helpers/render.jsx'
+
+describe('MiniLineChart indexed display', () => {
+  test('renders a shared common-period indexed chart without leaking non-finite values', () => {
+    const trendSeries = [
+      { date: '2025-12', etf: 1.8 },
+      { date: '2026-01', etf: 2, gold: 10, copper: 5, rareEarth: 4 },
+      { date: '2026-02', etf: 2.2, gold: Number.NaN, copper: 5.5, rareEarth: null },
+      { date: '2026-03', etf: 2.4, gold: 12, copper: 4, rareEarth: 6 },
+    ]
+    const { container, html, unmount } = render(<MiniLineChart trendSeries={trendSeries} />)
+    const out = html()
+    const chart = container.querySelector('[aria-label="ETF与因子走势"]')
+    expect(chart).toBeTruthy()
+    expect(out).toContain('基准 100')
+    expect(out).not.toContain('2025-12')
+    expect(out).toContain('2026-01')
+    expect(out).toContain('2026-03')
+    expect(out).toContain('+20.0%')
+    expect(out).toContain('-20.0%')
+    expect(out).not.toMatch(/NaN|Infinity|undefined|null/)
+    unmount()
+  })
+})
 
 describe('CommodityDriverPanel return5/20/60 display', () => {
   test('null/undefined return5/20/60 render formatter fallback, not 0.0%', () => {
