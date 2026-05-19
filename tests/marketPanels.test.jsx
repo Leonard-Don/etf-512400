@@ -121,6 +121,42 @@ describe('CommodityDriverPanel changePercent display', () => {
   })
 })
 
+describe('CommodityDriverPanel international references', () => {
+  test('renders international commodity data beside the domestic driver', () => {
+    const drivers = [{
+      key: 'gold',
+      label: '沪金主连',
+      source: 'SHFE',
+      unit: '元/克',
+      price: 1041.54,
+      changePercent: 0.0059,
+      trendScore: 37,
+      riskScore: 95,
+      return5: 0.019,
+      return20: 0.007,
+      return60: -0.103,
+      international: {
+        label: 'COMEX黄金',
+        source: 'COMEX',
+        unit: '美元/盎司',
+        price: 4544.4,
+        changePercent: -0.003,
+      },
+    }]
+    const { html, unmount } = render(<CommodityDriverPanel commodityDrivers={drivers} />)
+    const out = html()
+    expect(out).toContain('国际参照')
+    expect(out).toContain('COMEX黄金')
+    expect(out).toContain('美元/盎司')
+    expect(out).toContain('4,544.40')
+    expect(out).toContain('-0.30%')
+    expect(out).toContain('内盘日涨跌')
+    expect(out).toContain('外盘日涨跌')
+    expect(out).toContain('背离')
+    unmount()
+  })
+})
+
 describe('CommodityDriverPanel driver score meters', () => {
   // 上游 driver.trendScore/riskScore 在 schema 漂移、回测样本不足、或 JSON
   // 反序列化（NaN/Infinity → null）时会以 null/undefined/NaN 形态到达。原实现

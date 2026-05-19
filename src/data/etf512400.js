@@ -49,6 +49,73 @@ function liveContribution(key, weight, fallback) {
   return Number((weight * changePercent).toFixed(2))
 }
 
+const internationalCommodityReferenceByKey = {
+  gold: {
+    key: 'gold',
+    secid: '101.GC00Y',
+    label: 'COMEX黄金',
+    unit: '美元/盎司',
+    source: 'COMEX',
+    price: 4544.4,
+    previousClose: 4558,
+    change: -13.6,
+    changePercent: -0.003,
+    tradeDate: '2026-05-19',
+    tradeTime: '2026-05-19 16:24:47',
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/101.GC00Y',
+    fallback: true,
+  },
+  copper: {
+    key: 'copper',
+    secid: '109.LCPT',
+    label: 'LME铜03',
+    unit: '美元/吨',
+    source: 'LME',
+    price: 13506.5,
+    previousClose: 13590,
+    change: -83.5,
+    changePercent: -0.0061,
+    tradeDate: '2026-05-19',
+    tradeTime: '2026-05-19 16:28:00',
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/109.LCPT',
+    fallback: true,
+  },
+  aluminum: {
+    key: 'aluminum',
+    secid: '109.LALT',
+    label: 'LME铝03',
+    unit: '美元/吨',
+    source: 'LME',
+    price: 3580,
+    previousClose: 3557.5,
+    change: 22.5,
+    changePercent: 0.0063,
+    tradeDate: '2026-05-19',
+    tradeTime: '2026-05-19 16:28:00',
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/109.LALT',
+    fallback: true,
+  },
+}
+
+function normalizeInternationalReference(reference) {
+  if (!reference) return null
+  return {
+    key: reference.key,
+    secid: reference.secid,
+    label: reference.label,
+    unit: reference.unit,
+    source: reference.source,
+    price: reference.quote?.price ?? reference.price,
+    previousClose: reference.quote?.previousClose ?? reference.previousClose,
+    change: reference.quote?.change ?? reference.change,
+    changePercent: reference.quote?.changePercent ?? reference.changePercent,
+    tradeDate: reference.quote?.tradeDate ?? reference.tradeDate,
+    tradeTime: reference.quote?.tradeTime ?? reference.tradeTime,
+    sourceUrl: reference.sourceUrl,
+    fallback: reference.fallback ?? false,
+  }
+}
+
 export const etfProfile = {
   code: '512400',
   name: '有色金属ETF南方',
@@ -268,6 +335,9 @@ export const commodityDrivers = commoditySnapshot.map((driver) => ({
   trendScore: driver.trendScore,
   riskScore: driver.riskScore,
   klines: driver.klines ?? [],
+  international: normalizeInternationalReference(
+    driver.international ?? internationalCommodityReferenceByKey[driver.key],
+  ),
 }))
 
 export const etfKlines = klineSnapshot.map((item) => ({

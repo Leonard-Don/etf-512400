@@ -370,6 +370,35 @@ export function CommodityDriverPanel({ commodityDrivers }) {
               <dd>{formatSignedPercent(driver.return60, 1)}</dd>
             </div>
           </dl>
+          {driver.international ? (
+            <div className="driver-international" aria-label={`${driver.label}国际参照`}>
+              <div className="driver-international-main">
+                <span>国际参照</span>
+                <strong>{driver.international.label}</strong>
+                <small>{driver.international.source} · {driver.international.unit}</small>
+              </div>
+              <div className="driver-international-price">
+                <strong>{formatDriverPrice(driver.international)}</strong>
+                <span className={getChangeTone(driver.international.changePercent)}>
+                  {formatSignedPercent(driver.international.changePercent)}
+                </span>
+              </div>
+              <dl className="driver-international-compare">
+                <div>
+                  <dt>内盘日涨跌</dt>
+                  <dd>{formatSignedPercent(driver.changePercent, 1)}</dd>
+                </div>
+                <div>
+                  <dt>外盘日涨跌</dt>
+                  <dd>{formatSignedPercent(driver.international.changePercent, 1)}</dd>
+                </div>
+                <div>
+                  <dt>内外联动</dt>
+                  <dd>{describeDriverLinkage(driver.changePercent, driver.international.changePercent)}</dd>
+                </div>
+              </dl>
+            </div>
+          ) : null}
         </article>
       ))}
     </div>
@@ -380,4 +409,15 @@ function formatDriverPrice(driver) {
   if (!Number.isFinite(driver.price)) return '暂无'
   const digits = driver.price >= 10000 ? 0 : 2
   return formatNumber(driver.price, digits)
+}
+
+function getChangeTone(value) {
+  if (!Number.isFinite(value)) return 'neutral'
+  return value >= 0 ? 'positive' : 'negative'
+}
+
+function describeDriverLinkage(localChange, internationalChange) {
+  if (!Number.isFinite(localChange) || !Number.isFinite(internationalChange)) return '暂无'
+  if (localChange === 0 || internationalChange === 0) return '中性'
+  return Math.sign(localChange) === Math.sign(internationalChange) ? '同向' : '背离'
 }

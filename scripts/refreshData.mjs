@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import {
   percentFromEastmoney,
   priceFromQuote,
+  shanghaiDateTimeFromDate,
   shanghaiDateTimeFromEpoch,
 } from '../src/analysis/realtimeQuote.js'
 
@@ -68,6 +69,38 @@ const commodityContracts = [
     label: '稀土产业',
     unit: '点',
     source: 'CSI',
+  },
+]
+
+const internationalCommodityContracts = [
+  {
+    key: 'gold',
+    secid: '101.GC00Y',
+    label: 'COMEX黄金',
+    unit: '美元/盎司',
+    source: 'COMEX',
+    method: 'quote',
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/101.GC00Y',
+  },
+  {
+    key: 'copper',
+    secid: '109.LCPT',
+    label: 'LME铜03',
+    unit: '美元/吨',
+    source: 'LME',
+    method: 'ulist',
+    priceDecimals: 2,
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/109.LCPT',
+  },
+  {
+    key: 'aluminum',
+    secid: '109.LALT',
+    label: 'LME铝03',
+    unit: '美元/吨',
+    source: 'LME',
+    method: 'ulist',
+    priceDecimals: 2,
+    sourceUrl: 'https://quote.eastmoney.com/unify/r/109.LALT',
   },
 ]
 
@@ -378,6 +411,49 @@ function parseSecurityQuote(text, contract) {
   }
 }
 
+function scaledQuoteValue(value, decimals = 2) {
+  if (!Number.isFinite(value) || !Number.isInteger(decimals) || decimals < 0) return null
+  return Number((value / 10 ** decimals).toFixed(Math.min(decimals, 4)))
+}
+
+function parseInternationalUlistQuote(text, contract, fetchedAt = new Date()) {
+  const payload = JSON.parse(text)
+  const item = payload?.data?.diff?.find((entry) => `${entry.f13}.${entry.f12}` === contract.secid)
+
+  if (payload.rc !== 0 || !item) {
+    throw new Error(`Unexpected international quote payload for ${contract.secid}: ${text.slice(0, 120)}`)
+  }
+
+  const fetchedClock = shanghaiDateTimeFromDate(fetchedAt)
+  const price = scaledQuoteValue(item.f2, contract.priceDecimals)
+  const previousClose = scaledQuoteValue(item.f18, contract.priceDecimals)
+
+  return {
+    key: contract.key,
+    secid: contract.secid,
+    code: item.f12,
+    name: item.f14 || contract.label,
+    label: contract.label,
+    unit: contract.unit,
+    source: contract.source,
+    tradeDate: fetchedClock.date,
+    tradeTime: fetchedClock.time,
+    price,
+    previousClose,
+    open: scaledQuoteValue(item.f17, contract.priceDecimals),
+    high: null,
+    low: null,
+    averagePrice: null,
+    change: scaledQuoteValue(item.f4, contract.priceDecimals),
+    changePercent: percentFromEastmoney(item.f3),
+    amountCny: null,
+    volumeLots: null,
+    amplitude: null,
+    statusCode: null,
+    sourceUrl: contract.sourceUrl,
+  }
+}
+
 function parseKlines(text) {
   const payload = JSON.parse(text)
   if (payload.rc !== 0 || !payload.data?.klines) {
@@ -541,6 +617,50 @@ async function fetchCommodityDriver(contract, fallbackDriver) {
   }
 }
 
+async function fetchInternationalDriver(contract, fallbackQuote) {
+  try {
+    const fetchedAt = new Date()
+    const text =
+      contract.method === 'ulist'
+        ? await fetchText(
+            `https://push2.eastmoney.com/api/qt/ulist.np/get?secids=${contract.secid}&fields=f12,f13,f14,f2,f3,f4,f17,f18,f86,f152`,
+            { attempts: 1, timeoutMs: 6000 },
+          )
+        : await fetchText(
+            `https://push2.eastmoney.com/api/qt/stock/get?secid=${contract.secid}&fields=${quoteFields}`,
+            { attempts: 1, timeoutMs: 6000 },
+          )
+    const quote =
+      contract.method === 'ulist'
+        ? parseInternationalUlistQuote(text, contract, fetchedAt)
+        : {
+            ...parseSecurityQuote(text, contract),
+            sourceUrl: contract.sourceUrl,
+          }
+
+    return {
+      ...contract,
+      ok: true,
+      quote,
+    }
+  } catch (error) {
+    if (hasUsableValue(fallbackQuote)) {
+      return {
+        ...fallbackQuote,
+        fallback: true,
+        error: summarizeError(error),
+      }
+    }
+
+    return {
+      ...contract,
+      ok: false,
+      fallback: false,
+      error: summarizeError(error),
+    }
+  }
+}
+
 async function main() {
   const previousSnapshot = await readJsonFile(outputPath, null)
   const fundTrendFallback =
@@ -625,11 +745,27 @@ async function main() {
   const previousDriversByKey = new Map(
     (previousSnapshot?.commodityDrivers ?? []).map((driver) => [driver.key, driver]),
   )
-  const commodityDrivers = await runLimited(commodityContracts, 2, (contract) =>
+  const previousInternationalByKey = new Map(
+    (previousSnapshot?.commodityDrivers ?? [])
+      .filter((driver) => driver.international)
+      .map((driver) => [driver.key, driver.international]),
+  )
+  const domesticCommodityDrivers = await runLimited(commodityContracts, 2, (contract) =>
     fetchCommodityDriver(contract, previousDriversByKey.get(contract.key)),
   )
+  const internationalDrivers = await runLimited(internationalCommodityContracts, 2, (contract) =>
+    fetchInternationalDriver(contract, previousInternationalByKey.get(contract.key)),
+  )
+  const internationalByKey = new Map(
+    internationalDrivers.filter((driver) => driver.ok).map((driver) => [driver.key, driver]),
+  )
+  const commodityDrivers = domesticCommodityDrivers.map((driver) => ({
+    ...driver,
+    international: internationalByKey.get(driver.key) ?? previousInternationalByKey.get(driver.key) ?? null,
+  }))
   const commodityOkCount = commodityDrivers.filter((item) => item.ok).length
   const commodityFallbackCount = commodityDrivers.filter((item) => item.fallback).length
+  const internationalOkCount = internationalDrivers.filter((item) => item.ok).length
   const commodityHealth = {
     id: 'commodityDrivers',
     label: sourceLabels.commodityDrivers,
@@ -640,6 +776,8 @@ async function main() {
     okCount: commodityOkCount,
     total: commodityDrivers.length,
     fallbackCount: commodityFallbackCount,
+    internationalOkCount,
+    internationalTotal: internationalDrivers.length,
     error:
       commodityOkCount < 3
         ? '可用商品驱动少于 3 个'
@@ -667,6 +805,7 @@ async function main() {
         'push2his.eastmoney.com 000819 benchmark kline api',
         'push2.eastmoney.com futures/index quote api',
         'push2his.eastmoney.com futures/index kline api',
+        'push2.eastmoney.com COMEX/LME quote api',
         'fund.eastmoney.com pingzhongdata',
         'fundgz.1234567.com.cn estimated net value',
       ],
@@ -698,6 +837,7 @@ async function main() {
       `klines=${etfKlines.length}`,
       `benchmark=${benchmarkKlines.length}`,
       `drivers=${commodityDrivers.filter((item) => item.ok).length}/${commodityDrivers.length}`,
+      `international=${internationalOkCount}/${internationalDrivers.length}`,
       `mode=${snapshot.meta.mode}`,
       `history=${history.count}`,
       `tradeDate=${quote.tradeDate}`,

@@ -1663,6 +1663,11 @@
   color: #a9443b;
 }
 
+.driver-price .neutral,
+.driver-international-price .neutral {
+  color: #72807c;
+}
+
 .driver-scores {
   display: grid;
   gap: 7px;
@@ -1694,6 +1699,76 @@
   font-size: 12px;
   font-weight: 850;
   margin: 4px 0 0;
+}
+
+.driver-international {
+  border-top: 1px solid #e7eeea;
+  display: grid;
+  gap: 9px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-top: 10px;
+}
+
+.driver-international-main span {
+  color: #6d7976;
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.driver-international-main strong {
+  color: #17211e;
+  display: block;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.driver-international-main small {
+  color: #7a8782;
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.driver-international-price {
+  text-align: right;
+}
+
+.driver-international-price strong {
+  color: #17211e;
+  display: block;
+  font-size: 15px;
+}
+
+.driver-international-price span {
+  display: block;
+  font-size: 12px;
+  font-weight: 850;
+  margin-top: 4px;
+}
+
+.driver-international-price .positive {
+  color: #2b7b4f;
+}
+
+.driver-international-price .negative {
+  color: #a9443b;
+}
+
+.driver-international-compare {
+  display: grid;
+  gap: 7px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.driver-international-compare div {
+  background: #f7faf8;
+  border-radius: 7px;
+  padding: 8px;
 }
 
 .basket-strip {
@@ -2322,6 +2397,15 @@ td:nth-child(4) {
 
   .event-row {
     grid-template-columns: 1fr;
+  }
+
+  .driver-international,
+  .driver-international-compare {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-international-price {
+    text-align: left;
   }
 
   .strategy-row dl {
