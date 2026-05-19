@@ -12,7 +12,6 @@ import {
   Layers3,
   LineChart,
   ShieldAlert,
-  SlidersHorizontal,
   Target,
   TrendingUp,
 } from 'lucide-react'
@@ -63,6 +62,7 @@ import {
   REALTIME_QUOTE_URL,
   REALTIME_TENCENT_URL,
 } from './analysis/realtimeQuote.js'
+import { CommandBand } from './components/CommandBand'
 import { DecisionDeck } from './components/DecisionDeck'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { HoldingsTable } from './components/HoldingsTable'
@@ -72,7 +72,6 @@ import { SignalLab, StrategyOptimizer, StrategyRow } from './components/Strategy
 import { MetricCard, Panel } from './components/ui'
 import './App.css'
 
-const timeframes = ['20日', '60日', '年初至今']
 const scenarios = [
   { id: 'base', label: '基准' },
   { id: 'goldRisk', label: '黄金避险' },
@@ -119,7 +118,6 @@ const realtimeEndpoints = [
 ]
 
 function App() {
-  const [timeframe, setTimeframe] = useState('60日')
   const [scenario, setScenario] = useState('base')
   const [riskBudget, setRiskBudget] = useState(48)
   const [refreshNote, setRefreshNote] = useState('')
@@ -357,41 +355,16 @@ function App() {
         </section>
       ) : null}
 
-      <section className="command-band">
-        <div className="decision-panel">
-          <span className={`decision-dot ${primaryDecision.tone}`}></span>
-          <div>
-            <p>主结论</p>
-            <strong>{primaryDecision.action}</strong>
-          </div>
-          <div className="score-gauge" aria-label={`稳定性 ${primaryDecision.score}`}>
-            <span style={{ width: `${primaryDecision.score}%` }}></span>
-          </div>
-        </div>
-        <div className="segmented" aria-label="时间窗口">
-          {timeframes.map((item) => (
-            <button
-              className={item === timeframe ? 'selected' : ''}
-              key={item}
-              type="button"
-              onClick={() => setTimeframe(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <label className="risk-slider">
-          <SlidersHorizontal size={18} />
-          <span>风险预算 {riskBudget}%</span>
-          <input
-            type="range"
-            min="20"
-            max="80"
-            value={riskBudget}
-            onChange={(event) => setRiskBudget(Number(event.target.value))}
-          />
-        </label>
-      </section>
+      <CommandBand
+        dailyChange={dailyChange}
+        dataFreshness={dataFreshness}
+        premium={premium}
+        primaryDecision={primaryDecision}
+        riskBudget={riskBudget}
+        signal={signal}
+        trendProfile={trendProfile}
+        onRiskBudgetChange={setRiskBudget}
+      />
 
       <ErrorBoundary label="今日决策台">
         <DecisionDeck
