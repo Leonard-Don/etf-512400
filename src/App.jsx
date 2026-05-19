@@ -117,6 +117,22 @@ function formatSignedPointChange(value, digits = 1) {
   return `${sign}${Math.abs(value * 100).toFixed(digits)}个百分点`
 }
 
+function formatScenarioPriceImpact(scenarioDefinition) {
+  return scenarioDefinition.baseline ? '当前价格' : formatSignedPercent(scenarioDefinition.priceShock, 1)
+}
+
+function formatScenarioVolImpact(scenarioDefinition) {
+  return scenarioDefinition.baseline ? '原始波动' : formatSignedPointChange(scenarioDefinition.volShock)
+}
+
+function formatSelectedPriceImpact(scenarioState) {
+  return scenarioState.baseline ? '未加冲击' : formatSignedPercent(scenarioState.priceShock, 1)
+}
+
+function formatSelectedVolImpact(scenarioState) {
+  return scenarioState.baseline ? '沿用原值' : formatSignedPointChange(scenarioState.volShock)
+}
+
 function getPriceImpactTone(value) {
   if (value > 0) return 'impact-benefit'
   if (value < 0) return 'impact-risk'
@@ -431,11 +447,11 @@ function App() {
                 <span className="scenario-tab-title">{item.tabLabel}</span>
                 <span className="scenario-impact-row">
                   <small>价格</small>
-                  <b className={getPriceImpactTone(item.priceShock)}>{formatSignedPercent(item.priceShock, 1)}</b>
+                  <b className={getPriceImpactTone(item.priceShock)}>{formatScenarioPriceImpact(item)}</b>
                 </span>
                 <span className="scenario-impact-row">
                   <small>波动</small>
-                  <b className={getVolImpactTone(item.volShock)}>{formatSignedPointChange(item.volShock)}</b>
+                  <b className={getVolImpactTone(item.volShock)}>{formatScenarioVolImpact(item)}</b>
                 </span>
               </button>
             ))}
@@ -444,13 +460,13 @@ function App() {
             <div>
               <span>价格影响</span>
               <strong className={getPriceImpactTone(scenarioState.priceShock)}>
-                {formatSignedPercent(scenarioState.priceShock, 1)}
+                {formatSelectedPriceImpact(scenarioState)}
               </strong>
             </div>
             <div>
               <span>波动变化</span>
               <strong className={getVolImpactTone(scenarioState.volShock)}>
-                {formatSignedPointChange(scenarioState.volShock)}
+                {formatSelectedVolImpact(scenarioState)}
               </strong>
             </div>
             <div>

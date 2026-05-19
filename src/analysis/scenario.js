@@ -2,6 +2,7 @@ const scenarioAdjustmentById = {
   base: {
     label: '基准情景',
     tabLabel: '基准',
+    baseline: true,
     priceShock: 0,
     volShock: 0,
     note: '维持当前高波动震荡假设',

@@ -4,17 +4,18 @@ import { getScenarioAdjustment, scenarioDefinitions } from '../src/analysis/scen
 
 test('scenarioDefinitions exposes comparable price and volatility impacts for every What-If tab', () => {
   assert.deepEqual(
-    scenarioDefinitions.map(({ id, tabLabel, priceShock, volShock }) => ({
+    scenarioDefinitions.map(({ id, tabLabel, baseline, priceShock, volShock }) => ({
       id,
       tabLabel,
+      baseline: baseline ?? false,
       priceShock,
       volShock,
     })),
     [
-      { id: 'base', tabLabel: '基准', priceShock: 0, volShock: 0 },
-      { id: 'goldRisk', tabLabel: '黄金避险', priceShock: 0.052, volShock: 0.04 },
-      { id: 'dollarUp', tabLabel: '美元利率', priceShock: -0.066, volShock: 0.08 },
-      { id: 'demandSoft', tabLabel: '需求走弱', priceShock: -0.044, volShock: 0.06 },
+      { id: 'base', tabLabel: '基准', baseline: true, priceShock: 0, volShock: 0 },
+      { id: 'goldRisk', tabLabel: '黄金避险', baseline: false, priceShock: 0.052, volShock: 0.04 },
+      { id: 'dollarUp', tabLabel: '美元利率', baseline: false, priceShock: -0.066, volShock: 0.08 },
+      { id: 'demandSoft', tabLabel: '需求走弱', baseline: false, priceShock: -0.044, volShock: 0.06 },
     ],
   )
 })
