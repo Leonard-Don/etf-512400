@@ -1581,6 +1581,30 @@
   gap: 8px;
 }
 
+.quality-meter-row {
+  display: grid;
+  gap: 5px;
+}
+
+.quality-meter-row .meter {
+  grid-template-columns: 48px 1fr 40px;
+}
+
+.quality-meter-detail {
+  align-items: center;
+  color: #65726f;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 6px;
+  line-height: 1.35;
+  margin: 0 0 0 55px;
+}
+
+.quality-meter-detail strong {
+  color: #1a211f;
+}
+
 .quality-detail-list {
   display: grid;
   gap: 8px;

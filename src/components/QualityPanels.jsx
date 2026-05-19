@@ -38,9 +38,27 @@ export function TradingQualityPanel({ quality }) {
       </div>
 
       <div className="quality-bars">
-        <Meter label="跟踪" value={tracking.score} color="#526f8d" />
-        <Meter label="折溢价" value={premium.score} color="#b96836" />
-        <Meter label="流动性" value={liquidity.score} color="#5f7f56" />
+        <QualityMeter
+          label="跟踪"
+          value={tracking.score}
+          color="#526f8d"
+          status={tracking.status}
+          detail={formatTrackingMeterDetail(tracking)}
+        />
+        <QualityMeter
+          label="折溢价"
+          value={premium.score}
+          color="#b96836"
+          status={premium.status}
+          detail={formatPremiumMeterDetail(premium)}
+        />
+        <QualityMeter
+          label="流动性"
+          value={liquidity.score}
+          color="#5f7f56"
+          status={liquidity.status}
+          detail={formatLiquidityMeterDetail(liquidity)}
+        />
       </div>
 
       <dl className="quality-detail-list">
@@ -69,6 +87,33 @@ export function TradingQualityPanel({ quality }) {
       </div>
     </div>
   )
+}
+
+function QualityMeter({ label, value, color, status, detail }) {
+  return (
+    <div className="quality-meter-row">
+      <Meter label={label} value={value} color={color} />
+      <p className="quality-meter-detail">
+        <strong>{status}</strong>
+        <span>{detail}</span>
+      </p>
+    </div>
+  )
+}
+
+function formatTrackingMeterDetail(tracking) {
+  if (tracking.status === '样本不足') return `样本 ${tracking.sampleSize} 日`
+  return `60日 ${formatSignedPercent(tracking.deviation60, 2)} · 误差 ${formatPercent(tracking.trackingError60, 1)}`
+}
+
+function formatPremiumMeterDetail(premium) {
+  if (premium.status === '样本不足') return `样本 ${premium.sampleSize} 日`
+  return `当前 ${formatSignedPercent(premium.currentPremium, 2)} · ${formatZScore(premium.zScore)}`
+}
+
+function formatLiquidityMeterDetail(liquidity) {
+  if (liquidity.status === '样本不足') return `样本 ${liquidity.sampleSize} 日`
+  return `${formatPercentile(liquidity.amountPercentile)} · ${formatRatio(liquidity.amountRatio20)}`
 }
 
 export function DataFreshnessDrilldown({ registry }) {
