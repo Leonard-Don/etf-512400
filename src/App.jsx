@@ -334,7 +334,7 @@ function App() {
             <LineChart size={22} strokeWidth={2.2} />
           </div>
           <div>
-            <h1>512400 ETF Research Console</h1>
+            <h1>512400 ETF 研究控制台</h1>
             <p>{etfProfile.name} · {etfProfile.indexName}</p>
           </div>
         </div>

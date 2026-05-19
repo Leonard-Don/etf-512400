@@ -8,6 +8,26 @@ const TONE_PREFIX = {
   positive: '',
 }
 
+// 中文风险标签映射：覆盖 src/analysis/{signal,decision,tradingQuality,historyArchive,snapshotHealth}.js
+// 中产出的全部 tone 值，缺失时保留 暂无 占位，未知值按英文原值兜底但仍带中文回退说明。
+const RISK_LABEL_ZH = {
+  warning: '警告',
+  danger: '风险',
+  notice: '提示',
+  neutral: '中性',
+  positive: '正常',
+  opportunity: '机会',
+  good: '正常',
+  healthy: '正常',
+}
+
+function formatRiskLabel(tone) {
+  if (tone === undefined || tone === null || tone === '') return '暂无'
+  const zh = RISK_LABEL_ZH[tone]
+  if (zh) return `${zh} (${tone})`
+  return `${tone}`
+}
+
 function formatScore(value) {
   return Number.isFinite(value) ? String(value) : '暂无'
 }
@@ -78,7 +98,7 @@ export function formatMemoMarkdown(memo) {
     `- 当日涨跌: ${formatSignedPercentMetric(metrics.dailyChange)}`,
     `- 来源: ${memo.source ?? '暂无'}`,
     `- 规则: ${memo.rule ?? '暂无'}`,
-    `- 风险标签: ${memo.tone ?? '暂无'}`,
+    `- 风险标签: ${formatRiskLabel(memo.tone)}`,
   ]
   const replayLines = buildReplaySelectionLines(memo.replaySelection)
   if (replayLines) lines.push(...replayLines)
