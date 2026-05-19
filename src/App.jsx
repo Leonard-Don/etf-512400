@@ -434,7 +434,7 @@ function App() {
           </div>
         </Panel>
 
-        <Panel title="情景压力（What-If）" icon={ShieldAlert}>
+        <Panel title="情景压力分析" icon={ShieldAlert}>
           <div className="scenario-tabs" aria-label="情景影响选择">
             {scenarioDefinitions.map((item) => (
               <button
@@ -571,7 +571,7 @@ function App() {
               <strong>{dataFreshness.summary}</strong>
             </div>
             <div>
-              <span>Provider覆盖</span>
+              <span>数据源覆盖</span>
               <strong>{dataFreshness.coverageScore}%</strong>
             </div>
             <div>

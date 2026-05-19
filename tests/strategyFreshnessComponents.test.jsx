@@ -36,7 +36,7 @@ describe('DataFreshnessDrilldown', () => {
 
     const { html, unmount } = render(<DataFreshnessDrilldown registry={registry} />)
     const out = html()
-    expect(out).toContain('Provider Freshness')
+    expect(out).toContain('数据源新鲜度')
     expect(out).toContain('核心源 1 个，辅助源 2 个，缓存 1 个，失败 1 个')
     expect(out).toContain('实时ETF行情')
     expect(out).toContain('估算净值')

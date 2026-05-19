@@ -126,7 +126,7 @@ export function DataFreshnessDrilldown({ registry }) {
     <div className="provider-freshness-card" aria-label="数据源新鲜度明细">
       <div className="provider-freshness-head">
         <div>
-          <span>Provider Freshness</span>
+          <span>数据源新鲜度</span>
           <strong>{registry.summary}</strong>
         </div>
         <b>{registry.stalenessBadge}</b>
