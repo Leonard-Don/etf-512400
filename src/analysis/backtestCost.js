@@ -68,6 +68,26 @@ export function buildWalkForwardFolds({ length, trainSpan, testSpan, step }) {
   return folds
 }
 
+function keepLatestWalkForwardWindow(folds, { length, trainSpan, testSpan, maxFolds }) {
+  if (!folds.length || folds.at(-1).testEnd === length - 1) {
+    return folds
+      .slice(Math.max(0, folds.length - maxFolds))
+      .map((fold, index) => ({ ...fold, index }))
+  }
+
+  const latestFold = {
+    index: 0,
+    trainStart: length - trainSpan - testSpan,
+    trainEnd: length - testSpan - 1,
+    testStart: length - testSpan,
+    testEnd: length - 1,
+  }
+  const nonOverlapping = folds.filter((fold) => fold.testEnd < latestFold.testStart)
+  return [...nonOverlapping, latestFold]
+    .slice(Math.max(0, nonOverlapping.length + 1 - maxFolds))
+    .map((fold, index) => ({ ...fold, index }))
+}
+
 // 根据样本长度自适应地决定折的几何形状。
 // 目标：在有限样本（512400 当前约 280 根）下仍能切出 ≥3 折，
 // 同时保证每折训练段足够长（容纳最长慢线窗口），测试段不至于太短而失真。
@@ -97,9 +117,7 @@ export function planWalkForward(length, { minFolds = 3, maxFolds = 6 } = {}) {
     folds = buildWalkForwardFolds({ length, trainSpan, testSpan, step })
   }
 
-  if (folds.length > maxFolds) {
-    folds = folds.slice(0, maxFolds)
-  }
+  folds = keepLatestWalkForwardWindow(folds, { length, trainSpan, testSpan, maxFolds })
 
   return { folds, trainSpan, testSpan, step }
 }

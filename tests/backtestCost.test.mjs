@@ -147,6 +147,13 @@ test('planWalkForward：折数受 maxFolds 上限约束', () => {
   assert.ok(plan.folds.length <= 6)
 })
 
+test('planWalkForward：maxFolds 截断时保留最新样本外测试窗', () => {
+  const plan = planWalkForward(2000, { maxFolds: 6 })
+  assert.equal(plan.folds.length, 6)
+  assert.equal(plan.folds.at(-1).testEnd, 1999, '长历史截断后仍应覆盖最新样本')
+  plan.folds.forEach((fold, index) => assert.equal(fold.index, index))
+})
+
 test('planWalkForward：所有折训练段早于测试段、测试段不越界', () => {
   const plan = planWalkForward(360)
   assert.ok(plan.folds.length > 0)
