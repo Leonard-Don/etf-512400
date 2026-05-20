@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-05-19T09:16:56.438Z",
+    "generatedAt": "2026-05-20T02:25:23.597Z",
     "mode": "partial",
     "sources": [
       "push2.eastmoney.com quote api",
@@ -22,7 +22,7 @@
         "label": "ETF行情",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-19T09:16:55.985Z",
+        "fetchedAt": "2026-05-20T02:25:19.158Z",
         "fallback": false,
         "route": "eastmoney-kline-runtime"
       },
@@ -31,7 +31,7 @@
         "label": "512400 日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-19T09:16:55.595Z",
+        "fetchedAt": "2026-05-20T02:25:18.999Z",
         "fallback": false,
         "route": "eastmoney-etf-kline"
       },
@@ -40,7 +40,7 @@
         "label": "000819 基准日K",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-19T09:16:55.600Z",
+        "fetchedAt": "2026-05-20T02:25:18.840Z",
         "fallback": false,
         "route": "eastmoney-benchmark-kline"
       },
@@ -49,7 +49,7 @@
         "label": "盘中估算净值",
         "required": false,
         "ok": true,
-        "fetchedAt": "2026-05-19T09:16:55.780Z",
+        "fetchedAt": "2026-05-20T02:25:19.032Z",
         "fallback": false,
         "route": "fundgz.1234567.com.cn"
       },
@@ -58,7 +58,7 @@
         "label": "基金净值趋势",
         "required": true,
         "ok": true,
-        "fetchedAt": "2026-05-19T09:16:56.173Z",
+        "fetchedAt": "2026-05-20T02:25:23.294Z",
         "fallback": false
       },
       {
@@ -67,7 +67,7 @@
         "required": false,
         "ok": false,
         "fallback": true,
-        "fetchedAt": "2026-05-19T09:16:56.438Z",
+        "fetchedAt": "2026-05-20T02:25:23.597Z",
         "okCount": 5,
         "total": 5,
         "fallbackCount": 5,
@@ -80,38 +80,32 @@
   "quote": {
     "code": "512400",
     "name": "有色金属ETF南方",
-    "tradeDate": "2026-05-19",
-    "tradeTime": "2026-05-19 17:16:55",
-    "price": 1.981,
-    "previousClose": 2.009,
-    "open": 2.006,
-    "high": 2.006,
-    "low": 1.942,
+    "tradeDate": "2026-05-20",
+    "tradeTime": "2026-05-20 10:25:19",
+    "price": 1.938,
+    "previousClose": 1.981,
+    "open": 1.95,
+    "high": 1.958,
+    "low": 1.932,
     "averagePrice": null,
-    "change": -0.028,
-    "changePercent": -0.0139,
-    "amountCny": 812731964,
-    "volumeLots": 4130930,
-    "amplitude": 0.0319,
-    "turnoverRate": 0.0321,
+    "change": -0.043,
+    "changePercent": -0.0217,
+    "amountCny": 343508913,
+    "volumeLots": 1765639,
+    "amplitude": 0.0131,
+    "turnoverRate": 0.0138,
     "statusCode": 5,
     "totalMarketValueCny": null,
     "source": "eastmoney-kline-runtime"
   },
   "nav": {
-    "date": "2026-05-18",
-    "unit": 2.0081,
-    "dailyReturn": -0.0155,
-    "accumulated": 2.0331,
+    "date": "2026-05-19",
+    "unit": 1.9816,
+    "dailyReturn": -0.0132,
+    "accumulated": 2.0066,
     "source": "fund.eastmoney.com/pingzhongdata"
   },
   "navTrend": [
-    {
-      "date": "2025-03-20",
-      "unit": 1.1084,
-      "dailyReturn": -0.003,
-      "accumulated": 1.1184
-    },
     {
       "date": "2025-03-21",
       "unit": 1.0821,
@@ -1785,36 +1779,30 @@
       "unit": 2.0081,
       "dailyReturn": -0.0155,
       "accumulated": 2.0331
+    },
+    {
+      "date": "2026-05-19",
+      "unit": 1.9816,
+      "dailyReturn": -0.0132,
+      "accumulated": 2.0066
     }
   ],
   "estimate": {
-    "date": "2026-05-19",
-    "value": 1.981,
-    "changePercent": -0.013500000000000002,
-    "time": "2026-05-19 15:00",
-    "previousNavDate": "2026-05-18",
-    "previousUnitNav": 2.0081,
+    "date": "2026-05-20",
+    "value": 1.9386,
+    "changePercent": -0.0217,
+    "time": "2026-05-20 10:22",
+    "previousNavDate": "2026-05-19",
+    "previousUnitNav": 1.9816,
     "source": "fundgz.1234567.com.cn"
   },
   "performance": {
-    "oneMonth": -0.0737,
-    "threeMonth": -0.08289999999999999,
-    "sixMonth": 0.1802,
-    "oneYear": 0.9209
+    "oneMonth": -0.0859,
+    "threeMonth": -0.095,
+    "sixMonth": 0.1331,
+    "oneYear": 0.9059
   },
   "etfKlines": [
-    {
-      "date": "2025-03-21",
-      "open": 1.089,
-      "close": 1.066,
-      "high": 1.094,
-      "low": 1.062,
-      "volume": 2451013,
-      "amount": 267934405,
-      "amplitude": 0.029300000000000003,
-      "changePercent": -0.023799999999999998,
-      "change": -0.026
-    },
     {
       "date": "2025-03-24",
       "open": 1.066,
@@ -5162,21 +5150,21 @@
       "amplitude": 0.0319,
       "changePercent": -0.0139,
       "change": -0.028
+    },
+    {
+      "date": "2026-05-20",
+      "open": 1.95,
+      "close": 1.938,
+      "high": 1.958,
+      "low": 1.932,
+      "volume": 1765639,
+      "amount": 343508913,
+      "amplitude": 0.0131,
+      "changePercent": -0.0217,
+      "change": -0.043
     }
   ],
   "benchmarkKlines": [
-    {
-      "date": "2025-03-21",
-      "open": 5383.21,
-      "close": 5273.03,
-      "high": 5405.79,
-      "low": 5255.57,
-      "volume": 24424278,
-      "amount": 34043596458.1,
-      "amplitude": 0.0278,
-      "changePercent": -0.023700000000000002,
-      "change": -128
-    },
     {
       "date": "2025-03-24",
       "open": 5278.27,
@@ -8524,6 +8512,18 @@
       "amplitude": 0.0305,
       "changePercent": -0.013500000000000002,
       "change": -132.01
+    },
+    {
+      "date": "2026-05-20",
+      "open": 9496.29,
+      "close": 9417.01,
+      "high": 9502.28,
+      "low": 9387.86,
+      "volume": 14947867,
+      "amount": 37228462148.7,
+      "amplitude": 0.011899999999999999,
+      "changePercent": -0.0217,
+      "change": -208.97
     }
   ],
   "commodityDrivers": [
@@ -10311,16 +10311,16 @@
           "label": "LME铜03",
           "unit": "美元/吨",
           "source": "LME",
-          "tradeDate": "2026-05-19",
-          "tradeTime": "2026-05-19 17:16:56",
-          "price": 13485,
-          "previousClose": 13590,
-          "open": 13618,
+          "tradeDate": "2026-05-20",
+          "tradeTime": "2026-05-20 10:25:23",
+          "price": 13420.5,
+          "previousClose": 13427,
+          "open": 13428.5,
           "high": null,
           "low": null,
           "averagePrice": null,
-          "change": -105,
-          "changePercent": -0.0077,
+          "change": -6.5,
+          "changePercent": -0.0005,
           "amountCny": null,
           "volumeLots": null,
           "amplitude": null,
@@ -11229,16 +11229,16 @@
           "label": "LME铝03",
           "unit": "美元/吨",
           "source": "LME",
-          "tradeDate": "2026-05-19",
-          "tradeTime": "2026-05-19 17:16:56",
-          "price": 3599,
-          "previousClose": 3557.5,
-          "open": 3560,
+          "tradeDate": "2026-05-20",
+          "tradeTime": "2026-05-20 10:25:23",
+          "price": 3606,
+          "previousClose": 3587,
+          "open": 3592,
           "high": null,
           "low": null,
           "averagePrice": null,
-          "change": 41.5,
-          "changePercent": 0.0117,
+          "change": 19,
+          "changePercent": 0.0053,
           "amountCny": null,
           "volumeLots": null,
           "amplitude": null,
@@ -13018,8 +13018,8 @@
   ],
   "history": {
     "path": "src/data/history/512400-snapshots.json",
-    "count": 3,
-    "latestGeneratedAt": "2026-05-19T09:16:56.438Z",
-    "latestTradeDate": "2026-05-19"
+    "count": 4,
+    "latestGeneratedAt": "2026-05-20T02:25:23.597Z",
+    "latestTradeDate": "2026-05-20"
   }
 }

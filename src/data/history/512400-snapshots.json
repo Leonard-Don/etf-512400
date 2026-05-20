@@ -157,5 +157,58 @@
         "riskScore": 62
       }
     ]
+  },
+  {
+    "generatedAt": "2026-05-20T02:25:23.597Z",
+    "tradeDate": "2026-05-20",
+    "tradeTime": "2026-05-20 10:25:19",
+    "price": 1.938,
+    "nav": 1.9816,
+    "premium": -0.02200242228502225,
+    "changePercent": -0.0217,
+    "amountCny": 343508913,
+    "turnoverRate": 0.0138,
+    "drivers": [
+      {
+        "key": "gold",
+        "ok": true,
+        "price": 1041.54,
+        "changePercent": 0.0059,
+        "trendScore": 37,
+        "riskScore": 95
+      },
+      {
+        "key": "copper",
+        "ok": true,
+        "price": 103200,
+        "changePercent": 0.0018,
+        "trendScore": 67,
+        "riskScore": 34
+      },
+      {
+        "key": "aluminum",
+        "ok": true,
+        "price": 24350,
+        "changePercent": -0.0012,
+        "trendScore": 46,
+        "riskScore": 95
+      },
+      {
+        "key": "battery",
+        "ok": true,
+        "price": 199060,
+        "changePercent": 0.0152,
+        "trendScore": 100,
+        "riskScore": 95
+      },
+      {
+        "key": "rareEarth",
+        "ok": true,
+        "price": 3242.11,
+        "changePercent": 0.0012,
+        "trendScore": 90,
+        "riskScore": 62
+      }
+    ]
   }
 ]
