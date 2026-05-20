@@ -331,11 +331,19 @@ function finiteGridValues(values, fallback) {
   return [...new Set(safeValues)].sort((a, b) => a - b)
 }
 
+function finiteIntegerGridValues(values, fallback) {
+  const source = Array.isArray(values) && values.length ? values : fallback
+  const valid = source.filter((value) => Number.isInteger(value) && value > 0)
+  const fallbackValues = fallback.filter((value) => Number.isInteger(value) && value > 0)
+  const safeValues = valid.length ? valid : fallbackValues
+  return [...new Set(safeValues)].sort((a, b) => a - b)
+}
+
 function normalizeParameterGrid(parameterGrid = {}) {
   const grid = parameterGrid && typeof parameterGrid === 'object' ? parameterGrid : {}
   return {
-    fastWindows: finiteGridValues(grid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
-    slowWindows: finiteGridValues(grid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
+    fastWindows: finiteIntegerGridValues(grid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
+    slowWindows: finiteIntegerGridValues(grid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
     entryPullbacks: finiteGridValues(
       grid.entryPullbacks,
       DEFAULT_PARAMETER_GRID.entryPullbacks,

@@ -265,6 +265,30 @@ test('参数网格中的非正值会被过滤，避免生成负窗口或负回�
   assert.equal(result.parameterSurface.recommended.params.riskCut, 0.2)
 })
 
+test('参数网格中的小数窗口会被过滤，避免生成非整数交易日均线', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  let result
+
+  assert.doesNotThrow(() => {
+    result = buildStrategyOptimizer({
+      klines,
+      factorBaskets: baseFactors,
+      parameterGrid: {
+        fastWindows: [20.5, 20],
+        slowWindows: [60.5, 60],
+        entryPullbacks: [0.05],
+        deepPullbacks: [0.12],
+        riskCuts: [0.2],
+      },
+    })
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.totalCandidates, 1)
+  assert.equal(result.parameterSurface.recommended.params.fastWindow, 20)
+  assert.equal(result.parameterSurface.recommended.params.slowWindow, 60)
+})
+
 test('参数网格正值但组合约束全不成立时回退默认网格', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
   const result = buildStrategyOptimizer({
