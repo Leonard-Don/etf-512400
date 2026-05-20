@@ -32,6 +32,7 @@ export function rebalanceCost(previousExposure, nextExposure, costRate) {
 
 // 生成 walk-forward 滚动窗口：把样本切成多个「训练段 + 紧随其后的测试段」。
 // 相邻折按 step 向前滚动，测试段互不重叠，最大程度模拟真实的逐段样本外推进。
+// 若外部传入 step < testSpan，则夹到 testSpan，避免样本外测试窗被重复复合。
 //   length      —— 清洗后的 K 线总根数
 //   trainSpan   —— 每折训练段交易日数
 //   testSpan    —— 每折测试段交易日数
@@ -50,7 +51,8 @@ export function buildWalkForwardFolds({ length, trainSpan, testSpan, step }) {
     return folds
   }
 
-  const rollStep = Number.isFinite(step) && step > 0 ? Math.floor(step) : testSpan
+  const requestedStep = Number.isFinite(step) && step > 0 ? Math.floor(step) : testSpan
+  const rollStep = Math.max(testSpan, requestedStep)
   let trainStart = 0
   let index = 0
 

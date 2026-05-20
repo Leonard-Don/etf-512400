@@ -97,10 +97,15 @@ test('buildWalkForwardFolds：训练段永远在测试段之前（无未来信�
   })
 })
 
-test('buildWalkForwardFolds：自定义 step 让训练窗重叠以挤出更多折', () => {
-  const wide = buildWalkForwardFolds({ length: 300, trainSpan: 120, testSpan: 60, step: 60 })
-  const dense = buildWalkForwardFolds({ length: 300, trainSpan: 120, testSpan: 60, step: 30 })
-  assert.ok(dense.length > wide.length)
+test('buildWalkForwardFolds：自定义 step 小于测试窗时夹到 testSpan，避免测试窗重叠', () => {
+  const folds = buildWalkForwardFolds({ length: 300, trainSpan: 120, testSpan: 60, step: 30 })
+  assert.ok(folds.length >= 2)
+  for (let i = 1; i < folds.length; i += 1) {
+    assert.ok(
+      folds[i].testStart > folds[i - 1].testEnd,
+      `测试窗重叠：${folds[i - 1].testStart}-${folds[i - 1].testEnd} 与 ${folds[i].testStart}-${folds[i].testEnd}`,
+    )
+  }
 })
 
 test('buildWalkForwardFolds：fold.index 从 0 连续递增', () => {
