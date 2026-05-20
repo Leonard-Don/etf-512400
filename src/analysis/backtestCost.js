@@ -75,21 +75,23 @@ export function planWalkForward(length, { minFolds = 3, maxFolds = 6 } = {}) {
   }
 
   // 测试段占比约 22%，但夹在 [40, 130] 之间：太短样本外噪声大，太长折数不够。
-  const testSpan = Math.max(40, Math.min(130, Math.round(length * 0.22)))
+  let testSpan = Math.max(40, Math.min(130, Math.round(length * 0.22)))
   // 训练段约为测试段的 1.6 倍，且至少 130 根（容纳 120 日慢线 + 预热）。
-  const trainSpan = Math.max(130, Math.round(testSpan * 1.6))
+  let trainSpan = Math.max(130, Math.round(testSpan * 1.6))
 
   if (length < trainSpan + testSpan) {
     return { folds: [], trainSpan, testSpan, step: 0 }
   }
 
-  // 先按「测试段不重叠」铺折；若折数不足 minFolds，再缩小步长让训练窗重叠以多挤出几折。
+  // 先按「测试段不重叠」铺折；若折数不足 minFolds，再缩短测试段补折。
+  // 下游会复合各折样本外收益，因此 plan 层必须保持 step >= testSpan，避免重叠测试窗被重复计入。
   let step = testSpan
   let folds = buildWalkForwardFolds({ length, trainSpan, testSpan, step })
 
-  if (folds.length < minFolds) {
-    const slack = length - trainSpan - testSpan
-    step = Math.max(1, Math.floor(slack / (minFolds - 1)))
+  if (folds.length < minFolds && minFolds > 1) {
+    testSpan = Math.max(40, Math.min(testSpan, Math.floor((length - trainSpan) / minFolds)))
+    trainSpan = Math.max(130, Math.round(testSpan * 1.6))
+    step = testSpan
     folds = buildWalkForwardFolds({ length, trainSpan, testSpan, step })
   }
 

@@ -122,11 +122,19 @@ test('buildWalkForwardFolds：非法入参 → 返回空数组', () => {
 
 // ---- walk-forward：自适应规划 ----
 
-test('planWalkForward：280 根样本（512400 当前规模）切出 ≥3 折', () => {
+test('planWalkForward：280 根样本（512400 当前规模）测试窗不重叠', () => {
   const plan = planWalkForward(280)
-  assert.ok(plan.folds.length >= 3, `期望 ≥3 折，实际 ${plan.folds.length}`)
+  assert.ok(plan.folds.length >= 3, `期望至少 3 折，实际 ${plan.folds.length}`)
   assert.ok(plan.trainSpan >= 130, '训练段需容纳 120 日慢线 + 预热')
   assert.ok(plan.testSpan >= 40)
+  assert.ok(plan.step >= plan.testSpan, `step ${plan.step} 不应小于 testSpan ${plan.testSpan}`)
+  assert.equal(plan.folds.at(-1).testEnd, 279, '最后一折应覆盖最新样本')
+  for (let i = 1; i < plan.folds.length; i += 1) {
+    assert.ok(
+      plan.folds[i].testStart > plan.folds[i - 1].testEnd,
+      `测试窗重叠：${plan.folds[i - 1].testStart}-${plan.folds[i - 1].testEnd} 与 ${plan.folds[i].testStart}-${plan.folds[i].testEnd}`,
+    )
+  }
 })
 
 test('planWalkForward：折数受 maxFolds 上限约束', () => {
@@ -149,10 +157,14 @@ test('planWalkForward：样本过小（<120）→ 空折', () => {
   assert.deepEqual(planWalkForward(NaN).folds, [])
 })
 
-test('planWalkForward：minFolds 不满足时缩小步长补足折数', () => {
-  // 刚好够 trainSpan+testSpan 的样本，默认步长只能 1 折，需缩步长补到 minFolds
+test('planWalkForward：样本不足以满足 minFolds 时也不压缩到重叠测试窗', () => {
+  // 样本刚够铺出少量折时，宁可少于 minFolds，也不能让样本外测试窗重叠复合。
   const plan = planWalkForward(220, { minFolds: 3 })
   if (plan.trainSpan + plan.testSpan <= 220) {
     assert.ok(plan.folds.length >= 1)
+  }
+  assert.ok(plan.step >= plan.testSpan, `step ${plan.step} 不应小于 testSpan ${plan.testSpan}`)
+  for (let i = 1; i < plan.folds.length; i += 1) {
+    assert.ok(plan.folds[i].testStart > plan.folds[i - 1].testEnd)
   }
 })
