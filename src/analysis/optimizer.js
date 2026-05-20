@@ -9,6 +9,12 @@ import {
   movingAverage,
   trailingHigh,
 } from './math.js'
+import {
+  bpsToRate,
+  normalizeCostBpsPerSide,
+  planWalkForward,
+  rebalanceCost,
+} from './backtestCost.js'
 
 // 仓位档位：满仓 / 中性 / 深度回撤抢反弹 / 浅回撤试探 / 风控压仓
 const EXPOSURE_LEVELS = {
@@ -59,6 +65,14 @@ const OVERFIT = {
   midGap: 0.55,
   highStability: 70,
   midStability: 48,
+}
+
+// walk-forward 多折一致性扣分：跨折样本外年化越离散、出现亏损折越多，稳定性扣得越狠。
+// 这是单切分稳定性之外的「折间鲁棒性」补充惩罚——一组参数只在某一折好看不算稳。
+const FOLD_STABILITY = {
+  dispersionPenalty: 70, // 跨折样本外年化的标准差惩罚系数
+  losingFoldPenalty: 12, // 每一折样本外年化转负扣分
+  benchmarkMissPenalty: 8, // 每一折跑输买入持有扣分
 }
 
 const FACTOR_OVERLAY = {
@@ -153,7 +167,7 @@ function evaluateBuyHold(klines, startIndex, endIndex) {
   }
 }
 
-function evaluateOptimizedCandidate(klines, params, startIndex, endIndex) {
+function evaluateOptimizedCandidate(klines, params, startIndex, endIndex, costRate = 0) {
   const firstIndex = Math.max(startIndex + 1, params.slowWindow + 1)
   if (endIndex <= firstIndex) {
     return {
@@ -165,6 +179,8 @@ function evaluateOptimizedCandidate(klines, params, startIndex, endIndex) {
       exposure: 0,
       emptyDays: 0,
       periods: 0,
+      rebalanceCount: 0,
+      costDrag: 0,
     }
   }
 
@@ -172,15 +188,24 @@ function evaluateOptimizedCandidate(klines, params, startIndex, endIndex) {
   const curve = [1]
   const activeReturns = []
   const exposures = []
+  // 段内首根之前视为空仓：首次建仓的换手成本同样计入，不让窗口边界偷漏成本。
+  let previousExposure = 0
+  let rebalanceCount = 0
+  let totalCost = 0
 
   for (let index = firstIndex; index <= endIndex; index += 1) {
     const exposure = optimizedExposure(params, klines, index - 1)
     const dayReturn = klines[index].close / klines[index - 1].close - 1
-    const strategyReturn = dayReturn * exposure
+    // 仓位在 index-1 收盘决策、index 当根赚取收益，调仓成本与该根收益一并结算。
+    const cost = rebalanceCost(previousExposure, exposure, costRate)
+    if (cost > 0) rebalanceCount += 1
+    totalCost += cost
+    const strategyReturn = dayReturn * exposure - cost
     value *= 1 + strategyReturn
     curve.push(value)
     exposures.push(exposure)
     if (exposure > 0.01) activeReturns.push(strategyReturn)
+    previousExposure = exposure
   }
 
   const gains = activeReturns.filter((item) => item > 0)
@@ -197,7 +222,105 @@ function evaluateOptimizedCandidate(klines, params, startIndex, endIndex) {
     exposure: average(exposures) ?? 0,
     emptyDays: exposures.filter((item) => item < 0.1).length,
     periods: exposures.length,
+    rebalanceCount,
+    costDrag: totalCost,
   }
+}
+
+// 把一段净值曲线按多折求出的「分段收益」复合还原成等价的整体年化。
+// 各折训练段长度可能不同，直接平均年化会失真，因此先把每折的区间总收益累乘，
+// 再用累计交易日数还原年化——这才是把多折拼起来的诚实复合口径。
+function compoundFoldReturns(folds, pick) {
+  let value = 1
+  let periods = 0
+  folds.forEach((fold) => {
+    const slice = pick(fold)
+    if (!slice || !Number.isFinite(slice.totalReturn) || slice.periods <= 0) return
+    value *= 1 + slice.totalReturn
+    periods += slice.periods
+  })
+  return periods > 0 ? annualizedReturn(value - 1, periods) : 0
+}
+
+// 对一组折切片做统计聚合：均值年化（复合口径）、跨折离散度、最差折回撤、亏损折数。
+function aggregateFoldSlices(folds, pick) {
+  const slices = folds.map(pick).filter((slice) => slice && slice.periods > 0)
+  if (!slices.length) {
+    return {
+      annualReturn: 0,
+      maxDrawdown: 0,
+      hitRate: 0,
+      winLossRatio: 0,
+      exposure: 0,
+      emptyDays: 0,
+      periods: 0,
+      rebalanceCount: 0,
+      costDrag: 0,
+      annualReturnDispersion: 0,
+      worstFoldAnnualReturn: 0,
+      worstFoldMaxDrawdown: 0,
+      losingFolds: 0,
+      foldCount: 0,
+    }
+  }
+  const annuals = slices.map((slice) => slice.annualReturn)
+  return {
+    // 年化用复合口径还原；其余指标用折间均值，作为「典型一折」的画像。
+    annualReturn: compoundFoldReturns(folds, pick),
+    maxDrawdown: average(slices.map((slice) => slice.maxDrawdown)) ?? 0,
+    hitRate: average(slices.map((slice) => slice.hitRate)) ?? 0,
+    winLossRatio: average(slices.map((slice) => slice.winLossRatio)) ?? 0,
+    exposure: average(slices.map((slice) => slice.exposure)) ?? 0,
+    emptyDays: Math.round(average(slices.map((slice) => slice.emptyDays)) ?? 0),
+    periods: slices.reduce((sum, slice) => sum + slice.periods, 0),
+    rebalanceCount: slices.reduce((sum, slice) => sum + (slice.rebalanceCount ?? 0), 0),
+    costDrag: slices.reduce((sum, slice) => sum + (slice.costDrag ?? 0), 0),
+    annualReturnDispersion: standardDeviation(annuals),
+    worstFoldAnnualReturn: Math.min(...annuals),
+    worstFoldMaxDrawdown: Math.min(...slices.map((slice) => slice.maxDrawdown)),
+    losingFolds: annuals.filter((value) => value < 0).length,
+    foldCount: slices.length,
+  }
+}
+
+// 单组参数跑完全部 walk-forward 折：每折分别评估训练段与测试段（均已扣交易成本），
+// 再把多折聚合成一个「典型样本外画像」，供排名与稳定性评分使用。
+function evaluateCandidateAcrossFolds(klines, params, folds, costRate) {
+  const foldResults = folds.map((fold) => ({
+    index: fold.index,
+    train: evaluateOptimizedCandidate(klines, params, fold.trainStart, fold.trainEnd, costRate),
+    test: evaluateOptimizedCandidate(klines, params, fold.testStart, fold.testEnd, costRate),
+  }))
+  return {
+    folds: foldResults,
+    train: aggregateFoldSlices(foldResults, (fold) => fold.train),
+    test: aggregateFoldSlices(foldResults, (fold) => fold.test),
+  }
+}
+
+// 把多折买入持有基准聚合成与候选可比的样本外基准画像。
+function evaluateBuyHoldAcrossFolds(klines, folds) {
+  const foldResults = folds.map((fold) => ({
+    index: fold.index,
+    test: { ...evaluateBuyHold(klines, fold.testStart, fold.testEnd), periods: fold.testEnd - fold.testStart },
+  }))
+  return aggregateFoldSlices(foldResults, (fold) => fold.test)
+}
+
+// 折间一致性附加扣分：在「单切分稳定性」基础上，再按跨折离散度 / 亏损折 / 跑输基准折扣分。
+function foldStabilityPenalty(testAggregate, benchmarkAggregate) {
+  const dispersion = testAggregate.annualReturnDispersion ?? 0
+  const losingFolds = testAggregate.losingFolds ?? 0
+  const benchmarkMissFolds = (() => {
+    if (!testAggregate.foldCount) return 0
+    // 用聚合年化粗略判断是否整体跑输基准；多折级别的逐折比较已体现在 losingFolds。
+    return testAggregate.annualReturn < (benchmarkAggregate.annualReturn ?? 0) ? 1 : 0
+  })()
+  return (
+    dispersion * FOLD_STABILITY.dispersionPenalty +
+    losingFolds * FOLD_STABILITY.losingFoldPenalty +
+    benchmarkMissFolds * FOLD_STABILITY.benchmarkMissPenalty
+  )
 }
 
 function finiteGridValues(values, fallback) {
@@ -281,7 +404,7 @@ function scoreCandidate({ train, test, benchmarkTest, params }) {
   )
 }
 
-function stabilityScoreFor(train, test, benchmarkTest) {
+function stabilityScoreFor(train, test, benchmarkTest, foldPenalty = 0) {
   const trainTestGap = Math.abs(train.annualReturn - test.annualReturn)
   const drawdownGap = Math.abs(train.maxDrawdown - test.maxDrawdown)
   const negativePenalty = test.annualReturn < 0 ? STABILITY.negativeReturnPenalty : 0
@@ -294,7 +417,8 @@ function stabilityScoreFor(train, test, benchmarkTest) {
         trainTestGap * STABILITY.trainTestGapPenalty -
         drawdownGap * STABILITY.drawdownGapPenalty -
         negativePenalty -
-        benchmarkPenalty,
+        benchmarkPenalty -
+        foldPenalty,
       0,
       100,
     ),
@@ -520,7 +644,7 @@ function buildParameterSurface(ranked, candidates, benchmarkTest) {
   }
 }
 
-export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid }) {
+export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid, costBpsPerSide }) {
   const cleaned = cleanKlines(klines)
   const factorProfile = buildFactorProfile(factorBaskets)
 
@@ -534,23 +658,46 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
     }
   }
 
-  const splitIndex = Math.max(90, Math.floor(cleaned.length * 0.65))
-  const trainStart = 0
-  const trainEnd = splitIndex - 1
-  const testStart = splitIndex
-  const testEnd = cleaned.length - 1
-  const benchmarkTest = evaluateBuyHold(cleaned, testStart, testEnd)
+  // 单边交易成本：调用方可覆盖，默认取 A股 ETF 的保守口径（~4 bps/边）。
+  const normalizedCostBpsPerSide = normalizeCostBpsPerSide(costBpsPerSide)
+  const costRate = bpsToRate(normalizedCostBpsPerSide)
+
+  // walk-forward 滚动切分：把样本切成多折「训练段 + 紧随测试段」，逐折推进。
+  // 样本不足以铺出多折时（约 140–169 根），退化为单切分，保证优化器不静默崩溃。
+  const plan = planWalkForward(cleaned.length)
+  const usingWalkForward = plan.folds.length >= 2
+  const folds = usingWalkForward
+    ? plan.folds
+    : (() => {
+        const splitIndex = Math.max(90, Math.floor(cleaned.length * 0.65))
+        return [
+          {
+            index: 0,
+            trainStart: 0,
+            trainEnd: splitIndex - 1,
+            testStart: splitIndex,
+            testEnd: cleaned.length - 1,
+          },
+        ]
+      })()
+
+  // 多折买入持有基准：与候选同口径聚合，作为「样本外是否跑赢被动持有」的标尺。
+  const benchmarkTest = evaluateBuyHoldAcrossFolds(cleaned, folds)
   const candidates = generateOptimizerCandidates(parameterGrid).map((params) => {
-    const train = evaluateOptimizedCandidate(cleaned, params, trainStart, trainEnd)
-    const test = evaluateOptimizedCandidate(cleaned, params, testStart, testEnd)
+    const walk = evaluateCandidateAcrossFolds(cleaned, params, folds, costRate)
+    const train = walk.train
+    const test = walk.test
+    // 单切分稳定性（训练/测试差距）叠加折间一致性扣分（跨折离散、亏损折）。
+    const foldPenalty = usingWalkForward ? foldStabilityPenalty(test, benchmarkTest) : 0
     const stabilityScore = Math.min(
-      stabilityScoreFor(train, test, benchmarkTest),
+      stabilityScoreFor(train, test, benchmarkTest, foldPenalty),
       cleaned.length < OVERFIT.shortSampleDays ? STABILITY_CAP_SHORT_SAMPLE : 100,
     )
     return {
       params,
       train,
       test,
+      walkForward: walk,
       stabilityScore,
       overfitRisk: overfitLabel(stabilityScore, train, test, cleaned.length),
       score: scoreCandidate({ train, test, benchmarkTest, params }),
@@ -587,25 +734,72 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
           ? 'opportunity'
           : 'neutral'
 
+  // walk-forward 折的可读摘要：逐折训练/测试窗口、跨折一致性、最差折画像。
+  const foldSummaries = folds.map((fold) => {
+    const slice = best.walkForward.folds.find((item) => item.index === fold.index)
+    return {
+      index: fold.index,
+      trainSpan: fold.trainEnd - fold.trainStart + 1,
+      testSpan: fold.testEnd - fold.testStart + 1,
+      trainStartDate: cleaned[fold.trainStart]?.date,
+      testStartDate: cleaned[fold.testStart]?.date,
+      testEndDate: cleaned[fold.testEnd]?.date,
+      testAnnualReturn: slice?.test.annualReturn ?? 0,
+      testMaxDrawdown: slice?.test.maxDrawdown ?? 0,
+      testExposure: slice?.test.exposure ?? 0,
+      rebalanceCount: slice?.test.rebalanceCount ?? 0,
+    }
+  })
+  const walkForwardSummary = {
+    enabled: usingWalkForward,
+    foldCount: folds.length,
+    trainSpan: usingWalkForward ? plan.trainSpan : folds[0].trainEnd - folds[0].trainStart + 1,
+    testSpan: usingWalkForward ? plan.testSpan : folds[0].testEnd - folds[0].testStart + 1,
+    step: usingWalkForward ? plan.step : 0,
+    costBpsPerSide: normalizedCostBpsPerSide,
+    annualReturnDispersion: best.test.annualReturnDispersion,
+    worstFoldAnnualReturn: best.test.worstFoldAnnualReturn,
+    worstFoldMaxDrawdown: best.test.worstFoldMaxDrawdown,
+    losingFolds: best.test.losingFolds,
+    totalRebalances: best.test.rebalanceCount,
+    costDrag: best.test.costDrag,
+    folds: foldSummaries,
+    summary: usingWalkForward
+      ? `${folds.length} 折滚动样本外验证（每折训练≈${plan.trainSpan}日 / 测试≈${plan.testSpan}日），样本外年化已扣 ${
+          normalizedCostBpsPerSide
+        } bps/边交易成本。`
+      : `样本不足以铺出多折，回退为单切分；样本外年化已扣 ${
+          normalizedCostBpsPerSide
+        } bps/边交易成本。`,
+    explanation: usingWalkForward
+      ? `跨 ${folds.length} 折样本外年化标准差 ${formatPercent(best.test.annualReturnDispersion, 1)}，最差一折年化 ${formatPercent(best.test.worstFoldAnnualReturn, 1)}，亏损折 ${best.test.losingFolds}/${folds.length}。`
+      : '单切分结果，未做折间一致性检验，参考价值低于多折。',
+  }
+
   return {
     ok: true,
     totalCandidates: candidates.length,
     sample: {
       total: cleaned.length,
-      train: trainEnd - trainStart + 1,
-      test: testEnd - testStart + 1,
-      splitDate: cleaned[splitIndex]?.date ?? cleaned[testStart]?.date,
+      // train/test 现表示「单折」的窗口大小（walk-forward 下每折同形），
+      // 旧 UI 的「样本内 N日 / 样本外 N日」标签据此仍然可读。
+      train: walkForwardSummary.trainSpan,
+      test: walkForwardSummary.testSpan,
+      foldCount: folds.length,
+      walkForward: usingWalkForward,
+      splitDate: cleaned[folds[0].testStart]?.date,
       startDate: cleaned[0]?.date,
       endDate: cleaned.at(-1)?.date,
     },
     benchmarkTest,
+    walkForward: walkForwardSummary,
     parameterSurface,
     best: {
       ...best,
       label: paramsLabel(best.params),
       stabilityBand: stabilityBand(best.stabilityScore),
       overfitExplanation: overfitExplanation(best.overfitRisk),
-      explanation: `${stabilityBand(best.stabilityScore)}，${overfitExplanation(best.overfitRisk)}；当前原始仓位 ${formatPercent(latestRawExposure, 0)}，因子覆盖后为 ${formatPercent(currentExposure, 0)}。`,
+      explanation: `${stabilityBand(best.stabilityScore)}，${overfitExplanation(best.overfitRisk)}；${walkForwardSummary.explanation} 当前原始仓位 ${formatPercent(latestRawExposure, 0)}，因子覆盖后为 ${formatPercent(currentExposure, 0)}。`,
       rule: `快线${best.params.fastWindow}日、慢线${best.params.slowWindow}日过滤趋势；回撤${formatPercent(best.params.entryPullback, 0)}先建观察仓，回撤${formatPercent(best.params.deepPullback, 0)}进入主仓；若回撤超过${formatPercent(best.params.riskCut, 0)}且价格低于慢线，仓位压到18%以内。`,
       current: {
         rawExposure: latestRawExposure,
@@ -617,9 +811,10 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
       },
       invalidationRules: [
         '历史样本不足360个交易日时，过拟合风险最高只能评为中等',
-        '样本外年化收益转负，自动规则降级为观察',
+        '样本外年化收益（已扣交易成本）转负，自动规则降级为观察',
         '样本外最大回撤超过买入持有，停止放大仓位',
         '稳定性分数低于50，标记为过拟合风险偏高',
+        'walk-forward 跨折年化离散度过大或存在亏损折，按折间一致性扣稳定性',
         '当前高风险因子达到3个及以上，仓位按风控覆盖下调',
       ],
     },
@@ -634,6 +829,12 @@ export function buildStrategyOptimizer({ klines, factorBaskets, parameterGrid })
       testAnnualReturn: candidate.test.annualReturn,
       testMaxDrawdown: candidate.test.maxDrawdown,
       testExposure: candidate.test.exposure,
+      // walk-forward 折间一致性指标：跨折年化离散、最差折、亏损折数。
+      foldCount: candidate.test.foldCount,
+      annualReturnDispersion: candidate.test.annualReturnDispersion,
+      worstFoldAnnualReturn: candidate.test.worstFoldAnnualReturn,
+      losingFolds: candidate.test.losingFolds,
+      rebalanceCount: candidate.test.rebalanceCount,
       explanation: `${stabilityBand(candidate.stabilityScore)}，样本外仓位 ${formatPercent(candidate.test.exposure, 0)}；${overfitExplanation(candidate.overfitRisk)}。`,
     })),
   }

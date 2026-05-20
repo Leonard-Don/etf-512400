@@ -308,3 +308,104 @@ test('benchmarkMaxDrawdown 反映买入持有路径上的峰谷回撤', () => {
   // buyHold 全程满仓，maxDrawdown 应等于 benchmark
   approx(buyHold.maxDrawdown, -0.2, 1e-9)
 })
+
+// ---- 交易成本模型 ----
+
+// 构造一段会反复触发回撤档位切换、产生换手的行情：涨→急跌→反弹→再跌
+function choppyKlines() {
+  const out = []
+  const start = new Date('2024-01-01')
+  let day = 0
+  const push = (close) => {
+    const date = new Date(start)
+    date.setDate(start.getDate() + day)
+    out.push({ date: date.toISOString().slice(0, 10), close })
+    day += 1
+  }
+  for (let i = 0; i < 70; i += 1) push(100) // 建立 60 日均线/高点
+  for (let i = 0; i < 8; i += 1) push(88) // 跌破 -10% 档
+  for (let i = 0; i < 8; i += 1) push(100) // 反弹回原位
+  for (let i = 0; i < 8; i += 1) push(84) // 再跌破 -15% 档
+  for (let i = 0; i < 8; i += 1) push(99) // 再反弹
+  return out
+}
+
+test('交易成本：默认成本下主动策略产生 rebalanceCount 与正的 costDrag', () => {
+  const klines = choppyKlines()
+  const results = buildBacktestStrategies({ klines, factorBaskets: baseFactorBaskets })
+  const pullback = results.find((s) => s.id === 'pullback')
+  // 反复穿越回撤档位 → 必然多次调仓
+  assert.ok(pullback.rebalanceCount > 0, `期望调仓次数 >0，实际 ${pullback.rebalanceCount}`)
+  assert.ok(pullback.costDrag > 0, `期望成本拖累 >0，实际 ${pullback.costDrag}`)
+})
+
+test('交易成本：成本越高，主动策略 totalReturn 越低（成本被真正扣进净值）', () => {
+  const klines = choppyKlines()
+  const free = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 0,
+  }).find((s) => s.id === 'pullback')
+  const cheap = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 4,
+  }).find((s) => s.id === 'pullback')
+  const pricey = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 50,
+  }).find((s) => s.id === 'pullback')
+
+  assert.equal(free.costDrag, 0, '零成本时 costDrag 必须为 0')
+  assert.ok(cheap.costDrag > 0)
+  assert.ok(pricey.costDrag > cheap.costDrag, '成本费率越高，累计成本越大')
+  assert.ok(
+    cheap.totalReturn < free.totalReturn,
+    `加成本后收益应下降：free=${free.totalReturn} cheap=${cheap.totalReturn}`,
+  )
+  assert.ok(
+    pricey.totalReturn < cheap.totalReturn,
+    `成本越高收益越低：cheap=${cheap.totalReturn} pricey=${pricey.totalReturn}`,
+  )
+})
+
+test('交易成本：买入持有作为基准线豁免交易成本（永不调仓）', () => {
+  const klines = risingKlines(250, 0.001)
+  const free = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 0,
+  }).find((s) => s.id === 'buyHold')
+  const costed = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 50,
+  }).find((s) => s.id === 'buyHold')
+  // 基准是其它策略的对照，自身不计成本：两种费率下结果完全一致
+  approx(costed.totalReturn, free.totalReturn, 1e-12)
+  approx(costed.annualReturn, free.annualReturn, 1e-12)
+  assert.equal(costed.costDrag, 0)
+  assert.equal(costed.rebalanceCount, 0)
+})
+
+test('交易成本：单调上涨中 trend 策略只建一次仓 → 成本拖累很小但非负', () => {
+  const klines = risingKlines(250, 0.001)
+  const trend = buildBacktestStrategies({
+    klines,
+    factorBaskets: baseFactorBaskets,
+    costBpsPerSide: 4,
+  }).find((s) => s.id === 'trend')
+  // 持续上涨不触发降档，仅首次建仓一次换手
+  assert.ok(trend.costDrag >= 0)
+  assert.ok(trend.costDrag < 0.01, `单次建仓成本应很小，实际 ${trend.costDrag}`)
+})
+
+test('交易成本：样本不足时 costDrag 与 rebalanceCount 归零', () => {
+  const klines = flatKlines(15)
+  const results = buildBacktestStrategies({ klines, factorBaskets: baseFactorBaskets })
+  results.forEach((strategy) => {
+    assert.equal(strategy.costDrag, 0)
+    assert.equal(strategy.rebalanceCount, 0)
+  })
+})

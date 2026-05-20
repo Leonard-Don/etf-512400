@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { buildStrategyOptimizer } from '../src/analysis/optimizer.js'
+import { DEFAULT_COST_BPS_PER_SIDE } from '../src/analysis/backtestCost.js'
 
 const baseFactors = [
   { trend: 65, risk: 50, weight: 30 },
@@ -87,13 +88,16 @@ test('因子共振（positive≥3 且 highRisk≤1）允许 multiplier 略上调
   assert.ok(result.best.current.factorOverlay >= 1)
 })
 
-test('训练/测试切分日期落在样本中段', () => {
+test('walk-forward 每折训练/测试窗口为正，且每折窗口小于总样本（多折滚动）', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0005 ** i)
   const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
   assert.equal(result.ok, true)
   assert.ok(result.sample.train > 0)
   assert.ok(result.sample.test > 0)
-  assert.equal(result.sample.train + result.sample.test, klines.length)
+  // walk-forward 下 sample.train/test 是「单折」窗口大小，必然小于总样本
+  assert.ok(result.sample.train + result.sample.test < klines.length)
+  assert.ok(result.sample.foldCount >= 2, '260 根样本应能铺出至少 2 折')
+  assert.equal(result.sample.walkForward, true)
 })
 
 test('leaderboard 每项都带稳定性、过拟合、年化、回撤、仓位', () => {
@@ -228,4 +232,33 @@ test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原�
   assert.ok(['高稳定', '中等稳定', '低稳定'].includes(result.parameterSurface.stabilityBand))
   assert.ok(result.parameterSurface.recommended.explanation.includes('推荐它是因为'))
   assert.ok(result.parameterSurface.topWindows[0].explanation.includes('平均稳定性'))
+})
+
+test('非法负数成本覆盖值不会让优化器按零成本计算或在摘要里泄漏负 bps', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0008 ** i)
+  const singlePointGrid = {
+    fastWindows: [20],
+    slowWindows: [60],
+    entryPullbacks: [0.05],
+    deepPullbacks: [0.12],
+    riskCuts: [0.2],
+  }
+  const invalidCost = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: singlePointGrid,
+    costBpsPerSide: -20,
+  })
+  const defaultCost = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: singlePointGrid,
+  })
+
+  assert.equal(invalidCost.ok, true)
+  assert.equal(defaultCost.ok, true)
+  assert.equal(invalidCost.walkForward.costBpsPerSide, DEFAULT_COST_BPS_PER_SIDE)
+  assert.equal(invalidCost.best.test.costDrag, defaultCost.best.test.costDrag)
+  assert.ok(invalidCost.best.test.costDrag > 0)
+  assert.ok(!invalidCost.walkForward.summary.includes('-20 bps'))
 })

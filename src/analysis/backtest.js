@@ -7,6 +7,7 @@ import {
   movingAverage,
   trailingHigh,
 } from './math.js'
+import { bpsToRate, normalizeCostBpsPerSide, rebalanceCost } from './backtestCost.js'
 
 function strategyExposure(strategyId, klines, index, factorProfile) {
   const close = klines[index].close
@@ -61,7 +62,7 @@ function actionFromExposure(strategyId, exposure) {
   return '空仓等待'
 }
 
-function runBacktest(klines, strategy, factorProfile) {
+function runBacktest(klines, strategy, factorProfile, costRate) {
   const cleaned = cleanKlines(klines)
 
   if (cleaned.length < 22) {
@@ -76,6 +77,8 @@ function runBacktest(klines, strategy, factorProfile) {
       currentAction: '样本不足',
       sampleSize: cleaned.length,
       benchmarkAnnualReturn: 0,
+      rebalanceCount: 0,
+      costDrag: 0,
     }
   }
 
@@ -85,17 +88,30 @@ function runBacktest(klines, strategy, factorProfile) {
   const benchmarkCurve = [1]
   const exposures = []
   const activeReturns = []
+  // 上一根 K 线持有的仓位。第 0 根之前视为空仓，首次建仓也会被计入换手成本。
+  let previousExposure = 0
+  let rebalanceCount = 0
+  let totalCost = 0
+  // 买入持有是「基准线」：全程满仓、永不调仓，它本身就是其它策略对照的零成本参照，
+  // 因此基准不计交易成本（否则等于让基准与自己比较时被额外罚分，口径不一致）。
+  const effectiveCostRate = strategy.id === 'buyHold' ? 0 : costRate
 
   for (let index = 1; index < cleaned.length; index += 1) {
     const exposure = strategyExposure(strategy.id, cleaned, index - 1, factorProfile)
     const dayReturn = cleaned[index].close / cleaned[index - 1].close - 1
-    const strategyReturn = dayReturn * exposure
+    // 调仓成本：从 previousExposure 调到 exposure 的换手，按单边费率扣当期收益。
+    // 仓位在 index-1 收盘决策、index 当根生效，成本与该根收益一并结算，不引入未来信息。
+    const cost = rebalanceCost(previousExposure, exposure, effectiveCostRate)
+    if (cost > 0) rebalanceCount += 1
+    totalCost += cost
+    const strategyReturn = dayReturn * exposure - cost
     strategyValue *= 1 + strategyReturn
     benchmarkValue *= 1 + dayReturn
     curve.push(strategyValue)
     benchmarkCurve.push(benchmarkValue)
     exposures.push(exposure)
     if (Math.abs(exposure) > 0.01) activeReturns.push(strategyReturn)
+    previousExposure = exposure
   }
 
   const gains = activeReturns.filter((item) => item > 0)
@@ -118,11 +134,15 @@ function runBacktest(klines, strategy, factorProfile) {
     totalReturn: strategyValue - 1,
     benchmarkAnnualReturn: annualizedReturn(benchmarkValue - 1, cleaned.length - 1),
     benchmarkMaxDrawdown: maxDrawdownFromCurve(benchmarkCurve),
+    rebalanceCount,
+    costDrag: totalCost,
   }
 }
 
-export function buildBacktestStrategies({ klines, factorBaskets }) {
+export function buildBacktestStrategies({ klines, factorBaskets, costBpsPerSide }) {
   const factorProfile = buildFactorProfile(factorBaskets)
+  // 单边交易成本：调用方可覆盖，默认取 A股 ETF 的保守口径（~4 bps/边）。
+  const costRate = bpsToRate(normalizeCostBpsPerSide(costBpsPerSide))
   const strategies = [
     {
       id: 'buyHold',
@@ -146,5 +166,5 @@ export function buildBacktestStrategies({ klines, factorBaskets }) {
     },
   ]
 
-  return strategies.map((strategy) => runBacktest(klines, strategy, factorProfile))
+  return strategies.map((strategy) => runBacktest(klines, strategy, factorProfile, costRate))
 }
