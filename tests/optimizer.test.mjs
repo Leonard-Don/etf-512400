@@ -242,6 +242,29 @@ test('参数网格某一维全是非法值时回退默认网格，不应退化�
   assert.ok(result.parameterSurface.validCount > 0)
 })
 
+test('参数网格中的非正值会被过滤，避免生成负窗口或负回撤候选', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: {
+      fastWindows: [-5, 20],
+      slowWindows: [0, 60],
+      entryPullbacks: [-0.05, 0.05],
+      deepPullbacks: [0, 0.12],
+      riskCuts: [-0.2, 0.2],
+    },
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.totalCandidates, 1)
+  assert.equal(result.parameterSurface.recommended.params.fastWindow, 20)
+  assert.equal(result.parameterSurface.recommended.params.slowWindow, 60)
+  assert.equal(result.parameterSurface.recommended.params.entryPullback, 0.05)
+  assert.equal(result.parameterSurface.recommended.params.deepPullback, 0.12)
+  assert.equal(result.parameterSurface.recommended.params.riskCut, 0.2)
+})
+
 test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原因', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
   const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
