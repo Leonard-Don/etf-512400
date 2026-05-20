@@ -2,6 +2,25 @@ import { SlidersHorizontal } from 'lucide-react'
 import { formatPercent } from '../analysis/formatters.js'
 import { buildCommandBandSummary } from '../analysis/commandBandSummary.js'
 
+function describeRiskBudgetUse({ primaryDecision, riskBudget, signal }) {
+  const budgetCap = Number.isFinite(riskBudget) ? riskBudget / 100 : null
+  const signalExposure = signal.suggestedExposure
+  const executionExposure = primaryDecision.exposure
+
+  if (
+    !Number.isFinite(budgetCap) ||
+    !Number.isFinite(signalExposure) ||
+    !Number.isFinite(executionExposure)
+  ) {
+    return '等待信号'
+  }
+
+  if (executionExposure >= budgetCap - 0.005) return '预算封顶'
+  if (signalExposure >= budgetCap - 0.005) return '预算卡信号'
+  if (executionExposure < signalExposure - 0.005) return `${primaryDecision.action}压仓`
+  return '信号主导'
+}
+
 export function CommandBand({
   dailyChange,
   dataFreshness,
@@ -20,6 +39,7 @@ export function CommandBand({
     signal,
     trendProfile,
   })
+  const budgetUse = describeRiskBudgetUse({ primaryDecision, riskBudget, signal })
 
   return (
     <section className="command-band" aria-label="交易前检查">
@@ -44,11 +64,25 @@ export function CommandBand({
       <label className="risk-slider command-risk">
         <div className="command-risk-top">
           <SlidersHorizontal size={18} />
-          <span>风险预算 {riskBudget}%</span>
-          <b>信号仓 {formatPercent(signal.suggestedExposure, 0)}</b>
+          <span>风险预算上限</span>
+          <b>{budgetUse}</b>
+        </div>
+        <div className="command-risk-metrics" aria-label="风险预算作用">
+          <div>
+            <span>上限</span>
+            <strong>{riskBudget}%</strong>
+          </div>
+          <div>
+            <span>信号建议</span>
+            <strong>{formatPercent(signal.suggestedExposure, 0)}</strong>
+          </div>
+          <div>
+            <span>最终执行</span>
+            <strong>{formatPercent(primaryDecision.exposure, 0)}</strong>
+          </div>
         </div>
         <input
-          aria-label="风险预算"
+          aria-label="风险预算上限"
           type="range"
           min="20"
           max="80"

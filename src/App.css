@@ -371,7 +371,7 @@
 .risk-slider {
   align-items: stretch;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   padding: 16px 18px;
 }
 
@@ -398,6 +398,37 @@
   font-size: 13px;
   font-weight: 780;
   justify-self: end;
+  white-space: nowrap;
+}
+
+.command-risk-metrics {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.command-risk-metrics div {
+  background: #f6faf8;
+  border: 1px solid #dfe8e3;
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 9px;
+}
+
+.command-risk-metrics span {
+  color: #6a7773;
+  font-size: 11px;
+  font-weight: 720;
+  white-space: nowrap;
+}
+
+.command-risk-metrics strong {
+  color: #121817;
+  font-size: 14px;
+  font-weight: 820;
+  line-height: 1.1;
   white-space: nowrap;
 }
 
@@ -2409,6 +2440,10 @@ td:nth-child(4) {
   .risk-slider b {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .command-risk-metrics {
+    grid-template-columns: 1fr;
   }
 
   .risk-slider input {
