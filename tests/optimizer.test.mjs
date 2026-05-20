@@ -223,6 +223,25 @@ test('NaN 和缺失 close 会被清洗，不污染参数表面分数', () => {
   assert.ok(result.parameterSurface.topWindows.every((item) => Number.isFinite(item.annualReturn)))
 })
 
+test('参数网格某一维全是非法值时回退默认网格，不应退化成零候选', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: {
+      fastWindows: [Number.NaN, Number.POSITIVE_INFINITY],
+      slowWindows: [60],
+      entryPullbacks: [0.05],
+      deepPullbacks: [0.12],
+      riskCuts: [0.2],
+    },
+  })
+
+  assert.equal(result.ok, true)
+  assert.ok(result.totalCandidates > 0, '非法 fastWindows 应回退默认值并继续生成候选')
+  assert.ok(result.parameterSurface.validCount > 0)
+})
+
 test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原因', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
   const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })

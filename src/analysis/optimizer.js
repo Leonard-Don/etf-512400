@@ -325,7 +325,9 @@ function foldStabilityPenalty(testAggregate, benchmarkAggregate) {
 
 function finiteGridValues(values, fallback) {
   const source = Array.isArray(values) && values.length ? values : fallback
-  return [...new Set(source.filter((value) => Number.isFinite(value)))].sort((a, b) => a - b)
+  const valid = source.filter((value) => Number.isFinite(value))
+  const safeValues = valid.length ? valid : fallback.filter((value) => Number.isFinite(value))
+  return [...new Set(safeValues)].sort((a, b) => a - b)
 }
 
 function normalizeParameterGrid(parameterGrid = {}) {
