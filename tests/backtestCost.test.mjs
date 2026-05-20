@@ -65,6 +65,12 @@ test('rebalanceCost：缺省仓位按 0 处理（窗口边界首根建仓也计�
   approx(rebalanceCost(0.7, undefined, 0.0004), 0.7 * 0.0004)
 })
 
+test('rebalanceCost：非有限仓位按 0 处理，避免成本拖累漏出 NaN', () => {
+  approx(rebalanceCost(NaN, 0.5, 0.0004), 0.5 * 0.0004)
+  approx(rebalanceCost(0.5, Infinity, 0.0004), 0.5 * 0.0004)
+  approx(rebalanceCost(-Infinity, NaN, 0.0004), 0)
+})
+
 test('rebalanceCost：成本对称——加仓再减回原仓，两段成本相等', () => {
   const up = rebalanceCost(0.3, 0.9, 0.0005)
   const down = rebalanceCost(0.9, 0.3, 0.0005)

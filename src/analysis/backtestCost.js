@@ -21,12 +21,18 @@ export function normalizeCostBpsPerSide(costBpsPerSide) {
     : DEFAULT_COST_BPS_PER_SIDE
 }
 
+function finiteExposureForCost(exposure) {
+  return Number.isFinite(exposure) ? exposure : 0
+}
+
 // 单根 K 线上的调仓成本：换手率 = |新仓位 - 旧仓位|，乘单边费率。
 // 仓位从 0.4 调到 0.8 即换手 0.4，扣 0.4 * costRate 的当期收益。
 // 这样建仓、加仓、减仓、清仓都会被对称地计费，不会漏掉任何一次再平衡。
 export function rebalanceCost(previousExposure, nextExposure, costRate) {
   if (!Number.isFinite(costRate) || costRate <= 0) return 0
-  const turnover = Math.abs((nextExposure ?? 0) - (previousExposure ?? 0))
+  const turnover = Math.abs(
+    finiteExposureForCost(nextExposure) - finiteExposureForCost(previousExposure),
+  )
   return turnover * costRate
 }
 
