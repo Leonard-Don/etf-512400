@@ -323,10 +323,10 @@ function foldStabilityPenalty(testAggregate, benchmarkAggregate) {
   )
 }
 
-function finiteGridValues(values, fallback) {
+function finiteRatioGridValues(values, fallback) {
   const source = Array.isArray(values) && values.length ? values : fallback
-  const valid = source.filter((value) => Number.isFinite(value) && value > 0)
-  const fallbackValues = fallback.filter((value) => Number.isFinite(value) && value > 0)
+  const valid = source.filter((value) => Number.isFinite(value) && value > 0 && value <= 1)
+  const fallbackValues = fallback.filter((value) => Number.isFinite(value) && value > 0 && value <= 1)
   const safeValues = valid.length ? valid : fallbackValues
   return [...new Set(safeValues)].sort((a, b) => a - b)
 }
@@ -344,12 +344,12 @@ function normalizeParameterGrid(parameterGrid = {}) {
   return {
     fastWindows: finiteIntegerGridValues(grid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
     slowWindows: finiteIntegerGridValues(grid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
-    entryPullbacks: finiteGridValues(
+    entryPullbacks: finiteRatioGridValues(
       grid.entryPullbacks,
       DEFAULT_PARAMETER_GRID.entryPullbacks,
     ),
-    deepPullbacks: finiteGridValues(grid.deepPullbacks, DEFAULT_PARAMETER_GRID.deepPullbacks),
-    riskCuts: finiteGridValues(grid.riskCuts, DEFAULT_PARAMETER_GRID.riskCuts),
+    deepPullbacks: finiteRatioGridValues(grid.deepPullbacks, DEFAULT_PARAMETER_GRID.deepPullbacks),
+    riskCuts: finiteRatioGridValues(grid.riskCuts, DEFAULT_PARAMETER_GRID.riskCuts),
   }
 }
 
