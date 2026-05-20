@@ -344,9 +344,8 @@ function normalizeParameterGrid(parameterGrid = {}) {
   }
 }
 
-function generateOptimizerCandidates(parameterGrid) {
-  const { fastWindows, slowWindows, entryPullbacks, deepPullbacks, riskCuts } =
-    normalizeParameterGrid(parameterGrid)
+function candidatesFromGrid(parameterGrid) {
+  const { fastWindows, slowWindows, entryPullbacks, deepPullbacks, riskCuts } = parameterGrid
   const candidates = []
 
   fastWindows.forEach((fastWindow) => {
@@ -371,6 +370,14 @@ function generateOptimizerCandidates(parameterGrid) {
   })
 
   return candidates
+}
+
+function generateOptimizerCandidates(parameterGrid) {
+  const normalizedGrid = normalizeParameterGrid(parameterGrid)
+  const candidates = candidatesFromGrid(normalizedGrid)
+  return candidates.length
+    ? candidates
+    : candidatesFromGrid(normalizeParameterGrid(DEFAULT_PARAMETER_GRID))
 }
 
 function scoreCandidate({ train, test, benchmarkTest, params }) {

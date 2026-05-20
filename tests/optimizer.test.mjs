@@ -265,6 +265,25 @@ test('参数网格中的非正值会被过滤，避免生成负窗口或负回�
   assert.equal(result.parameterSurface.recommended.params.riskCut, 0.2)
 })
 
+test('参数网格正值但组合约束全不成立时回退默认网格', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: {
+      fastWindows: [100],
+      slowWindows: [110],
+      entryPullbacks: [0.1],
+      deepPullbacks: [0.12],
+      riskCuts: [0.2],
+    },
+  })
+
+  assert.equal(result.ok, true)
+  assert.ok(result.totalCandidates > 0, '组合约束全失败时应回退默认候选')
+  assert.ok(result.parameterSurface.validCount > 0)
+})
+
 test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原因', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
   const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
