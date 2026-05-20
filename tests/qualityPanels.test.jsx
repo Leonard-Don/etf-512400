@@ -42,6 +42,21 @@ function makeQuality(overrides = {}) {
 }
 
 describe('TradingQualityPanel quality meters', () => {
+  test('hero explains what 先查跟踪偏离 means before the user reads the meters', () => {
+    const { container, unmount } = render(<TradingQualityPanel quality={makeQuality()} />)
+    const hero = container.querySelector('.quality-hero')
+    expect(hero.textContent).toContain('交易前检查')
+    expect(hero.textContent).toContain('先查跟踪偏离')
+    expect(hero.textContent).toContain('近60日相对基准偏离偏大')
+    expect(hero.textContent).toContain('+9.32%')
+    expect(hero.textContent).toContain('先确认不是跟踪误差或口径问题')
+    expect(hero.textContent).toContain('先看净值口径、跟踪误差和基准走势')
+    expect(hero.textContent).toContain('中证申万有色金属 000819')
+    expect(hero.textContent).toContain('质量分')
+    expect(hero.textContent).toContain('23')
+    unmount()
+  })
+
   test('zero tracking score is paired with the deviation reason', () => {
     const { container, unmount } = render(<TradingQualityPanel quality={makeQuality()} />)
     const text = container.textContent

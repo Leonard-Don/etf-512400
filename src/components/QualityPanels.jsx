@@ -4,17 +4,23 @@ import { Meter } from './ui'
 
 export function TradingQualityPanel({ quality }) {
   const { tracking, premium, liquidity } = quality
+  const heroCopy = buildQualityHeroCopy(quality)
 
   return (
     <div className="quality-console">
       <div className={`quality-hero ${quality.tone}`}>
-        <div>
-          <span>执行结论</span>
+        <div className="quality-hero-main">
+          <span>交易前检查</span>
           <strong>{quality.action}</strong>
-          <p>{tracking.benchmarkName}</p>
+          <p>{heroCopy.reason}</p>
+          <div className="quality-hero-steps">
+            <em>{heroCopy.check}</em>
+            <em>{tracking.benchmarkName}</em>
+          </div>
         </div>
         <div className="quality-score">
           <Gauge size={18} />
+          <span>质量分</span>
           <b>{quality.score}</b>
         </div>
       </div>
@@ -87,6 +93,34 @@ export function TradingQualityPanel({ quality }) {
       </div>
     </div>
   )
+}
+
+function buildQualityHeroCopy({ action, tracking, premium, liquidity }) {
+  if (tracking.status === '偏离放大') {
+    return {
+      reason: `近60日相对基准偏离偏大：${formatSignedPercent(tracking.deviation60, 2)}，先确认不是跟踪误差或口径问题。`,
+      check: `先看${tracking.basis}口径、跟踪误差和基准走势`,
+    }
+  }
+
+  if (premium.status === '溢价偏热') {
+    return {
+      reason: `当前折溢价偏热：${formatSignedPercent(premium.currentPremium, 2)}，追买容易把短线溢价变成持仓成本。`,
+      check: '优先限价，等折溢价回落再放大仓位',
+    }
+  }
+
+  if (liquidity.status === '成交收缩') {
+    return {
+      reason: `成交额处于低位：${formatPercentile(liquidity.amountPercentile)}，大单可能放大滑点。`,
+      check: '拆单执行，避开临近收盘一次性成交',
+    }
+  }
+
+  return {
+    reason: `${action}：跟踪、折溢价和流动性没有触发硬性拦截。`,
+    check: '按主仓位执行，继续用限价控制成本',
+  }
 }
 
 function QualityMeter({ label, value, color, status, detail }) {
