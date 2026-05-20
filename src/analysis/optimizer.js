@@ -332,15 +332,16 @@ function finiteGridValues(values, fallback) {
 }
 
 function normalizeParameterGrid(parameterGrid = {}) {
+  const grid = parameterGrid && typeof parameterGrid === 'object' ? parameterGrid : {}
   return {
-    fastWindows: finiteGridValues(parameterGrid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
-    slowWindows: finiteGridValues(parameterGrid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
+    fastWindows: finiteGridValues(grid.fastWindows, DEFAULT_PARAMETER_GRID.fastWindows),
+    slowWindows: finiteGridValues(grid.slowWindows, DEFAULT_PARAMETER_GRID.slowWindows),
     entryPullbacks: finiteGridValues(
-      parameterGrid.entryPullbacks,
+      grid.entryPullbacks,
       DEFAULT_PARAMETER_GRID.entryPullbacks,
     ),
-    deepPullbacks: finiteGridValues(parameterGrid.deepPullbacks, DEFAULT_PARAMETER_GRID.deepPullbacks),
-    riskCuts: finiteGridValues(parameterGrid.riskCuts, DEFAULT_PARAMETER_GRID.riskCuts),
+    deepPullbacks: finiteGridValues(grid.deepPullbacks, DEFAULT_PARAMETER_GRID.deepPullbacks),
+    riskCuts: finiteGridValues(grid.riskCuts, DEFAULT_PARAMETER_GRID.riskCuts),
   }
 }
 

@@ -284,6 +284,19 @@ test('参数网格正值但组合约束全不成立时回退默认网格', () =>
   assert.ok(result.parameterSurface.validCount > 0)
 })
 
+test('参数网格为 null 时回退默认网格，不应抛错', () => {
+  const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
+  const result = buildStrategyOptimizer({
+    klines,
+    factorBaskets: baseFactors,
+    parameterGrid: null,
+  })
+
+  assert.equal(result.ok, true)
+  assert.ok(result.totalCandidates > 0)
+  assert.ok(result.parameterSurface.validCount > 0)
+})
+
 test('参数表面 summary 解释稳健覆盖、离散标签和 top window 原因', () => {
   const klines = syntheticKlines(260, (i) => 100 * 1.0006 ** i)
   const result = buildStrategyOptimizer({ klines, factorBaskets: baseFactors })
