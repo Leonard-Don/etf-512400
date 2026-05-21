@@ -1,7 +1,6 @@
 import liveSnapshot from './liveSnapshot.json'
 import historySnapshots from './history/512400-snapshots.json'
 import { buildDataFreshness, describeMarketStatus } from '../analysis/snapshotHealth'
-import { summarizeSourceHealth } from './sourceHealthContract'
 
 const quoteSnapshot = liveSnapshot.quote ?? {}
 const navSnapshot = liveSnapshot.nav ?? {}
@@ -19,17 +18,6 @@ const dataFreshness = buildDataFreshness({
   navDate: navSnapshot.date,
   sourceHealth: sourceHealthSnapshot,
 })
-
-export const sourceHealthContract = summarizeSourceHealth(
-  sourceHealthSnapshot.map((source) => ({
-    id: source.id,
-    label: source.label,
-    required: source.required,
-    ok: source.ok,
-    fallback: source.fallback,
-    asOf: source.fetchedAt ?? liveSnapshot.meta?.generatedAt,
-  })),
-)
 
 function driverFor(key) {
   return commoditySnapshot.find((driver) => driver.key === key && driver.ok)
@@ -172,7 +160,6 @@ export const etfProfile = {
     sources: liveSnapshot.meta?.sources ?? [],
     sourceHealth: sourceHealthSnapshot,
     dataFreshness,
-    sourceHealthContract,
     history: liveSnapshot.history,
   },
 }

@@ -1,5 +1,5 @@
 const DAY_MS = 24 * 60 * 60 * 1000
-const STALE_SNAPSHOT_DAYS = 3
+export const STALE_SNAPSHOT_DAYS = 3
 
 export function shanghaiDateString(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {

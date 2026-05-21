@@ -2,7 +2,7 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildDataFreshness, describeMarketStatus } from '../src/analysis/snapshotHealth.js'
+import { buildDataFreshness, describeMarketStatus, STALE_SNAPSHOT_DAYS } from '../src/analysis/snapshotHealth.js'
 
 const SUPPORTED_FORMATS = new Set(['text', 'json', 'markdown'])
 const DEFAULT_SNAPSHOT_URL = new URL('../src/data/liveSnapshot.json', import.meta.url)
@@ -69,7 +69,7 @@ export function parseArgs(argv) {
 // fresh = green, recent = yellow, stale = red, missing = grey.
 export function classifyProvider(provider) {
   if (!provider.ok && !provider.fallback) return 'missing'
-  if (provider.ageDays !== null && provider.ageDays !== undefined && provider.ageDays > 3) {
+  if (provider.ageDays !== null && provider.ageDays !== undefined && provider.ageDays > STALE_SNAPSHOT_DAYS) {
     return 'stale'
   }
   if (provider.fallback) return 'recent'
