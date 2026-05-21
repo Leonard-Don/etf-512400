@@ -6,9 +6,12 @@ import {
   calendarDayGap,
   describeMarketStatus,
   shanghaiDateString,
+  tradingDayGap,
 } from '../src/analysis/snapshotHealth.js'
 
 const MAY_6_SHANGHAI = new Date('2026-05-06T04:00:00Z')
+// 2026-05-11 是周一，2026-05-08 是上一周五 —— 用于验证周末感知。
+const MAY_11_MON_SHANGHAI = new Date('2026-05-11T04:00:00Z')
 
 test('shanghaiDateString 使用 Asia/Shanghai 日期', () => {
   assert.equal(shanghaiDateString(MAY_6_SHANGHAI), '2026-05-06')
@@ -23,6 +26,14 @@ test('calendarDayGap 对缺失或非法日期返回 null', () => {
   assert.equal(calendarDayGap('', '2026-05-06'), null)
   assert.equal(calendarDayGap('not-a-date', '2026-05-06'), null)
   assert.equal(calendarDayGap('2026-05-06', undefined), null)
+})
+
+test('tradingDayGap 只数工作日，跳过周末', () => {
+  assert.equal(tradingDayGap('2026-05-08', '2026-05-11'), 1) // 周五→周一：跳过周六日
+  assert.equal(tradingDayGap('2026-05-08', '2026-05-08'), 0) // 同日
+  assert.equal(tradingDayGap('2026-05-04', '2026-05-08'), 4) // 周一→周五：周内 4 天
+  assert.equal(tradingDayGap('2026-05-08', '2026-05-09'), 0) // 周五→周六：周六不计
+  assert.equal(tradingDayGap('', '2026-05-11'), null) // 非法日期
 })
 
 test('describeMarketStatus 不再依赖固定休市文案', () => {
@@ -204,10 +215,10 @@ test('buildDataFreshness 标记 stale 并写出行情和净值距今天数', () 
   assert.equal(result.status, 'stale')
   assert.equal(result.tone, 'warning')
   assert.equal(result.summary, '行情停留在 2026-04-30')
-  assert.equal(result.quoteAgeDays, 6)
-  assert.equal(result.navAgeDays, 7)
-  assert.ok(result.details.includes('行情距今天 6 天'))
-  assert.ok(result.details.includes('净值距今天 7 天'))
+  assert.equal(result.quoteAgeDays, 4)
+  assert.equal(result.navAgeDays, 5)
+  assert.ok(result.details.includes('行情距今天 4 天'))
+  assert.ok(result.details.includes('净值距今天 5 天'))
 })
 
 test('buildDataFreshness 在缓存源缺标签时回退到数量描述', () => {
@@ -305,4 +316,23 @@ test('buildProviderFreshnessRegistry 汇总核心/辅助/缓存/失败源 drilld
   assert.equal(result.providers[0].statusText, '运行时实时')
   assert.equal(result.providers[1].statusText, '缓存兜底')
   assert.ok(result.actionItems.some((item) => item.includes('缓存只作旁证')))
+})
+
+test('buildDataFreshness 把周五数据在周一视作上一交易日而非 stale', () => {
+  const result = buildDataFreshness({
+    quoteTradeDate: '2026-05-08',
+    navDate: '2026-05-08',
+    now: MAY_11_MON_SHANGHAI,
+  })
+  assert.equal(result.status, 'previous_trade_day')
+  assert.equal(result.tone, 'good')
+  assert.equal(result.quoteAgeDays, 1)
+  assert.equal(result.navAgeDays, 1)
+})
+
+test('describeMarketStatus 把周五数据在周一视作上一交易日', () => {
+  assert.equal(
+    describeMarketStatus({ quoteTradeDate: '2026-05-08', now: MAY_11_MON_SHANGHAI }),
+    '行情停留在上一交易日',
+  )
 })

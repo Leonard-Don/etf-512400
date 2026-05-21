@@ -24,6 +24,21 @@ export function calendarDayGap(fromDate, toDate) {
   return Math.round((to - from) / DAY_MS)
 }
 
+// 工作日差：只数周一~周五，跳过周末。行情/净值用它算「距今交易日数」，
+// 避免周一把上一交易日（周五）的数据误判为 stale。长假仍会标 stale。
+export function tradingDayGap(fromDate, toDate) {
+  const from = dateToUtcDay(fromDate)
+  const to = dateToUtcDay(toDate)
+  if (from === null || to === null) return null
+  if (to <= from) return Math.round((to - from) / DAY_MS)
+  let count = 0
+  for (let day = from + DAY_MS; day <= to; day += DAY_MS) {
+    const weekday = new Date(day).getUTCDay()
+    if (weekday !== 0 && weekday !== 6) count += 1
+  }
+  return count
+}
+
 function sourceLabels(sources) {
   return sources
     .map((source) => source.label || source.id)
@@ -110,8 +125,8 @@ export function buildProviderFreshnessRegistry({
   now = new Date(),
 } = {}) {
   const snapshotAgeDays = timestampDayGap(snapshotGeneratedAt, now)
-  const quoteAgeDays = calendarDayGap(quoteTradeDate, shanghaiDateString(now))
-  const navAgeDays = calendarDayGap(navDate, shanghaiDateString(now))
+  const quoteAgeDays = tradingDayGap(quoteTradeDate, shanghaiDateString(now))
+  const navAgeDays = tradingDayGap(navDate, shanghaiDateString(now))
 
   const providers = sourceHealth.map((source) => {
     const status = providerStatusFor(source)
@@ -240,7 +255,7 @@ export function describeMarketStatus({ quoteTradeDate, statusCode, now = new Dat
   if (!quoteTradeDate) return '行情日期未知'
 
   const today = shanghaiDateString(now)
-  const tradeGap = calendarDayGap(quoteTradeDate, today)
+  const tradeGap = tradingDayGap(quoteTradeDate, today)
 
   if (tradeGap === null) return `行情日 ${quoteTradeDate}`
   if (tradeGap <= 0) {
@@ -258,8 +273,8 @@ export function buildDataFreshness({
   now = new Date(),
 }) {
   const today = shanghaiDateString(now)
-  const quoteGap = calendarDayGap(quoteTradeDate, today)
-  const navGap = calendarDayGap(navDate, today)
+  const quoteGap = tradingDayGap(quoteTradeDate, today)
+  const navGap = tradingDayGap(navDate, today)
   const providerRegistry = buildProviderFreshnessRegistry({
     sourceHealth,
     quoteTradeDate,
