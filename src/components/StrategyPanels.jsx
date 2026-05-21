@@ -104,7 +104,7 @@ export function StrategyOptimizer({ optimizer }) {
 
       <p className="optimizer-rule">{best.rule}</p>
       <p className="optimizer-rule">{best.explanation}</p>
-      <p className="historical-caution">历史拟合结果不代表未来收益，优先看稳定性、回撤、仓位和过拟合风险。</p>
+      <p className="historical-caution">推荐策略从数百个网格候选里按样本外打分选出，展示的样本外年化与回撤带选择偏差、通常偏乐观；历史拟合不代表未来收益，优先看稳定性、回撤、仓位与过拟合风险。</p>
 
       {surface ? (
         <div className="surface-console">

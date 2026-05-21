@@ -60,6 +60,7 @@ describe('StrategyOptimizer surface explanations', () => {
     expect(out).toContain('样本外仓位')
     expect(out).toContain('推荐它是因为')
     expect(out).toContain(optimizer.parameterSurface.dispersionLabel)
+    expect(out).toContain('选择偏差')
     unmount()
   })
 })
