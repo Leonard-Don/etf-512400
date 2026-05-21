@@ -139,7 +139,7 @@ tests/
 这是个人对 512400 ETF 的研究控制台，定位是单一研究工具，不追求泛化到其他 ETF。当前版本是有意收口的稳定状态：
 
 - 数据 fallback 契约（运行时实时 + 手动快照双层）已稳定
-- 28 种策略 / 因子 / 优化器 / 回测 / 健康度评分全套覆盖；测试比源码大 14%
+- 策略 / 因子 / 优化器 / 回测 / 健康度评分均有单元与组件测试覆盖
 - 51 PR hardening 历程（zero/falsy/non-finite/NaN sanitization 大扫除）已收尾
 - `npm run health` CLI 让 freshness contract 可被 cron / CI 直接消费
 

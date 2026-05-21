@@ -53,9 +53,10 @@ async function proxyMarketJson(res, url) {
     res.setHeader('cache-control', 'no-store')
     res.end(text)
   } catch (error) {
+    console.error(`[etf-realtime-proxy] upstream request failed: ${url}`, error.message)
     writeJson(res, 502, {
       rc: 502,
-      error: error.message,
+      error: '行情代理请求失败',
     })
   }
 }

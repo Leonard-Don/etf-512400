@@ -15,10 +15,13 @@ const projectRoot = resolve(__dirname, '..')
 const outputPath = resolve(projectRoot, 'src/data/liveSnapshot.json')
 const historyPath = resolve(projectRoot, 'src/data/history/512400-snapshots.json')
 
+const quoteFields =
+  'f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f107,f152,f169,f170,f171,f292'
+const klineFields =
+  'fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'
 const quoteUrl =
   'https://push2.eastmoney.com/api/qt/stock/get?secid=1.512400&fields=f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f116,f117,f168,f169,f170,f171,f292'
-const quoteKlineFallbackUrl =
-  `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=1&end=20500101&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61`
+const quoteKlineFallbackUrl = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=1&end=20500101&${klineFields}`
 const quoteTencentFallbackUrl =
   'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh512400,day,,,1,qfq'
 const etfTencentKlineFallbackUrl =
@@ -27,10 +30,6 @@ const benchmarkTencentKlineFallbackUrl =
   'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh000819,day,,,280,qfq'
 const fundGaugeUrl = `https://fundgz.1234567.com.cn/js/512400.js?rt=${Date.now()}`
 const fundTrendUrl = `https://fund.eastmoney.com/pingzhongdata/512400.js?v=${Date.now()}`
-const quoteFields =
-  'f43,f44,f45,f46,f47,f48,f50,f57,f58,f59,f60,f71,f86,f107,f152,f169,f170,f171,f292'
-const klineFields =
-  'fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'
 const etfKlineUrl =
   `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.512400&klt=101&fqt=1&lmt=280&end=20500101&${klineFields}`
 const benchmarkKlineUrl =
