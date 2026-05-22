@@ -2024,11 +2024,6 @@ td:nth-child(4) {
   margin: 4px 0 0;
 }
 
-.pipeline {
-  display: grid;
-  gap: 9px;
-}
-
 .snapshot-readout {
   display: grid;
   gap: 10px;
@@ -2055,39 +2050,6 @@ td:nth-child(4) {
   display: block;
   font-size: 14px;
   margin-top: 5px;
-}
-
-.pipeline-step {
-  align-items: center;
-  border: 1px solid #e4ebe7;
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: auto auto 1fr;
-  min-height: 42px;
-  padding: 0 11px;
-}
-
-.pipeline-step svg {
-  color: #5f7f56;
-}
-
-.pipeline-step span {
-  align-items: center;
-  background: #eef5f0;
-  border-radius: 999px;
-  color: #3c6849;
-  display: inline-flex;
-  font-size: 11px;
-  font-weight: 800;
-  height: 22px;
-  justify-content: center;
-  width: 22px;
-}
-
-.pipeline-step strong {
-  color: #17211e;
-  font-size: 13px;
 }
 
 .source-list {
@@ -2270,76 +2232,6 @@ td:nth-child(4) {
   margin-top: -3px !important;
 }
 
-.source-health-list {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 14px;
-}
-
-.source-health-row {
-  align-items: start;
-  background: #f7faf8;
-  border: 1px solid #e4ebe7;
-  border-left: 3px solid #5f7f56;
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-width: 0;
-  padding: 9px 10px;
-}
-
-.source-health-row.warning {
-  background: #fbf8f2;
-  border-color: #eee1ce;
-  border-left-color: #b96836;
-}
-
-.source-health-row.danger {
-  background: #fbeeea;
-  border-color: #e9b4aa;
-  border-left-color: #b4493d;
-}
-
-.source-health-row span {
-  color: #52615d;
-  font-size: 12px;
-  font-weight: 750;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.source-health-row div {
-  text-align: right;
-}
-
-.source-health-row strong {
-  color: #17211e;
-  display: block;
-  font-size: 12px;
-}
-
-.source-health-row em {
-  color: #72807c;
-  display: block;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 750;
-  margin-top: 3px;
-}
-
-.source-health-row p {
-  color: #6b7975;
-  font-size: 11px;
-  font-weight: 700;
-  grid-column: 1 / -1;
-  line-height: 1.4;
-  margin: -4px 0 0;
-  overflow-wrap: anywhere;
-}
-
 @media (max-width: 1180px) {
   .decision-deck {
     grid-template-columns: 1fr 1fr;
@@ -2456,7 +2348,6 @@ td:nth-child(4) {
   .backtest-summary,
   .stress-readout,
   .snapshot-readout,
-  .source-health-list,
   .provider-group-grid,
   .provider-source-row {
     grid-template-columns: 1fr;
