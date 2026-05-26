@@ -6,6 +6,7 @@
 ![Realtime Quotes](https://img.shields.io/badge/quotes-runtime%20fallback-0969da)
 ![Research Snapshot](https://img.shields.io/badge/snapshot-local%20research-6a7f64)
 ![Status](https://img.shields.io/badge/status-personal%20research-6a7f64)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 有色金属 ETF 南方（512400）的本地实时行情与研究决策台。它把盘中行情、估算净值、折溢价、流动性、商品驱动、跟踪质量和历史策略验证放到一个单页控制台里，用于自用研究、复盘和交易前检查。
 
